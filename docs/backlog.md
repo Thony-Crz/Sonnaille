@@ -4,6 +4,8 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 
 **Objectif de la V0** : une démo sur la Chartreuse et le Vercors, prête pour la saison d'estive 2027 (juin), qui permet de trouver 10 à 20 alpha users.
 
+**Définition de « terminé » pour toute tâche de code** : écrite en TDD (le test a d'abord échoué), rangée dans la bonne couche de la clean architecture, tests et test d'architecture verts en CI ([decisions.md](decisions.md), D2).
+
 **Principe d'itération** : d'abord un squelette déployé de bout en bout (une carte en ligne), puis chaque lot ajoute une fonction visible. Les lots 0 et 1 peuvent avancer en parallèle : l'inventaire des données ne bloque pas le squelette.
 
 ## V0 — Démo Chartreuse et Vercors
@@ -23,7 +25,7 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 
 | ID | Tâche | Terminé quand | Dépend de |
 | --- | --- | --- | --- |
-| T06 | Initialiser le projet (proposition : Vite et TypeScript) et le déploiement GitHub Pages par artefact (`deploy-pages`, pas de branche `gh-pages`) ; `robots.txt` et `noindex` | Une page vide, non indexable, est en ligne après chaque push sur `main` | T04 |
+| T06 | Initialiser le projet (Vite, TypeScript, Vitest), les couches de la clean architecture avec leur test, le déploiement GitHub Pages par artefact (`deploy-pages`, pas de branche `gh-pages`) ; `robots.txt` et `noindex` | Une page vide, non indexable, est en ligne après chaque push sur `main` ; tests verts en CI | T04 |
 | T07 | Afficher une carte MapLibre centrée sur la Chartreuse et le Vercors, fond IGN Plan | La carte s'affiche sur mobile et sur ordinateur | T06 |
 | T08 | Ajouter le sélecteur de fonds (IGN Plan, photographies aériennes, OpenStreetMap), avec le choix mémorisé sur l'appareil | Le fond choisi est conservé au rechargement | T07 |
 | T09 | Rendre l'app installable (manifeste, icônes), sans hors ligne | L'app s'installe sur Android et iPhone | T06 |
@@ -46,7 +48,7 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 | T16 | Saisir la date de la sortie et l'activité (trail, VTT, randonnée) | Les secteurs et observations sont filtrés selon la date ; l'activité est transmise aux conseils | T15 |
 | T17 | Détecter ce que traverse le tracé (Turf.js) : zones, secteurs actifs à la date, observations de moins de 3 jours ; marge réglable | Tronçons concernés en surbrillance | T13, T16 |
 | T18 | Écran de résultat : nom, point d'entrée, distance parcourue à l'intérieur, source et date, lien vers les conseils | Écran 3 conforme au cahier des charges | T17 |
-| T19 | Tests de la détection avec des GPX de référence (traversée, frôlement, hors zone, hors période) | Tests verts en CI | T17 |
+| T19 | Tests d'intégration de la détection avec des GPX de référence (traversée, frôlement, hors zone, hors période) ; les tests unitaires, eux, sont écrits avant le code dans chaque tâche | Tests verts en CI | T17 |
 
 ### Lot 4 — Pédagogie
 
