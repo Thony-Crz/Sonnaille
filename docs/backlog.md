@@ -34,7 +34,7 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 
 | ID | Tâche | Terminé quand | Dépend de |
 | --- | --- | --- | --- |
-| T10 | Définir le format GeoJSON commun (zones, secteurs, observations, lieux, chemins) et le valider en CI | Schémas dans le dépôt, CI en échec si un fichier est invalide | T06 |
+| ~~T10~~ ✅ | Définir le format GeoJSON commun et le valider en CI | Fait pour les zones pastorales ([format-zones.md](format-zones.md)) ; observations, lieux et chemins seront ajoutés avec leurs tâches | T06 |
 | T11 | Zone large : contours de tous les quartiers Map Patou découpés sur les deux massifs ; repli sur le RPG si la réutilisation est refusée | `zones.geojson` généré et valide | T01, T10 |
 | T12 | Scraper Map Patou (`POST /api/v1/map/geojson`), isolé dans son propre module, appelé à la construction du site (une fois par jour en saison) ; normaliser `type_animal` ; données jamais committées ni affichées dans les logs | Les secteurs sont dans le site déployé et absents du dépôt | T02, T04, T10 |
 | T13 | Afficher les couches activables, avec une légende | Chaque couche s'active et se désactive indépendamment | T07, T11 |
