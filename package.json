@@ -10,12 +10,14 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "data": "tsx scripts/fetch-pastoral-zones.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
     "happy-dom": "^21.0.4",
     "sharp": "^0.35.5",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.6",
     "vitest": "^5.1.0"

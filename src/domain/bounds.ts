@@ -22,6 +22,24 @@ export function enclosingBounds(bounds: Bounds[]): Bounds {
   };
 }
 
+/** Whether two bounds overlap or touch. */
+export function intersects(a: Bounds, b: Bounds): boolean {
+  return a.west <= b.east && b.west <= a.east && a.south <= b.north && b.south <= a.north;
+}
+
+/** Smallest bounds containing these [longitude, latitude] positions; undefined if there are none. */
+export function boundsOf(positions: number[][]): Bounds | undefined {
+  if (positions.length === 0) return undefined;
+  const longitudes = positions.map((p) => p[0]!);
+  const latitudes = positions.map((p) => p[1]!);
+  return {
+    west: Math.min(...longitudes),
+    south: Math.min(...latitudes),
+    east: Math.max(...longitudes),
+    north: Math.max(...latitudes),
+  };
+}
+
 export function contains(bounds: Bounds, { longitude, latitude }: Position): boolean {
   return (
     longitude >= bounds.west &&
