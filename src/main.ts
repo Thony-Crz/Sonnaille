@@ -3,6 +3,7 @@
 import './ui/style.css';
 import { chooseBaseMap, initialBaseMap } from './application/base-map-choice';
 import { importTrack } from './application/import-track';
+import { createObservationAt, deleteMySighting, mySightings, saveMySighting } from './application/my-sightings';
 import { createObservation, showObservations } from './application/observations';
 import type { ObservationOnMap, ZoneOnMap } from './application/ports';
 import { prepareOuting } from './application/prepare-outing';
@@ -16,6 +17,7 @@ import { trackHasTimes, type Track } from './domain/track';
 import { dayOf, parseDay } from './domain/zone-status';
 import { HttpAdviceRepository } from './infrastructure/advice-content';
 import { readGpx } from './infrastructure/gpx-reader';
+import { LocalStorageSightings, publicationText } from './infrastructure/local-storage-sightings';
 import { HttpObservationRepository, HttpObservationSettings, observationFeature } from './infrastructure/observations-content';
 import { HttpPastoralZoneRepository } from './infrastructure/http-pastoral-zone-repository';
 import { LocalStorageActivityPreferences } from './infrastructure/local-storage-activity-preferences';
@@ -29,6 +31,7 @@ import { createUnderstandPanel, createWelcomeDialog } from './ui/info-panels';
 import { MapLibreMapView } from './ui/maplibre-map-view';
 import { createObservationForm } from './ui/observation-form';
 import { createOutingReportPanel } from './ui/outing-report-panel';
+import { createMySightings, createSightingForm } from './ui/sightings';
 import { createTrackImport, enableFileDrop } from './ui/track-import';
 import { createZoneLegend } from './ui/zone-legend';
 import { createZoneSheetPanel } from './ui/zone-sheet-panel';
@@ -47,6 +50,9 @@ const zoneRepository = new HttpPastoralZoneRepository(`${base}data/pastoral-zone
 const adviceRepository = new HttpAdviceRepository(`${base}content/advice.json`, (url) => fetch(url));
 const observationRepository = new HttpObservationRepository(`${base}content/observations.geojson`, (url) => fetch(url));
 const observationSettings = new HttpObservationSettings(`${base}content/observation-settings.json`, (url) => fetch(url));
+const sightingStore = new LocalStorageSightings(storage);
+// V0 publication: the sightings are pasted into this file on GitHub (only the repository owner can commit).
+const OBSERVATIONS_EDIT_URL = 'https://github.com/Thony-Crz/Sonnaille/edit/main/public/content/observations.geojson';
 
 // --- State -----------------------------------------------------------------
 // Day shown on the map: today, or ?date=YYYY-MM-DD (e.g. a summer day for a demo),
@@ -102,12 +108,8 @@ const observationForm = createObservationForm({
     if (!track) return;
     const { observation, timeFromTrack } = createObservation({ ...answers, track, outingDate: day });
     observationForm.showResult(JSON.stringify(observationFeature(observation), null, 2), timeFromTrack);
-    const withPreview = { load: async () => [...(await observationRepository.load().catch(() => [])), observation] };
-    void showObservations(withPreview, observationSettings, view, new Date()).then((result) => {
-      if (!result.available) return;
-      sightings = result.items;
-      showOutingReport();
-    });
+    saveMySighting(sightingStore, observation);
+    refreshSightings();
   },
 });
 
@@ -180,6 +182,73 @@ async function importFile(file: File): Promise<void> {
   else trackImport.setStatus(`${result.track.name} — zones pastorales indisponibles, analyse impossible pour le moment.`);
 }
 
+// --- Sightings: tap the map, keep on the device, publish ----------------------
+const sightingForm = createSightingForm({
+  onSave: (answers) => {
+    saveMySighting(sightingStore, createObservationAt(answers));
+    refreshSightings();
+    mySightingsPanel.setNote('Enregistré dans « Mes signalements ».');
+  },
+  onCancel: () => {},
+});
+document.body.append(sightingForm.element);
+
+let picking = false;
+const mySightingsPanel = createMySightings({
+  onReport: () => void reportSighting(),
+  onDelete: (id) => {
+    deleteMySighting(sightingStore, id);
+    refreshSightings();
+  },
+  onPublish: () => {
+    const text = publicationText(mySightings(sightingStore));
+    void navigator.clipboard?.writeText(text);
+    window.open(OBSERVATIONS_EDIT_URL, '_blank', 'noopener');
+    mySightingsPanel.setNote(
+      'Copié. Dans l’éditeur GitHub qui s’ouvre, collez dans la liste « features » (après la dernière entrée, avec une virgule), puis validez avec « Commit changes ».',
+    );
+  },
+});
+view.addPanel(mySightingsPanel.element);
+
+async function reportSighting(): Promise<void> {
+  if (picking) {
+    view.cancelPick();
+    return;
+  }
+  picking = true;
+  mySightingsPanel.setPicking(true);
+  zoneSheet.hide();
+  outingReport.hide();
+  const position = await view.pickLocation();
+  picking = false;
+  mySightingsPanel.setPicking(false);
+  if (!position) return;
+  const now = new Date();
+  const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  sightingForm.open(position, { date: dayOf(now), time });
+}
+
+/** Shows published sightings plus the ones kept on this device, and refreshes what depends on them. */
+function refreshSightings(): void {
+  const mine = mySightings(sightingStore);
+  mySightingsPanel.setList(mine);
+  const withMine = {
+    load: async () => {
+      const published = await observationRepository.load().catch(() => []);
+      return [...published.filter((o) => !mine.some((m) => m.id === o.id)), ...mine];
+    },
+  };
+  void showObservations(withMine, observationSettings, view, new Date()).then((result) => {
+    if (result.available) {
+      recentObservations = result.recent;
+      sightings = result.items;
+    }
+    updateLegendNote();
+    if (track && !outingReport.element.hidden) showOutingReport();
+  });
+}
+
 // --- Welcome (T23) and "Comprendre" (T22) ------------------------------------
 if (shouldShowWelcome(welcomePreferences)) {
   document.body.append(createWelcomeDialog({ onClose: () => markWelcomeSeen(welcomePreferences) }));
@@ -199,13 +268,7 @@ understandButton.addEventListener('click', () => {
 });
 
 // --- Start -----------------------------------------------------------------
-void showObservations(observationRepository, observationSettings, view, new Date()).then((result) => {
-  if (result.available) {
-    recentObservations = result.recent;
-    sightings = result.items;
-  }
-  updateLegendNote();
-});
+refreshSightings();
 
 void Promise.all([showPastoralZones(zoneRepository, view, day), adviceRepository.load().catch(() => [])]).then(
   ([result, loadedAdvice]) => {
@@ -215,7 +278,7 @@ void Promise.all([showPastoralZones(zoneRepository, view, day), adviceRepository
     if (!zones.available) return;
 
     view.onZoneSelected((zone) => {
-      if (!zones.available) return;
+      if (!zones.available || picking) return;
       selectedZone = zone;
       outingReport.hide();
       zoneSheet.show(buildZoneSheet(zone, { activity, advice, source: zones.source, fetchedAt: zones.fetchedAt }));

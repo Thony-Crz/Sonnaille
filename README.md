@@ -32,7 +32,7 @@ npm run data     # fetch today's pastoral zones from Map Patou (never committed)
 ```
 
 - **Zones for another day**: `MAP_PATOU_DATE=2026-07-15 npm run data`, then open `/Sonnaille/?date=2026-07-15`. At most one request per day is sent to Map Patou.
-- **Field sightings**: the "Signaler un troupeau vu" form produces a GeoJSON entry; add it to `public/content/observations.geojson` and push.
+- **Field sightings**: "Signaler des animaux vus", tap the map, answer, save: the sighting is kept on the device ("Mes signalements"). "Publier" copies the entries and opens the GitHub editor of `public/content/observations.geojson`: paste them into `features` and commit.
 - **Base maps**: see [fonds-de-carte.md](docs/fonds-de-carte.md), including how to enable the IGN 1:25,000 map with a personal IGN key.
 - **Demo**: [docs/demo](docs/demo/README.md).
 
