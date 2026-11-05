@@ -37,6 +37,12 @@ export interface ActivityPreferences {
   save(activity: Activity): void;
 }
 
+/** Whether the welcome message has been seen on this device. */
+export interface WelcomePreferences {
+  load(): string | null;
+  save(value: 'seen'): void;
+}
+
 /** Where the advice texts come from (published content, editable without a release). */
 export interface AdviceRepository {
   load(): Promise<Advice[]>;

@@ -48,7 +48,7 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 | ~~T16~~ ✅ | Saisir la date de la sortie et l'activité (trail, VTT, randonnée) | Fait : date de la sortie (aujourd'hui par défaut) et activité mémorisée dans le panneau « Votre sortie » ; la carte suit la date | T15 |
 | ~~T17~~ ✅ | Détecter ce que traverse le tracé (Turf.js) : zones, secteurs actifs à la date, observations de moins de 3 jours ; marge réglable | Fait : détection en TypeScript pur dans le domaine (D2), marge de 50 m par défaut, zones traversées en surbrillance ; observations à ajouter avec le lot 5 | T13, T16 |
 | ~~T18~~ ✅ | Écran de résultat : nom, point d'entrée, distance parcourue à l'intérieur, source et date, lien vers les conseils | Fait : panneau « Votre sortie » (résumé, zones dans l'ordre, km d'entrée, distance dans la zone, période) | T17 |
-| T19 | Tests d'intégration de la détection avec des GPX de référence (traversée, frôlement, hors zone, hors période) ; les tests unitaires, eux, sont écrits avant le code dans chaque tâche | Tests verts en CI | T17 |
+| ~~T19~~ ✅ | Tests d'intégration de la détection avec des GPX de référence (traversée, frôlement, hors zone, hors période) ; les tests unitaires, eux, sont écrits avant le code dans chaque tâche | Fait : `tests/integration/outing.test.ts`, GPX fictifs (traversée, frôlement, hors zone, hors saison), vérifié par mutation | T17 |
 
 ### Lot 4 — Pédagogie
 
@@ -56,8 +56,8 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 | --- | --- | --- | --- |
 | ~~T20~~ ✅ | Rédiger les conseils au format JSON, déclinés par espèce, présence de chiens et activité (message de 15 mots maximum, détail, source publique citée) | Fait : `public/content/advice.json`, 9 conseils tirés de Pasto Kézako, vérifiés par un test (15 mots max, source, couverture statut × activité) ; relecture par un professionnel à venir (V1) | T10 |
 | ~~T21~~ ✅ | Résumé pédagogique au résultat de l'import (écran 4) et fiche conseil (écran 5), avec les conseils choisis selon le contexte | Fait : conseils du statut le plus prudent rencontré et de l'activité, dans « Votre sortie » et la fiche de zone | T18, T20 |
-| T22 | Page « Comprendre » | Accessible depuis le menu à tout moment | T20 |
-| T23 | Avertissement « l'application ne garantit rien » et mentions des sources | Visible au premier lancement et sur chaque résultat | T18 |
+| ~~T22~~ ✅ | Page « Comprendre » | Fait : bouton « Comprendre » (rôle du chien de protection, tous les conseils, sources et crédits) | T20 |
+| ~~T23~~ ✅ | Avertissement « l'application ne garantit rien » et mentions des sources | Fait : accueil au premier lancement (mémorisé), avertissement sur chaque fiche et chaque analyse | T18 |
 
 ### Lot 5 — Observations de terrain
 

@@ -7,6 +7,7 @@ import type { ZoneOnMap } from './application/ports';
 import { prepareOuting } from './application/prepare-outing';
 import { showPastoralZones, showZonesOn, toggleZoneLayer, type ShowZonesResult } from './application/show-pastoral-zones';
 import { showTerritory } from './application/show-territory';
+import { markWelcomeSeen, shouldShowWelcome } from './application/welcome';
 import { buildZoneSheet, initialActivity } from './application/zone-sheet';
 import type { Activity, Advice } from './domain/advice';
 import { BASE_MAPS } from './domain/base-map';
@@ -17,9 +18,11 @@ import { readGpx } from './infrastructure/gpx-reader';
 import { HttpPastoralZoneRepository } from './infrastructure/http-pastoral-zone-repository';
 import { LocalStorageActivityPreferences } from './infrastructure/local-storage-activity-preferences';
 import { LocalStorageBaseMapPreferences } from './infrastructure/local-storage-base-map-preferences';
+import { LocalStorageValue } from './infrastructure/local-storage-value';
 import { createBaseMapSwitcher } from './ui/base-map-switcher';
 import { configureMapLibre } from './ui/configure-maplibre';
-import { frenchNumber } from './ui/dom';
+import { element, frenchNumber } from './ui/dom';
+import { createUnderstandPanel, createWelcomeDialog } from './ui/info-panels';
 import { MapLibreMapView } from './ui/maplibre-map-view';
 import { createOutingReportPanel } from './ui/outing-report-panel';
 import { createTrackImport, enableFileDrop } from './ui/track-import';
@@ -35,6 +38,7 @@ const base = import.meta.env.BASE_URL;
 const storage = () => window.localStorage;
 const baseMapPreferences = new LocalStorageBaseMapPreferences(storage);
 const activityPreferences = new LocalStorageActivityPreferences(storage);
+const welcomePreferences = new LocalStorageValue<'seen'>('sonnaille.welcome', storage);
 const zoneRepository = new HttpPastoralZoneRepository(`${base}data/pastoral-zones.geojson`, (url) => fetch(url));
 const adviceRepository = new HttpAdviceRepository(`${base}content/advice.json`, (url) => fetch(url));
 
@@ -126,6 +130,24 @@ async function importFile(file: File): Promise<void> {
   if (zones.available) showOutingReport();
   else trackImport.setStatus(`${result.track.name} — zones pastorales indisponibles, analyse impossible pour le moment.`);
 }
+
+// --- Welcome (T23) and "Comprendre" (T22) ------------------------------------
+if (shouldShowWelcome(welcomePreferences)) {
+  document.body.append(createWelcomeDialog({ onClose: () => markWelcomeSeen(welcomePreferences) }));
+}
+
+const understandButton = element('button', { type: 'button', className: 'understand-button', textContent: 'Comprendre' });
+view.addPanel(element('div', { className: 'map-panel understand-entry' }, understandButton));
+let understand: ReturnType<typeof createUnderstandPanel> | null = null;
+understandButton.addEventListener('click', () => {
+  if (!understand) {
+    understand = createUnderstandPanel({ advice });
+    document.body.append(understand.element);
+  }
+  zoneSheet.hide();
+  outingReport.hide();
+  understand.open();
+});
 
 // --- Start -----------------------------------------------------------------
 void Promise.all([showPastoralZones(zoneRepository, view, day), adviceRepository.load().catch(() => [])]).then(
