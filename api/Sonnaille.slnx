@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Sonnaille.Api/Sonnaille.Api.csproj" />
+    <Project Path="src/Sonnaille.Application/Sonnaille.Application.csproj" />
+    <Project Path="src/Sonnaille.Domain/Sonnaille.Domain.csproj" />
+    <Project Path="src/Sonnaille.Infrastructure/Sonnaille.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Sonnaille.Tests/Sonnaille.Tests.csproj" />
+  </Folder>
+</Solution>
