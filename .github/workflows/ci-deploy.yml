@@ -38,7 +38,10 @@ jobs:
         with:
           path: public/data
           key: pastoral-zones-${{ steps.day.outputs.today }}
+      # Not blocking: the Map Patou API is not reachable from GitHub runners (D4).
+      # Without data, the site deploys and the app says the zones are unavailable.
       - run: npm run data
+        continue-on-error: true
       - run: npm run build
       - if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v5

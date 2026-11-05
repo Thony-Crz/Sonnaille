@@ -76,3 +76,23 @@ Le code reste public. Les données Map Patou ne sont jamais committées.
 
 - Le vocabulaire métier a une traduction fixe dans le code : emprise → `Bounds`, territoire → `territory`, massif → `Massif`, zone pastorale → `PastoralZone`, secteur prévu → `PlannedSector`, observation → `Observation`, conseil → `Advice`, tracé → `Track`, sortie → `Outing`.
 - Tout README modifié l'est dans les deux langues, dans le même commit.
+
+## D4 — L'API Map Patou n'est pas joignable depuis la CI
+
+5 novembre 2026 · Statut : adoptée, provisoire
+
+**Constat**
+
+Depuis les serveurs de GitHub Actions, la connexion à `mappatous-api.lessem.inrae.fr` échoue (`UND_ERR_CONNECT_TIMEOUT`), alors que la même requête fonctionne depuis un poste en France. L'API filtre vraisemblablement les adresses des hébergeurs.
+
+**Décision**
+
+- L'étape `npm run data` de la CI n'est plus bloquante : sans données, le site se déploie quand même et l'application indique que les zones sont indisponibles.
+- En développement, `npm run data` fonctionne depuis le poste local (`MAP_PATOU_DATE=2026-07-15` pour un jour d'été).
+- Le reste de D1 tient toujours : données jamais versionnées dans le dépôt public, au plus une requête par jour.
+
+**Pistes pour avoir les zones en production** (à trancher, par ordre de préférence)
+
+1. Un accès officiel accordé par le Réseau Pastoral AuRA (T03), éventuellement avec un export que la CI peut lire.
+2. Un dépôt privé de données, alimenté depuis le poste d'Anthony par `npm run data`, que la CI lit avec un jeton.
+3. Un runner GitHub auto-hébergé sur un poste en France.
