@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Fictitious track passing about 30 m north of the "dogs" zone, Komoot-style declaration. -->
+<gpx version="1.1" creator="Sonnaille tests" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata><name>Frôlement</name></metadata>
+  <trk>
+    <trkseg>
+      <trkpt lat="45.21027" lon="5.6900"></trkpt>
+      <trkpt lat="45.21027" lon="5.7200"></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

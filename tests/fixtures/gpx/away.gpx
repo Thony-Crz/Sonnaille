@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!-- Fictitious route far from any zone, written as a GPX route (rte). -->
+<gpx version="1.1" creator="Sonnaille tests" xmlns="http://www.topografix.com/GPX/1/1">
+  <rte>
+    <name>Loin des alpages</name>
+    <rtept lat="45.4000" lon="5.4000"></rtept>
+    <rtept lat="45.4100" lon="5.4100"></rtept>
+  </rte>
+</gpx>
