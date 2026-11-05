@@ -12,7 +12,7 @@ import { markWelcomeSeen, shouldShowWelcome } from './application/welcome';
 import { buildZoneSheet, initialActivity } from './application/zone-sheet';
 import type { Activity, Advice } from './domain/advice';
 import { availableBaseMaps } from './domain/base-map';
-import type { Track } from './domain/track';
+import { trackHasTimes, type Track } from './domain/track';
 import { dayOf, parseDay } from './domain/zone-status';
 import { HttpAdviceRepository } from './infrastructure/advice-content';
 import { readGpx } from './infrastructure/gpx-reader';
@@ -174,6 +174,7 @@ async function importFile(file: File): Promise<void> {
   }
   track = result.track;
   observationForm.setTrackLength(result.lengthKm);
+  observationForm.setTrackHasTimes(trackHasTimes(result.track));
   trackImport.setStatus(`${result.track.name} — ${frenchNumber(result.lengthKm)} km`);
   if (zones.available) showOutingReport();
   else trackImport.setStatus(`${result.track.name} — zones pastorales indisponibles, analyse impossible pour le moment.`);

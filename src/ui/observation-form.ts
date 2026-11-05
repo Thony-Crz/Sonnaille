@@ -7,11 +7,15 @@ export interface ObservationAnswers {
   species: Species;
   headcount: Headcount;
   guardDogs: boolean;
+  /** HH:MM, asked only when the GPX has no time. */
+  time?: string;
 }
 
 export interface ObservationForm {
   element: HTMLElement;
   setTrackLength(km: number): void;
+  /** Asks for the time of the sighting when the GPX does not have it. */
+  setTrackHasTimes(hasTimes: boolean): void;
   showResult(json: string, timeFromTrack: boolean): void;
 }
 
@@ -49,6 +53,8 @@ export function createObservationForm({ onSubmit }: { onSubmit: (answers: Observ
   }
 
   const guardDogs = element('input', { type: 'checkbox', name: 'guardDogs' });
+  const time = element('input', { type: 'time', name: 'time', value: '12:00' });
+  const timeLabel = element('label', { hidden: true }, element('span', { textContent: "Heure de l'observation" }), time);
   const error = element('p', { className: 'observation-error' });
   error.setAttribute('role', 'alert');
   const result = element('div', { className: 'observation-result' });
@@ -57,6 +63,7 @@ export function createObservationForm({ onSubmit }: { onSubmit: (answers: Observ
     'form',
     { className: 'observation-form', noValidate: true },
     element('label', {}, element('span', { textContent: 'Au kilomètre' }), km),
+    timeLabel,
     element('label', {}, element('span', { textContent: 'Quels animaux ?' }), species),
     headcount,
     element('label', { className: 'observation-dogs' }, guardDogs, element('span', { textContent: 'Chiens de protection vus' })),
@@ -71,6 +78,11 @@ export function createObservationForm({ onSubmit }: { onSubmit: (answers: Observ
       error.textContent = `Choisissez un kilomètre entre 0 et ${frenchNumber(length)}.`;
       return;
     }
+    const askedTime = !timeLabel.hidden;
+    if (askedTime && !/^\d{2}:\d{2}$/.test(time.value)) {
+      error.textContent = "Indiquez l'heure à laquelle vous avez vu les animaux.";
+      return;
+    }
     error.textContent = '';
     const chosen = form.querySelector<HTMLInputElement>('input[name="headcount"]:checked');
     onSubmit({
@@ -78,6 +90,7 @@ export function createObservationForm({ onSubmit }: { onSubmit: (answers: Observ
       species: species.value as Species,
       headcount: (chosen?.value ?? 'dozens') as Headcount,
       guardDogs: guardDogs.checked,
+      ...(askedTime ? { time: time.value } : {}),
     });
   });
 
@@ -89,6 +102,9 @@ export function createObservationForm({ onSubmit }: { onSubmit: (answers: Observ
       length = value;
       km.max = String(value);
     },
+    setTrackHasTimes: (hasTimes) => {
+      timeLabel.hidden = hasTimes;
+    },
     showResult: (json, timeFromTrack) => {
       const copy = element('button', { type: 'button', className: 'observation-copy', textContent: 'Copier' });
       copy.addEventListener('click', () => {
@@ -97,9 +113,10 @@ export function createObservationForm({ onSubmit }: { onSubmit: (answers: Observ
         });
       });
       result.replaceChildren(
-        ...(timeFromTrack
-          ? []
-          : [element('p', { className: 'observation-warning', textContent: "Votre GPX n'a pas d'heure : l'observation est datée de midi le jour de la sortie." })]),
+        element('p', {
+          className: 'observation-time-source',
+          textContent: timeFromTrack ? 'Heure tirée de votre GPX.' : "Heure saisie à la main : votre GPX n'a pas d'heure.",
+        }),
         element('p', {
           textContent: 'Ajoutez cette entrée au tableau « features » du fichier content/observations.geojson du dépôt : elle sera visible après le prochain déploiement.',
         }),

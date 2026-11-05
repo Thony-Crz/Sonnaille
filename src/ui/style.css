@@ -417,7 +417,7 @@ body {
 }
 
 .observation-error,
-.observation-warning {
+.observation-time-source {
   margin: 0;
   color: #9a3a1c;
   font-size: 13px;
@@ -435,4 +435,16 @@ body {
   margin: 0 8px 8px;
   padding-top: 6px;
   border-top: 1px solid #ece9e0;
+}
+
+.observation-result .observation-time-source {
+  color: #555;
+}
+
+.observation-form input[type='time'] {
+  min-height: 36px;
+  padding: 0 8px;
+  border: 1px solid #d3d1c7;
+  border-radius: 6px;
+  font: inherit;
 }

@@ -49,6 +49,28 @@ describe('createObservation', () => {
     expect(observation.position.longitude).toBe(5.7);
   });
 
+  it('uses the time entered by the user when the GPX has no time', () => {
+    const result = createObservation({
+      track: untimed,
+      km: 1,
+      species: 'cattle',
+      headcount: 'dozens',
+      guardDogs: false,
+      outingDate: '2026-07-15',
+      time: '09:30',
+    });
+
+    const observedAt = new Date(result.observation.observedAt);
+    expect(result.timeFromTrack).toBe(false);
+    expect([observedAt.getDate(), observedAt.getHours(), observedAt.getMinutes()]).toEqual([15, 9, 30]);
+  });
+
+  it('prefers the GPX time over a time entered by the user', () => {
+    const result = createObservation({ track: timed, km: 1, species: 'sheep', headcount: 'few', guardDogs: false, outingDate: '2026-07-15', time: '18:00' });
+
+    expect(result.observation.observedAt).toBe('2026-07-15T06:20:00.000Z');
+  });
+
   it('uses noon on the outing day when the GPX has no time', () => {
     const result = createObservation({ track: untimed, km: 1, species: 'cattle', headcount: 'dozens', guardDogs: false, outingDate: '2026-07-15' });
 

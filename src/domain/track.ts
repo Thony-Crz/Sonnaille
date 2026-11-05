@@ -33,6 +33,11 @@ export function trackLengthMeters(track: Track): number {
   );
 }
 
+/** Whether the GPX recorded when each point was passed (Strava, a watch…), or only where (a planned route). */
+export function trackHasTimes(track: Track): boolean {
+  return track.segments.some((segment) => segment.some((point) => point.time !== undefined));
+}
+
 export function trackBounds(track: Track): Bounds | undefined {
   return boundsOf(track.segments.flat().map((p) => [p.longitude, p.latitude]));
 }

@@ -86,11 +86,49 @@ describe('createObservationForm', () => {
     expect(writeText).toHaveBeenCalledWith('{"type":"Feature"}');
   });
 
-  it('warns when the time could not be read from the GPX', () => {
+  it('asks for the time of the sighting when the GPX has none', () => {
+    const { form, $, onSubmit } = setup();
+
+    form.setTrackHasTimes(false);
+    const time = $<HTMLInputElement>('input[name="time"]');
+    expect(time.closest('label')?.hidden).toBe(false);
+    expect(time.closest('label')?.textContent).toContain("Heure de l'observation");
+    expect(time.value).toBe('12:00');
+
+    time.value = '09:30';
+    $<HTMLButtonElement>('button[type="submit"]').click();
+
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ time: '09:30' }));
+  });
+
+  it('does not ask for the time when the GPX has it', () => {
+    const { form, $, onSubmit } = setup();
+
+    form.setTrackHasTimes(true);
+    $<HTMLButtonElement>('button[type="submit"]').click();
+
+    expect($<HTMLInputElement>('input[name="time"]').closest('label')?.hidden).toBe(true);
+    expect(onSubmit.mock.calls[0]?.[0]).not.toHaveProperty('time');
+  });
+
+  it('refuses an empty time', () => {
+    const { form, $, onSubmit } = setup();
+    form.setTrackHasTimes(false);
+    $<HTMLInputElement>('input[name="time"]').value = '';
+
+    $<HTMLButtonElement>('button[type="submit"]').click();
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(form.element.querySelector('.observation-error')?.textContent).toBe("Indiquez l'heure à laquelle vous avez vu les animaux.");
+  });
+
+  it('says where the time comes from', () => {
     const { form } = setup();
 
     form.showResult('{}', false);
+    expect(form.element.textContent).toContain("Heure saisie à la main : votre GPX n'a pas d'heure.");
 
-    expect(form.element.textContent).toContain("Votre GPX n'a pas d'heure : l'observation est datée de midi le jour de la sortie.");
+    form.showResult('{}', true);
+    expect(form.element.textContent).toContain('Heure tirée de votre GPX.');
   });
 });

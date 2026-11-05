@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { distanceMeters, trackBounds, trackLengthMeters, type Track } from './track';
+import { distanceMeters, trackBounds, trackHasTimes, trackLengthMeters, type Track } from './track';
 
 describe('distanceMeters', () => {
   it('is 0 between a point and itself', () => {
@@ -32,6 +32,18 @@ const track: Track = {
 describe('trackLengthMeters', () => {
   it('adds the segments without joining them', () => {
     expect(trackLengthMeters(track)).toBeCloseTo(2 * 1_112, -1);
+  });
+});
+
+describe('trackHasTimes', () => {
+  it('is false for a track without timestamps', () => {
+    expect(trackHasTimes(track)).toBe(false);
+  });
+
+  it('is true when the GPX has timestamps', () => {
+    const timed: Track = { name: 'T', segments: [[{ longitude: 5.7, latitude: 45.2, time: '2026-07-15T06:00:00Z' }]] };
+
+    expect(trackHasTimes(timed)).toBe(true);
   });
 });
 

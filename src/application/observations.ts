@@ -5,7 +5,8 @@ import type { MapView, ObservationOnMap, ObservationRepository, ObservationSetti
 
 /**
  * A sighting reported after an outing, at a km of the GPX track. Its time comes from
- * the GPX timestamps, or is noon on the outing day when the GPX has none.
+ * the GPX timestamps; when the GPX has none, from the time entered by the user
+ * (HH:MM, local time) on the outing day, or noon by default.
  */
 export function createObservation({
   track,
@@ -14,6 +15,7 @@ export function createObservation({
   headcount,
   guardDogs,
   outingDate,
+  time: enteredTime,
 }: {
   track: Track;
   km: number;
@@ -21,13 +23,15 @@ export function createObservation({
   headcount: Headcount;
   guardDogs: boolean;
   outingDate: string;
+  /** HH:MM, used when the GPX has no time. */
+  time?: string;
 }): { observation: Observation; timeFromTrack: boolean } {
   const point = pointAtKm(track, km);
   const time = point.time;
   // Five decimals: about one metre, more than enough for a flock.
   const round = (degrees: number) => Math.round(degrees * 1e5) / 1e5;
   const position = { longitude: round(point.position.longitude), latitude: round(point.position.latitude) };
-  const observedAt = time ?? new Date(`${outingDate}T12:00:00`).toISOString();
+  const observedAt = time ?? new Date(`${outingDate}T${enteredTime ?? '12:00'}:00`).toISOString();
   const id = `obs-${observedAt}-${position.latitude.toFixed(4)}-${position.longitude.toFixed(4)}`;
   return { observation: { id, observedAt, position, species, headcount, guardDogs }, timeFromTrack: time !== undefined };
 }
