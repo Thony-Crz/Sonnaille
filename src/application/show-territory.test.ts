@@ -11,6 +11,7 @@ class FakeMapView implements MapView {
   }
   showPastoralZones(): void {}
   setZoneLayerVisible(): void {}
+  showObservations(): void {}
   showTrack(): void {}
   showBaseMap(): void {}
 }

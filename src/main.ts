@@ -3,6 +3,7 @@
 import './ui/style.css';
 import { chooseBaseMap, initialBaseMap } from './application/base-map-choice';
 import { importTrack } from './application/import-track';
+import { showObservations } from './application/observations';
 import type { ZoneOnMap } from './application/ports';
 import { prepareOuting } from './application/prepare-outing';
 import { showPastoralZones, showZonesOn, toggleZoneLayer, type ShowZonesResult } from './application/show-pastoral-zones';
@@ -15,6 +16,7 @@ import type { Track } from './domain/track';
 import { dayOf, parseDay } from './domain/zone-status';
 import { HttpAdviceRepository } from './infrastructure/advice-content';
 import { readGpx } from './infrastructure/gpx-reader';
+import { HttpObservationRepository, HttpObservationSettings } from './infrastructure/observations-content';
 import { HttpPastoralZoneRepository } from './infrastructure/http-pastoral-zone-repository';
 import { LocalStorageActivityPreferences } from './infrastructure/local-storage-activity-preferences';
 import { LocalStorageBaseMapPreferences } from './infrastructure/local-storage-base-map-preferences';
@@ -41,6 +43,8 @@ const activityPreferences = new LocalStorageActivityPreferences(storage);
 const welcomePreferences = new LocalStorageValue<'seen'>('sonnaille.welcome', storage);
 const zoneRepository = new HttpPastoralZoneRepository(`${base}data/pastoral-zones.geojson`, (url) => fetch(url));
 const adviceRepository = new HttpAdviceRepository(`${base}content/advice.json`, (url) => fetch(url));
+const observationRepository = new HttpObservationRepository(`${base}content/observations.geojson`, (url) => fetch(url));
+const observationSettings = new HttpObservationSettings(`${base}content/observation-settings.json`, (url) => fetch(url));
 
 // --- State -----------------------------------------------------------------
 // Day shown on the map: today, or ?date=YYYY-MM-DD (e.g. a summer day for a demo),
@@ -51,6 +55,7 @@ let zones: ShowZonesResult = { available: false };
 let advice: Advice[] = [];
 let track: Track | null = null;
 let selectedZone: ZoneOnMap | null = null;
+let recentObservations = 0;
 
 // --- Map and panels --------------------------------------------------------
 const baseMap = initialBaseMap(baseMapPreferences);
@@ -97,7 +102,13 @@ function updateLegendNote(): void {
   }
   const shownDay = new Date(`${day}T12:00:00`).toLocaleDateString('fr-FR');
   const fetched = new Date(zones.fetchedAt).toLocaleDateString('fr-FR');
-  legend.setNote(`Troupeaux prévus le ${shownDay}. Source : ${zones.source}, données du ${fetched}. Touchez une zone pour sa fiche.`);
+  const sightings =
+    recentObservations > 0
+      ? ` ${recentObservations} observation${recentObservations > 1 ? 's' : ''} de terrain récente${recentObservations > 1 ? 's' : ''} (en violet).`
+      : '';
+  legend.setNote(
+    `Troupeaux prévus le ${shownDay}. Source : ${zones.source}, données du ${fetched}.${sightings} Touchez une zone pour sa fiche.`,
+  );
 }
 
 /** Shows the outing report (T16-T18) for the imported track, on the current day and activity. */
@@ -150,6 +161,11 @@ understandButton.addEventListener('click', () => {
 });
 
 // --- Start -----------------------------------------------------------------
+void showObservations(observationRepository, observationSettings, view, new Date()).then((result) => {
+  if (result.available) recentObservations = result.recent;
+  updateLegendNote();
+});
+
 void Promise.all([showPastoralZones(zoneRepository, view, day), adviceRepository.load().catch(() => [])]).then(
   ([result, loadedAdvice]) => {
     zones = result;

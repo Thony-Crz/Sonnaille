@@ -2,12 +2,13 @@ import type { FilterSpecification } from '@maplibre/maplibre-gl-style-spec';
 import type { FeatureCollection } from 'geojson';
 import { Map, NavigationControl, type ControlPosition, type GeoJSONSource } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import type { MapView, ZoneOnMap } from '../application/ports';
+import type { MapView, ObservationOnMap, ZoneOnMap } from '../application/ports';
 import type { BaseMapId } from '../domain/base-map';
 import type { Bounds } from '../domain/bounds';
 import type { Track } from '../domain/track';
 import { ZONE_STATUSES, type ZoneStatus } from '../domain/zone-status';
 import { BASE_MAP_STYLES, withAttribution } from './base-map-styles';
+import { circleRing } from './geo-circle';
 import { ZONE_STYLES } from './zone-styles';
 
 const EMPTY_STYLE = { version: 8 as const, sources: {}, layers: [] };
@@ -16,6 +17,8 @@ const TRACK_SOURCE = 'track';
 const TRACK_LAYERS = ['track-casing', 'track-line'];
 const TRACK_COLOR = '#23395b';
 const HIGHLIGHT_LAYER = 'zones-highlight';
+const OBSERVATIONS_SOURCE = 'observations';
+const OBSERVATION_COLOR = '#6a3d9a';
 
 const fillLayerId = (status: ZoneStatus) => `zones-${status}-fill`;
 const lineLayerId = (status: ZoneStatus) => `zones-${status}-line`;
@@ -26,6 +29,7 @@ export class MapLibreMapView implements MapView {
   private shownZones: Record<string, ZoneOnMap> = {};
   private track: FeatureCollection | null = null;
   private highlighted: string[] = [];
+  private observations: FeatureCollection | null = null;
   private readonly visible: Record<ZoneStatus, boolean> = { 'flock-with-dogs': true, flock: true, 'no-flock': true };
 
   constructor(container: HTMLElement, baseMap: BaseMapId) {
@@ -34,6 +38,7 @@ export class MapLibreMapView implements MapView {
     // A new base map replaces the whole style: overlays are added again each time.
     this.map.on('style.load', () => {
       this.addZoneLayers();
+      this.addObservationLayers();
       this.addTrackLayers();
     });
     this.showBaseMap(baseMap);
@@ -100,6 +105,32 @@ export class MapLibreMapView implements MapView {
     if (this.map.getLayer(HIGHLIGHT_LAYER)) this.map.removeLayer(HIGHLIGHT_LAYER);
     if (this.map.getSource(ZONES_SOURCE)) {
       this.addHighlightLayer();
+      this.raiseTrack();
+    }
+  }
+
+  /** Field sightings: a point and a halo per species, sharp while recent, faded afterwards. */
+  showObservations(items: ObservationOnMap[]): void {
+    this.observations = {
+      type: 'FeatureCollection',
+      features: items.flatMap(({ observation, recent, haloMeters }) => [
+        {
+          type: 'Feature' as const,
+          properties: { kind: 'halo', recent, id: observation.id },
+          geometry: { type: 'Polygon' as const, coordinates: [circleRing(observation.position, haloMeters)] },
+        },
+        {
+          type: 'Feature' as const,
+          properties: { kind: 'point', recent, id: observation.id, guardDogs: observation.guardDogs },
+          geometry: { type: 'Point' as const, coordinates: [observation.position.longitude, observation.position.latitude] },
+        },
+      ]),
+    };
+
+    const source = this.map.getSource(OBSERVATIONS_SOURCE) as GeoJSONSource | undefined;
+    if (source) source.setData(this.observations);
+    else if (this.map.isStyleLoaded()) {
+      this.addObservationLayers();
       this.raiseTrack();
     }
   }
@@ -175,6 +206,40 @@ export class MapLibreMapView implements MapView {
     }
     this.addHighlightLayer();
     this.raiseTrack();
+  }
+
+  private addObservationLayers(): void {
+    if (!this.observations || this.map.getSource(OBSERVATIONS_SOURCE)) return;
+
+    this.map.addSource(OBSERVATIONS_SOURCE, { type: 'geojson', data: this.observations });
+    const recent = (sharp: number, faded: number) => ['case', ['get', 'recent'], sharp, faded] as unknown as number;
+    this.map.addLayer({
+      id: 'observations-halo',
+      type: 'fill',
+      source: OBSERVATIONS_SOURCE,
+      filter: ['==', ['get', 'kind'], 'halo'],
+      paint: { 'fill-color': OBSERVATION_COLOR, 'fill-opacity': recent(0.22, 0.06) },
+    });
+    this.map.addLayer({
+      id: 'observations-halo-line',
+      type: 'line',
+      source: OBSERVATIONS_SOURCE,
+      filter: ['==', ['get', 'kind'], 'halo'],
+      paint: { 'line-color': OBSERVATION_COLOR, 'line-width': 1.2, 'line-opacity': recent(0.8, 0.3), 'line-dasharray': [2, 2] },
+    });
+    this.map.addLayer({
+      id: 'observations-point',
+      type: 'circle',
+      source: OBSERVATIONS_SOURCE,
+      filter: ['==', ['get', 'kind'], 'point'],
+      paint: {
+        'circle-radius': 6,
+        'circle-color': OBSERVATION_COLOR,
+        'circle-opacity': recent(1, 0.35),
+        'circle-stroke-color': '#ffffff',
+        'circle-stroke-width': 2,
+      },
+    });
   }
 
   private addHighlightLayer(): void {

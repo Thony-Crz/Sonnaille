@@ -401,3 +401,54 @@ describe('MapLibreMapView highlighted zones', () => {
     expect(lastMap().getLayer('zones-highlight')?.filter).toEqual(['in', ['get', 'id'], ['literal', ['A']]]);
   });
 });
+
+const sighting = (id: string, recent: boolean) => ({
+  observation: {
+    id,
+    observedAt: '2026-07-14T08:00:00.000Z',
+    position: { longitude: 5.7, latitude: 45.2 },
+    species: 'sheep' as const,
+    headcount: 'dozens' as const,
+    guardDogs: true,
+  },
+  recent,
+  haloMeters: 400,
+});
+
+describe('MapLibreMapView observations', () => {
+  beforeEach(() => {
+    maplibre.maps.length = 0;
+  });
+
+  it('draws each sighting as a point with a halo, flagged recent or not', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+
+    view.showObservations([sighting('o1', true)]);
+
+    const data = lastMap().getSource('observations')?.data as { features: Array<{ geometry: { type: string }; properties: Record<string, unknown> }> };
+    expect(data.features.map((f) => [f.geometry.type, f.properties.kind, f.properties.recent])).toEqual([
+      ['Polygon', 'halo', true],
+      ['Point', 'point', true],
+    ]);
+    expect(lastMap().layers.map((l) => l.id)).toEqual(['observations-halo', 'observations-halo-line', 'observations-point']);
+  });
+
+  it('keeps the track above the sightings', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showTrack(track);
+
+    view.showObservations([sighting('o1', false)]);
+
+    expect(lastMap().layers.slice(-2).map((l) => l.id)).toEqual(['track-casing', 'track-line']);
+  });
+
+  it('keeps the sightings when the base map changes', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showObservations([sighting('o1', true)]);
+
+    view.showBaseMap('osm');
+    lastMap().emit('style.load');
+
+    expect(lastMap().getLayer('observations-point')).toBeDefined();
+  });
+});

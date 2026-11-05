@@ -14,6 +14,7 @@ class FakeMapView implements MapView {
   showPastoralZones(zones: ZoneOnMap[]): void {
     this.zones.push(zones);
   }
+  showObservations(): void {}
   showTrack(): void {}
   setZoneLayerVisible(status: ZoneStatus, visible: boolean): void {
     this.visibility.push([status, visible]);

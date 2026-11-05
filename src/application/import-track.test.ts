@@ -13,6 +13,7 @@ class FakeMapView implements MapView {
   showBaseMap(): void {}
   showPastoralZones(): void {}
   setZoneLayerVisible(): void {}
+  showObservations(): void {}
   showTrack(track: Track): void {
     this.tracks.push(track);
   }

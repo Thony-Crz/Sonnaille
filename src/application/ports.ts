@@ -18,6 +18,14 @@ export interface MapView {
   showPastoralZones(zones: ZoneOnMap[]): void;
   setZoneLayerVisible(status: ZoneStatus, visible: boolean): void;
   showTrack(track: Track): void;
+  showObservations(observations: ObservationOnMap[]): void;
+}
+
+export interface ObservationOnMap {
+  observation: Observation;
+  /** Sharp while recent, faded afterwards. */
+  recent: boolean;
+  haloMeters: number;
 }
 
 /** Reads an imported file into a track, on the device. Implemented in `infrastructure`. */
