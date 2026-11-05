@@ -44,6 +44,13 @@ const maplibre = vi.hoisted(() => {
     addLayer(layer: (typeof this.layers)[number]) {
       this.layers.push(layer);
     }
+    removeLayer(id: string) {
+      this.layers = this.layers.filter((l) => l.id !== id);
+    }
+    moveLayer(id: string) {
+      const layer = this.getLayer(id);
+      if (layer) this.layers = [...this.layers.filter((l) => l.id !== id), layer];
+    }
     getLayer(id: string) {
       return this.layers.find((l) => l.id === id);
     }
@@ -62,6 +69,7 @@ vi.mock('maplibre-gl', () => ({ Map: maplibre.Map, NavigationControl: maplibre.N
 
 import type { ZoneOnMap } from '../application/ports';
 import type { PastoralZone } from '../domain/pastoral-zone';
+import type { Track } from '../domain/track';
 import { BASE_MAP_STYLES } from './base-map-styles';
 import { ZONE_STYLES } from './zone-styles';
 import { MapLibreMapView } from './maplibre-map-view';
@@ -295,5 +303,69 @@ describe('MapLibreMapView zone selection', () => {
     lastMap().emitOnLayers('click', { features: [{ properties: { id: 'A' } }, { properties: { id: 'B' } }] });
 
     expect(onSelected).toHaveBeenCalledWith({ zone: zoneB, status: 'flock-with-dogs' });
+  });
+});
+
+const track: Track = {
+  name: 'Sortie',
+  segments: [
+    [
+      { longitude: 5.7, latitude: 45.2 },
+      { longitude: 5.71, latitude: 45.21 },
+    ],
+    [
+      { longitude: 5.72, latitude: 45.22 },
+      { longitude: 5.73, latitude: 45.23 },
+    ],
+  ],
+};
+
+describe('MapLibreMapView track', () => {
+  beforeEach(() => {
+    maplibre.maps.length = 0;
+  });
+
+  it('draws the track, one line per segment, above the zones', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showPastoralZones(zones);
+
+    view.showTrack(track);
+
+    expect(lastMap().getSource('track')?.data).toEqual({
+      type: 'FeatureCollection',
+      features: [
+        { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [[5.7, 45.2], [5.71, 45.21]] } },
+        { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [[5.72, 45.22], [5.73, 45.23]] } },
+      ],
+    });
+    expect(lastMap().layers.slice(-2).map((l) => l.id)).toEqual(['track-casing', 'track-line']);
+  });
+
+  it('keeps the track above the zones when they arrive later', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showTrack(track);
+
+    view.showPastoralZones(zones);
+
+    expect(lastMap().layers.at(-1)?.id).toBe('track-line');
+  });
+
+  it('keeps the track when the base map changes', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showTrack(track);
+
+    view.showBaseMap('osm');
+    lastMap().emit('style.load');
+
+    expect(lastMap().getLayer('track-line')).toBeDefined();
+  });
+
+  it('replaces the track when another one is imported', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showTrack(track);
+
+    view.showTrack({ ...track, segments: [track.segments[0]!] });
+
+    expect(lastMap().getSource('track')?.setData).toHaveBeenCalledTimes(1);
   });
 });

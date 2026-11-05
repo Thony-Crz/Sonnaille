@@ -44,7 +44,7 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 
 | ID | Tâche | Terminé quand | Dépend de |
 | --- | --- | --- | --- |
-| T15 | Lire un GPX dans le navigateur (glisser-déposer ou sélection de fichier) et afficher le tracé ; tester avec des exports Strava, Komoot et Garmin | Le tracé s'affiche pour les trois sources, aucune requête réseau ne contient le fichier | T07 |
+| ~~T15~~ ✅ | Lire un GPX dans le navigateur (glisser-déposer ou sélection de fichier) et afficher le tracé ; tester avec des exports Strava, Komoot et Garmin | Fait : bouton « Importer un GPX » et dépôt sur la carte, lecture locale (traces et itinéraires, formats Strava, Komoot, Garmin testés sur des GPX fictifs), tracé au-dessus des zones | T07 |
 | T16 | Saisir la date de la sortie et l'activité (trail, VTT, randonnée) | Les secteurs et observations sont filtrés selon la date ; l'activité est transmise aux conseils | T15 |
 | T17 | Détecter ce que traverse le tracé (Turf.js) : zones, secteurs actifs à la date, observations de moins de 3 jours ; marge réglable | Tronçons concernés en surbrillance | T13, T16 |
 | T18 | Écran de résultat : nom, point d'entrée, distance parcourue à l'intérieur, source et date, lien vers les conseils | Écran 3 conforme au cahier des charges | T17 |

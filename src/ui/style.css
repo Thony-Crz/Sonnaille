@@ -195,3 +195,36 @@ body {
   font-size: 12px;
   color: #555;
 }
+
+/* GPX import panel, under the base map switcher */
+.track-import {
+  padding: 8px 12px;
+}
+
+.track-import button {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 6px;
+  background: #2f5d3a;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.track-import-privacy,
+.track-import-status {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #555;
+}
+
+.track-import-status:empty {
+  display: none;
+}
+
+#map.drop-active {
+  outline: 4px dashed #2f5d3a;
+  outline-offset: -8px;
+}

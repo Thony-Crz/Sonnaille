@@ -5,12 +5,16 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import type { MapView, ZoneOnMap } from '../application/ports';
 import type { BaseMapId } from '../domain/base-map';
 import type { Bounds } from '../domain/bounds';
+import type { Track } from '../domain/track';
 import { ZONE_STATUSES, type ZoneStatus } from '../domain/zone-status';
 import { BASE_MAP_STYLES, withAttribution } from './base-map-styles';
 import { ZONE_STYLES } from './zone-styles';
 
 const EMPTY_STYLE = { version: 8 as const, sources: {}, layers: [] };
 const ZONES_SOURCE = 'pastoral-zones';
+const TRACK_SOURCE = 'track';
+const TRACK_LAYERS = ['track-casing', 'track-line'];
+const TRACK_COLOR = '#23395b';
 
 const fillLayerId = (status: ZoneStatus) => `zones-${status}-fill`;
 const lineLayerId = (status: ZoneStatus) => `zones-${status}-line`;
@@ -19,13 +23,17 @@ export class MapLibreMapView implements MapView {
   private readonly map: Map;
   private zones: FeatureCollection | null = null;
   private shownZones: Record<string, ZoneOnMap> = {};
+  private track: FeatureCollection | null = null;
   private readonly visible: Record<ZoneStatus, boolean> = { 'flock-with-dogs': true, flock: true, 'no-flock': true };
 
   constructor(container: HTMLElement, baseMap: BaseMapId) {
     this.map = new Map({ container, style: EMPTY_STYLE });
     this.map.addControl(new NavigationControl({ showCompass: false }), 'top-right');
     // A new base map replaces the whole style: overlays are added again each time.
-    this.map.on('style.load', () => this.addZoneLayers());
+    this.map.on('style.load', () => {
+      this.addZoneLayers();
+      this.addTrackLayers();
+    });
     this.showBaseMap(baseMap);
   }
 
@@ -84,6 +92,22 @@ export class MapLibreMapView implements MapView {
     });
   }
 
+  /** Draws the imported track, one line per segment, above the zones. */
+  showTrack(track: Track): void {
+    this.track = {
+      type: 'FeatureCollection',
+      features: track.segments.map((segment) => ({
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'LineString', coordinates: segment.map((p) => [p.longitude, p.latitude]) },
+      })),
+    };
+
+    const source = this.map.getSource(TRACK_SOURCE) as GeoJSONSource | undefined;
+    if (source) source.setData(this.track);
+    else if (this.map.isStyleLoaded()) this.addTrackLayers();
+  }
+
   setZoneLayerVisible(status: ZoneStatus, visible: boolean): void {
     this.visible[status] = visible;
     for (const id of [fillLayerId(status), lineLayerId(status)]) {
@@ -100,6 +124,15 @@ export class MapLibreMapView implements MapView {
       },
       position,
     );
+  }
+
+  private addTrackLayers(): void {
+    if (!this.track || this.map.getSource(TRACK_SOURCE)) return;
+
+    this.map.addSource(TRACK_SOURCE, { type: 'geojson', data: this.track });
+    const layout = { 'line-cap': 'round' as const, 'line-join': 'round' as const };
+    this.map.addLayer({ id: 'track-casing', type: 'line', source: TRACK_SOURCE, layout, paint: { 'line-color': '#ffffff', 'line-width': 7 } });
+    this.map.addLayer({ id: 'track-line', type: 'line', source: TRACK_SOURCE, layout, paint: { 'line-color': TRACK_COLOR, 'line-width': 4 } });
   }
 
   private addZoneLayers(): void {
@@ -128,5 +161,6 @@ export class MapLibreMapView implements MapView {
         paint: { 'line-color': color, 'line-width': status === 'no-flock' ? 1 : 1.6 },
       });
     }
+    for (const id of TRACK_LAYERS) if (this.map.getLayer(id)) this.map.moveLayer(id);
   }
 }
