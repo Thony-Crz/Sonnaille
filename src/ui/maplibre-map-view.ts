@@ -1,6 +1,6 @@
 import type { FilterSpecification } from '@maplibre/maplibre-gl-style-spec';
 import type { FeatureCollection } from 'geojson';
-import { Map, NavigationControl, type ControlPosition, type GeoJSONSource } from 'maplibre-gl';
+import { GeolocateControl, Map, NavigationControl, type ControlPosition, type GeoJSONSource } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { MapView, ObservationOnMap, ZoneOnMap } from '../application/ports';
 import type { BaseMapId } from '../domain/base-map';
@@ -35,6 +35,11 @@ export class MapLibreMapView implements MapView {
   constructor(container: HTMLElement, baseMap: BaseMapId) {
     this.map = new Map({ container, style: EMPTY_STYLE });
     this.map.addControl(new NavigationControl({ showCompass: false }), 'top-right');
+    // Where am I (T26): the position stays in the browser, shown once on request, never tracked.
+    this.map.addControl(
+      new GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: false, showUserLocation: true }),
+      'top-right',
+    );
     // A new base map replaces the whole style: overlays are added again each time.
     this.map.on('style.load', () => {
       this.addZoneLayers();

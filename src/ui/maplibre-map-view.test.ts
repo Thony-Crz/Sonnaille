@@ -62,10 +62,13 @@ const maplibre = vi.hoisted(() => {
   class NavigationControl {
     constructor(public options: Record<string, unknown>) {}
   }
-  return { maps, Map, NavigationControl };
+  class GeolocateControl {
+    constructor(public options: Record<string, unknown>) {}
+  }
+  return { maps, Map, NavigationControl, GeolocateControl };
 });
 
-vi.mock('maplibre-gl', () => ({ Map: maplibre.Map, NavigationControl: maplibre.NavigationControl }));
+vi.mock('maplibre-gl', () => ({ Map: maplibre.Map, NavigationControl: maplibre.NavigationControl, GeolocateControl: maplibre.GeolocateControl }));
 
 import type { ZoneOnMap } from '../application/ports';
 import type { PastoralZone } from '../domain/pastoral-zone';
@@ -134,6 +137,17 @@ describe('MapLibreMapView', () => {
     const [control, position] = lastMap().addControl.mock.calls.at(-1) as [IControl, string];
     expect(position).toBe('top-left');
     expect(control.onAdd(lastMap() as never)).toBe(panel);
+  });
+
+  it('offers to show where you are, once, without tracking you (T26)', () => {
+    new MapLibreMapView(container, 'ign-plan');
+
+    const [control, position] = lastMap().addControl.mock.calls.find(([c]) => c instanceof maplibre.GeolocateControl) as [
+      { options: Record<string, unknown> },
+      string,
+    ];
+    expect(position).toBe('top-right');
+    expect(control.options).toMatchObject({ trackUserLocation: false, showUserLocation: true });
   });
 
   it('can add a panel in another corner', () => {

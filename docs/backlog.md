@@ -70,7 +70,7 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 
 | ID | Tâche | Terminé quand | Dépend de |
 | --- | --- | --- | --- |
-| T26 | Afficher sa position sur la carte (Could) | Point de position, sans suivi ni alerte | T07 |
+| ~~T26~~ ✅ | Afficher sa position sur la carte (Could) | Fait : bouton de géolocalisation MapLibre, position affichée une fois à la demande, sans suivi ni envoi | T07 |
 | T27 | Passe mobile : affichage, performance, lisibilité en plein soleil | Parcours complet fluide sur un téléphone moyen de gamme | Lots 1 à 5 |
 | T28 | Préparer la démo : jeu de GPX de démonstration, scénario, support pour les partenaires | Démo jouable en 10 minutes | T27 |
 | T29 | Trouver 10 à 20 alpha users, en priorité dans un club de trail ou de VTT | Critère de passage à la V1 atteint | T28 |
