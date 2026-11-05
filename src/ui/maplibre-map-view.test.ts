@@ -94,6 +94,12 @@ describe('MapLibreMapView', () => {
     expect(lastMap().options).toMatchObject({ container });
   });
 
+  it('keeps the credits compact, so they do not cover the legend on phones', () => {
+    new MapLibreMapView(container, 'ign-plan');
+
+    expect(lastMap().options).toMatchObject({ attributionControl: { compact: true } });
+  });
+
   it('opens with the requested base map', () => {
     new MapLibreMapView(container, 'osm');
 
@@ -239,6 +245,16 @@ describe('MapLibreMapView pastoral zones', () => {
 
     lastMap().styleLoaded = true;
     lastMap().emit('style.load');
+    expect(lastMap().layers).toHaveLength(6);
+  });
+
+  it('adds the zones once the style has loaded, even while raster tiles are still loading', () => {
+    const view = new MapLibreMapView(container, 'topo');
+    lastMap().styleLoaded = false; // MapLibre says "not loaded" while tiles load...
+    lastMap().emit('style.load'); // ...although the style itself is ready.
+
+    view.showPastoralZones(zones);
+
     expect(lastMap().layers).toHaveLength(6);
   });
 

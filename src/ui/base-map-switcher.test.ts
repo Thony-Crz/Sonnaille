@@ -16,8 +16,8 @@ describe('createBaseMapSwitcher', () => {
   it('offers one labelled option per base map, in the same group', () => {
     const element = createBaseMapSwitcher({ baseMaps: BASE_MAPS, selected: 'ign-plan', onChange: vi.fn() });
 
-    expect(radios(element).map((r) => r.value)).toEqual(['ign-plan', 'ign-aerial', 'osm']);
-    expect(radios(element).map((r) => r.labels?.[0]?.textContent)).toEqual(['Plan IGN', 'Photos aériennes IGN', 'OpenStreetMap']);
+    expect(radios(element).map((r) => r.value)).toEqual(BASE_MAPS.map((b) => b.id));
+    expect(radios(element).map((r) => r.labels?.[0]?.textContent)).toEqual(BASE_MAPS.map((b) => b.label));
     expect(new Set(radios(element).map((r) => r.name)).size).toBe(1);
   });
 

@@ -11,7 +11,7 @@ import { showTerritory } from './application/show-territory';
 import { markWelcomeSeen, shouldShowWelcome } from './application/welcome';
 import { buildZoneSheet, initialActivity } from './application/zone-sheet';
 import type { Activity, Advice } from './domain/advice';
-import { BASE_MAPS } from './domain/base-map';
+import { availableBaseMaps } from './domain/base-map';
 import type { Track } from './domain/track';
 import { dayOf, parseDay } from './domain/zone-status';
 import { HttpAdviceRepository } from './infrastructure/advice-content';
@@ -21,6 +21,7 @@ import { HttpPastoralZoneRepository } from './infrastructure/http-pastoral-zone-
 import { LocalStorageActivityPreferences } from './infrastructure/local-storage-activity-preferences';
 import { LocalStorageBaseMapPreferences } from './infrastructure/local-storage-base-map-preferences';
 import { LocalStorageValue } from './infrastructure/local-storage-value';
+import { createBaseMapStyles } from './ui/base-map-styles';
 import { createBaseMapSwitcher } from './ui/base-map-switcher';
 import { configureMapLibre } from './ui/configure-maplibre';
 import { element, frenchNumber } from './ui/dom';
@@ -60,7 +61,10 @@ let recentObservations = 0;
 let sightings: ObservationOnMap[] = [];
 
 // --- Map and panels --------------------------------------------------------
-const baseMap = initialBaseMap(baseMapPreferences);
+// The IGN 1:25,000 map needs a personal IGN key, given at build time (docs/fonds-de-carte.md).
+const scan25Key: string | undefined = import.meta.env.VITE_IGN_SCAN25_KEY || undefined;
+const baseMaps = availableBaseMaps({ scan25: scan25Key !== undefined });
+const baseMap = initialBaseMap(baseMapPreferences, baseMaps);
 // Framing leaves room for the panels: on phones the outing sheet covers the bottom half,
 // on larger screens it sits on the right and the controls on the left.
 let framingForSheet = false;
@@ -69,9 +73,9 @@ const framePadding = () => {
   if (phone) return framingForSheet ? { top: 210, bottom: Math.round(window.innerHeight * 0.5) + 16, left: 16, right: 56 } : 24;
   return framingForSheet ? { top: 24, bottom: 24, left: 190, right: 430 } : { top: 24, bottom: 24, left: 190, right: 24 };
 };
-const view = new MapLibreMapView(container, baseMap, { framePadding });
+const view = new MapLibreMapView(container, baseMap, { framePadding, styles: createBaseMapStyles({ scan25Key }) });
 view.addPanel(
-  createBaseMapSwitcher({ baseMaps: BASE_MAPS, selected: baseMap, onChange: (id) => chooseBaseMap(view, baseMapPreferences, id) }),
+  createBaseMapSwitcher({ baseMaps, selected: baseMap, onChange: (id) => chooseBaseMap(view, baseMapPreferences, id) }),
 );
 showTerritory(view);
 

@@ -7,7 +7,7 @@ import type { BaseMapId } from '../domain/base-map';
 import type { Bounds } from '../domain/bounds';
 import type { Track } from '../domain/track';
 import { ZONE_STATUSES, type ZoneStatus } from '../domain/zone-status';
-import { BASE_MAP_STYLES, withAttribution } from './base-map-styles';
+import { BASE_MAP_STYLES, withAttribution, type BaseMapStyles } from './base-map-styles';
 import { circleRing } from './geo-circle';
 import { ZONE_STYLES } from './zone-styles';
 
@@ -30,15 +30,20 @@ export class MapLibreMapView implements MapView {
   private track: FeatureCollection | null = null;
   private highlighted: string[] = [];
   private observations: FeatureCollection | null = null;
+  /**
+   * Set on 'style.load'. MapLibre's isStyleLoaded() stays false while raster tiles load,
+   * which would leave overlays out when they arrive after the style.
+   */
+  private styleReady = false;
   private readonly visible: Record<ZoneStatus, boolean> = { 'flock-with-dogs': true, flock: true, 'no-flock': true };
 
   constructor(
     container: HTMLElement,
     baseMap: BaseMapId,
     /** Room to leave around framed areas, given by the layout (panels over the map). */
-    private readonly options: { framePadding?: () => number | PaddingOptions } = {},
+    private readonly options: { framePadding?: () => number | PaddingOptions; styles?: BaseMapStyles } = {},
   ) {
-    this.map = new Map({ container, style: EMPTY_STYLE });
+    this.map = new Map({ container, style: EMPTY_STYLE, attributionControl: { compact: true } });
     this.map.addControl(new NavigationControl({ showCompass: false }), 'top-right');
     // Where am I (T26): the position stays in the browser, shown once on request, never tracked.
     this.map.addControl(
@@ -47,6 +52,7 @@ export class MapLibreMapView implements MapView {
     );
     // A new base map replaces the whole style: overlays are added again each time.
     this.map.on('style.load', () => {
+      this.styleReady = true;
       this.addZoneLayers();
       this.addObservationLayers();
       this.addTrackLayers();
@@ -65,7 +71,9 @@ export class MapLibreMapView implements MapView {
   }
 
   showBaseMap(id: BaseMapId): void {
-    const { style, attribution } = BASE_MAP_STYLES[id];
+    const styles = this.options.styles ?? BASE_MAP_STYLES;
+    const { style, attribution } = styles[id] ?? styles['ign-plan'];
+    this.styleReady = false;
     this.map.setStyle(style, {
       diff: false,
       transformStyle: (_previous, next) => withAttribution(next, attribution),
@@ -85,7 +93,7 @@ export class MapLibreMapView implements MapView {
 
     const source = this.map.getSource(ZONES_SOURCE) as GeoJSONSource | undefined;
     if (source) source.setData(this.zones);
-    else if (this.map.isStyleLoaded()) this.addZoneLayers();
+    else if (this.isReady()) this.addZoneLayers();
   }
 
   /**
@@ -139,7 +147,7 @@ export class MapLibreMapView implements MapView {
 
     const source = this.map.getSource(OBSERVATIONS_SOURCE) as GeoJSONSource | undefined;
     if (source) source.setData(this.observations);
-    else if (this.map.isStyleLoaded()) {
+    else if (this.isReady()) {
       this.addObservationLayers();
       this.raiseTrack();
     }
@@ -158,7 +166,7 @@ export class MapLibreMapView implements MapView {
 
     const source = this.map.getSource(TRACK_SOURCE) as GeoJSONSource | undefined;
     if (source) source.setData(this.track);
-    else if (this.map.isStyleLoaded()) this.addTrackLayers();
+    else if (this.isReady()) this.addTrackLayers();
   }
 
   setZoneLayerVisible(status: ZoneStatus, visible: boolean): void {
@@ -177,6 +185,10 @@ export class MapLibreMapView implements MapView {
       },
       position,
     );
+  }
+
+  private isReady(): boolean {
+    return this.styleReady || this.map.isStyleLoaded() === true;
   }
 
   private addTrackLayers(): void {

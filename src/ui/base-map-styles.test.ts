@@ -1,6 +1,6 @@
 import type { RasterSourceSpecification, StyleSpecification } from 'maplibre-gl';
 import { describe, expect, it } from 'vitest';
-import { BASE_MAP_STYLES, IGN_PLAN_STYLE_URL, withAttribution } from './base-map-styles';
+import { BASE_MAP_STYLES, IGN_PLAN_STYLE_URL, createBaseMapStyles, withAttribution } from './base-map-styles';
 
 describe('BASE_MAP_STYLES', () => {
   it('uses the Géoplateforme IGN Plan vector style', () => {
@@ -25,7 +25,32 @@ describe('BASE_MAP_STYLES', () => {
     expect(source.tiles).toEqual(['https://tile.openstreetmap.org/{z}/{x}/{y}.png']);
   });
 
+  it('uses the OpenTopoMap tiles for the topographic map, up to zoom 17', () => {
+    const style = BASE_MAP_STYLES.topo.style as StyleSpecification;
+    const source = Object.values(style.sources)[0] as RasterSourceSpecification;
+
+    expect(source.tiles).toEqual([
+      'https://a.tile.opentopomap.org/{z}/{x}/{y}.png',
+      'https://b.tile.opentopomap.org/{z}/{x}/{y}.png',
+      'https://c.tile.opentopomap.org/{z}/{x}/{y}.png',
+    ]);
+    expect(source.maxzoom).toBe(17);
+  });
+
+  it('has no IGN 1:25,000 map without a key', () => {
+    expect(BASE_MAP_STYLES['ign-scan25']).toBeUndefined();
+  });
+
+  it('uses the private IGN service with the given key for the 1:25,000 map', () => {
+    const style = createBaseMapStyles({ scan25Key: 'my-key' })['ign-scan25']?.style as StyleSpecification;
+    const tiles = (Object.values(style.sources)[0] as RasterSourceSpecification).tiles?.[0];
+
+    expect(tiles).toContain('https://data.geopf.fr/private/wmts?apikey=my-key&');
+    expect(tiles).toContain('LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&');
+  });
+
   it.each([
+    ['topo', 'OpenTopoMap'],
     ['ign-plan', 'IGN'],
     ['ign-aerial', 'IGN'],
     ['osm', 'OpenStreetMap'],
