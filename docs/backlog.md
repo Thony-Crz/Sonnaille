@@ -16,14 +16,14 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 | ~~T02~~ ✅ | Étudier Map Patou : comment les données sont exposées, géométries, calendriers, fréquence de mise à jour | Fait : [map-patou.md](map-patou.md) | — |
 | ~~T30~~ ✅ | Revoir le positionnement face à Visorando | Fait : cible trail et VTT, conseils adaptés, observations de terrain (cahier des charges, section 1) | T01 |
 | T03 | Écrire au responsable de Map Patou, en demandant les mêmes conditions de réutilisation que Visorando | Mail envoyé (non bloquant) | — |
-| T04 | Décider où vivent les données scrapées : dépôt privé (Pages payant) ou données hors du dépôt public | Décision notée dans `docs/decisions.md` | T02 |
+| ~~T04~~ ✅ | Décider où vivent les données scrapées | Fait : hors du dépôt public, récupérées à la construction ([decisions.md](decisions.md), D1) | T02 |
 | T05 | Vérifier les conditions d'usage des tuiles IGN (Géoplateforme) : Plan IGN, photographies aériennes | Conditions notées dans `docs/sources.md` | — |
 
 ### Lot 1 — Squelette déployé
 
 | ID | Tâche | Terminé quand | Dépend de |
 | --- | --- | --- | --- |
-| T06 | Initialiser le projet (proposition : Vite et TypeScript) et le déploiement GitHub Pages par GitHub Actions | Une page vide est en ligne après chaque push sur `main` | T04 |
+| T06 | Initialiser le projet (proposition : Vite et TypeScript) et le déploiement GitHub Pages par artefact (`deploy-pages`, pas de branche `gh-pages`) ; `robots.txt` et `noindex` | Une page vide, non indexable, est en ligne après chaque push sur `main` | T04 |
 | T07 | Afficher une carte MapLibre centrée sur la Chartreuse et le Vercors, fond IGN Plan | La carte s'affiche sur mobile et sur ordinateur | T06 |
 | T08 | Ajouter le sélecteur de fonds (IGN Plan, photographies aériennes, OpenStreetMap), avec le choix mémorisé sur l'appareil | Le fond choisi est conservé au rechargement | T07 |
 | T09 | Rendre l'app installable (manifeste, icônes), sans hors ligne | L'app s'installe sur Android et iPhone | T06 |
@@ -34,7 +34,7 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 | --- | --- | --- | --- |
 | T10 | Définir le format GeoJSON commun (zones, secteurs, observations, lieux, chemins) et le valider en CI | Schémas dans le dépôt, CI en échec si un fichier est invalide | T06 |
 | T11 | Zone large : contours de tous les quartiers Map Patou découpés sur les deux massifs ; repli sur le RPG si la réutilisation est refusée | `zones.geojson` généré et valide | T01, T10 |
-| T12 | Scraper Map Patou (`POST /api/v1/map/geojson`), isolé dans son propre module, lancé une fois par jour par GitHub Actions ; normaliser `type_animal` | `secteurs.geojson` mis à jour automatiquement, au plus une requête par jour | T02, T04, T10 |
+| T12 | Scraper Map Patou (`POST /api/v1/map/geojson`), isolé dans son propre module, appelé à la construction du site (une fois par jour en saison) ; normaliser `type_animal` ; données jamais committées ni affichées dans les logs | Les secteurs sont dans le site déployé et absents du dépôt | T02, T04, T10 |
 | T13 | Afficher les couches activables, avec une légende | Chaque couche s'active et se désactive indépendamment | T07, T11 |
 | T14 | Fiche d'une zone : nom, période de présence, espèce, chiens, source, date de mise à jour, conseils adaptés | Un toucher sur une zone ouvre sa fiche avec les conseils correspondants | T13, T20 |
 

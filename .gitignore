@@ -1,0 +1,6 @@
+# Données Map Patou : jamais versionnées (voir docs/decisions.md, D1)
+data/map-patou/
+
+# Secrets locaux
+.env
+.env.*
