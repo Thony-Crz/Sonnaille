@@ -1,8 +1,8 @@
 # Sonnaille — Cahier des charges
 
-Version 2 · Nov 5, 2026 · @Anthony
+Version 2.1 · Nov 5, 2026 · @Anthony
 
-Sonnaille aide les randonneurs, traileurs et vététistes à **préparer leur sortie** en territoire pastoral et à **signaler ce qu'ils ont vu après**, avec un volet pédagogique sur les troupeaux et les chiens de protection (patous). Ce n'est pas un GPS. Elle complète Map Patou : Map Patou dit où les troupeaux sont prévus, l'application ajoute la préparation de sortie, la pédagogie et les observations de terrain.
+Sonnaille aide d'abord les **traileurs et les vététistes**, puis les randonneurs, à **préparer leur sortie** en territoire pastoral et à **signaler ce qu'ils ont vu après**, avec des conseils adaptés à la zone et à l'activité sur les troupeaux et les chiens de protection (patous). Ce n'est pas un GPS. Elle complète Map Patou : Map Patou dit où les troupeaux sont prévus, l'application ajoute la préparation de sortie, la pédagogie et les observations de terrain.
 
 ## 1. Contexte, positionnement et objectifs
 
@@ -11,10 +11,16 @@ Le pastoralisme est mal connu des pratiquants d'activités de plein air, et les 
 | Outil | Ce qu'il fait | Ce qui manque |
 | --- | --- | --- |
 | Map Patou (Réseau Pastoral Auvergne-Rhône-Alpes, hébergé par l'INRAE) | Présence *prévisionnelle* des troupeaux protégés en estive, calendriers tenus par des comptes à rôles (éleveur, contributeur, admin) | Préparation d'une sortie à partir d'un tracé, pédagogie, observations de terrain |
-| Pasto'rando | Localisation des zones pastorales sur un massif | Couverture limitée à un massif, pas de pédagogie, interface peu engageante |
-| Visorando, Komoot | Préparation et suivi de randonnées | Aucune vocation à faire cohabiter les usagers de la montagne |
+| Pastorando | Position des troupeaux par colliers GPS | Limité à Allos et au Haut-Verdon, pas de pédagogie |
+| Visorando | Calque Map Patou et alerte quand un itinéraire traverse une zone, depuis juillet 2026, dans 9 départements dont l'Isère, la Drôme et la Savoie | Pédagogie réduite à un rappel général, pas d'observations de terrain, rien de spécifique au trail ou au VTT |
+| Strava, Komoot, Garmin Connect | Préparation de sorties trail et VTT, échange de GPX | Pas de données pastorales (à vérifier) |
 
-**Positionnement** : un complément de Map Patou, pas une source concurrente. À terme, l'application affiche ses calendriers avec l'accord du Réseau Pastoral AuRA et en citant la source.
+**Positionnement**
+
+- **Cible principale : les traileurs et les vététistes.** Ils préparent leurs sorties hors de Visorando, manipulent des GPX tous les jours, et ce sont les profils les plus exposés face aux patous, car une allure rapide est lue comme une menace. Les randonneurs sont une cible secondaire : ils ont la carte des zones sans avoir à importer de GPX.
+- **Ce qui distingue Sonnaille de Visorando** : des conseils adaptés au GPX ou à la zone consultée (espèce, chiens, activité), des observations de terrain modérées, et à terme une expertise validée par des acteurs du pastoralisme. Cette expertise est une promesse : elle n'est pas en V0.
+- **Un complément de Map Patou**, pas une source concurrente. À terme, l'application affiche ses calendriers avec l'accord du Réseau Pastoral AuRA et en citant la source.
+- **Visorando** : à contacter en V1 ou en V2, en vue d'un partenariat.
 
 **Objectifs**
 
@@ -25,12 +31,12 @@ Le pastoralisme est mal connu des pratiquants d'activités de plein air, et les 
 
 **Principes non négociables**
 
-- **Avant et après la sortie, pas pendant.** Le GPS ne sert qu'à afficher sa position sur la carte ; c'est une fonction secondaire.
+- **Avant et après la sortie.** Le GPS ne sert qu'à afficher sa position sur la carte ; c'est une fonction secondaire. Un usage pendant la sortie (notifications sur le téléphone) n'est envisageable qu'avec le mode hors ligne, après la V0.
 - **On signale des zones, jamais des chiens ni des personnes.** Aucune identité ni coordonnée de berger n'est affichée, aucun patou n'est relié à un berger, aucun texte libre ne décrit le comportement d'un chien.
 - **Le tracé GPX ne quitte jamais l'appareil.** Seul le point d'observation choisi par l'utilisateur est envoyé.
 - **L'application ne garantit rien.** Elle indique des zones et des probabilités de présence, jamais l'absence de troupeau ou de chien. Un avertissement le rappelle.
 
-**Hors périmètre** : navigation avec guidage, alertes géolocalisées pendant la sortie, gestion des troupeaux par les éleveurs, données de santé animale, localisation de chiens individuels.
+**Hors périmètre** : navigation avec guidage, export vers une montre, gestion des troupeaux par les éleveurs, données de santé animale, localisation de chiens individuels.
 
 ## 2. Phasage
 
@@ -44,13 +50,16 @@ Trois versions, chacune ouverte seulement si la précédente a atteint son crit�
 | Comptes | Aucun (un seul éditeur) | Comptes contributeurs (Google, etc.) | Rôle berger validé par un humain |
 | Technique | Site statique, GitHub Pages et Actions | API et base géographique | — |
 | Hors ligne | Non | Oui, si le GPS est utilisé sur le terrain | Oui |
-| Critère de passage | 10 à 20 alpha users trouvés | À définir (proposition : chaque alpha user fait au moins une préparation et un signalement par saison, sans relance) | — |
+| Critère de passage | 10 à 20 alpha users trouvés, de préférence dans un club de trail ou de VTT | À définir (proposition : chaque alpha user fait au moins une préparation et un signalement par saison, sans relance) | — |
+
+**V3, envisagée** : enregistrer des randonnées et des GPX, et ouvrir une dimension collaborative comme Visorando. Cela contredit le principe « le tracé ne quitte jamais l'appareil » : il faudra un choix explicite de l'utilisateur, tracé par tracé.
 
 ## 3. Utilisateurs
 
 | Profil | Besoin principal | À partir de |
 | --- | --- | --- |
-| Randonneur, traileur, vététiste (cible principale) | Préparer sa sortie, savoir comment réagir, signaler après | V0 en consultation, V1 en contribution |
+| Traileur, vététiste (cible principale) | Préparer sa sortie à partir d'un GPX (Strava, Komoot, Garmin), savoir comment réagir à allure rapide, signaler après | V0 en consultation, V1 en contribution |
+| Randonneur (cible secondaire) | Consulter la carte des zones et les conseils, importer un GPX s'il le souhaite | V0 |
 | Curieux, habitant | Comprendre le pastoralisme local | V0 |
 | Contributeur | Signaler des troupeaux observés | V1 (compte requis) |
 | Berger, éleveur | Faire connaître son activité, valider des secteurs, témoigner | V2 (rôle validé) |
@@ -63,14 +72,14 @@ Trois versions, chacune ouverte seulement si la précédente a atteint son crit�
 | F1 | Carte des zones pastorales, secteurs prévus, observations, cabanes, points d'eau, chemins | V0 | Couches activables |
 | F2 | Fonds de carte sélectionnables, IGN par défaut | V0 | Voir section 9 |
 | F3 | Import GPX et détection des zones et troupeaux sur le tracé, à la date de sortie | V0 | Voir section 6 |
-| F4 | Conseils pédagogiques troupeaux et patous | V0 | Au résultat de l'import, sur la fiche d'une zone, page « Comprendre » ; voir section 8 |
+| F4 | Conseils pédagogiques adaptés au contexte | V0 | Au résultat de l'import GPX, sur la fiche de chaque zone cliquée, page « Comprendre » ; adaptés à l'espèce, aux chiens et à l'activité ; voir section 8 |
 | F5 | Signalement après la sortie (point ou kilomètre du GPX) | V0 pour l'éditeur, V1 pour les contributeurs | Voir section 7 |
 | F6 | Afficher sa position sur la carte | V0 (Could) | Point de position seulement, pas de suivi ni d'alerte |
 | F7 | Question « les bêtes y sont toujours ? » | V1 | Posée à qui importe un GPX passant près d'une observation récente |
 | F8 | Comptes contributeurs | V1 | Requis uniquement pour contribuer ; la consultation reste anonyme |
 | F9 | Mode hors ligne (fonds et zones d'un secteur) | V1 | Indispensable si la carte est consultée sur le terrain |
 | F10 | Rappel le matin de la sortie | V1 (Could) | Si l'utilisateur donne la date ; notifications web limitées sur iPhone |
-| F11 | Export du GPX annoté | V1 (Could) | Réutilisable dans une montre ou une app de rando |
+| F11 | Notifications pendant la sortie, sur le téléphone | Après la V1 (Could) | Seulement avec le mode hors ligne ; une alerte selon la position, application fermée, demandera probablement une application native |
 | F12 | Fiches de lieux avec témoignages de bergers | V2 | Texte et photo d'abord, audio ensuite ; accord écrit |
 | F13 | Rôle berger validé par un humain | V2 | Validation à confier de préférence à une structure pastorale partenaire |
 
@@ -131,9 +140,13 @@ L'utilisateur dépose un fichier GPX, indique la date de sa sortie, et obtient e
 
 ## 8. Module pédagogique : troupeaux et patous
 
-Les conseils apparaissent sous forme de messages courts, avec un détail accessible en un toucher. Leur contenu est relu par des acteurs du pastoralisme avant publication.
+Les conseils apparaissent sous forme de messages courts, avec un détail accessible en un toucher.
 
-**Déclencheurs** : le résultat d'un import GPX (moment principal, la veille de la sortie), la fiche d'une zone, la page « Comprendre » consultable à tout moment, et en V1 le rappel du matin.
+**Déclencheurs** : le résultat d'un import GPX (moment principal, la veille de la sortie), la fiche de chaque zone pastorale cliquée sur la carte, la page « Comprendre » consultable à tout moment, et en V1 le rappel du matin.
+
+**Conseils adaptés** : le message dépend du contexte connu : espèce (ovins, bovins…), présence de chiens, et activité choisie par l'utilisateur (trail, VTT, randonnée). Un vététiste qui traverse une zone ovine avec chiens ne lit pas le même message qu'un randonneur dans une zone bovine.
+
+**Expertise** : en V0, les conseils sont rédigés à partir de sources publiques citées et affichés comme « non encore relus par un professionnel ». La relecture par des acteurs du pastoralisme est une promesse de la V1.
 
 | Situation | Message court (écran) | Pour aller plus loin |
 | --- | --- | --- |
@@ -218,6 +231,8 @@ Le tracé GPX importé n'est pas une entité : il n'est jamais enregistré côt�
 | Risque | Conséquence | Parade |
 | --- | --- | --- |
 | Réutilisation des données de Map Patou sans accord | Perte de confiance du partenaire principal, problème juridique si publication | Usage privé en V0, dépôt privé, contact du responsable en parallèle, origine annoncée à la démo, scraper isolé |
+| Visorando propose déjà l'alerte de traversée de zone | Pas de raison d'adopter Sonnaille | Cible trail et VTT, conseils adaptés au contexte, observations de terrain ; partenariat envisagé en V1 ou V2 |
+| Expertise promise mais pas encore apportée | Perte de crédibilité auprès des utilisateurs et des partenaires | Conseils sourcés et affichés comme non relus en V0 ; recherche d'un relecteur pour la V1 |
 | Dépendance à une seule source pour les secteurs prévus | Démo vide si l'accès est coupé | Zone large en données ouvertes et observations propres, Map Patou activable ou non |
 | Contours imprécis ou datés | Fausses alertes ou oublis | Source et date de mise à jour affichées, validation par les bergers |
 | Alerte systématique en saison | Messages ignorés | Ton pédagogique, précision croissante selon le niveau de donnée |
@@ -236,13 +251,16 @@ Le tracé GPX importé n'est pas une entité : il n'est jamais enregistré côt�
 - [x] Massif du prototype : Chartreuse et Vercors.
 - [x] Application ouverte à tous ou à un cercle : V0 en démo privée, V1 avec 10 à 20 alpha users.
 - [x] Contributions : V0 saisie par l'éditeur seul, V1 par comptes contributeurs.
+- [x] Positionnement face à Visorando : cible trail et VTT, conseils adaptés, observations de terrain (T30).
+- [x] Export vers une montre : abandonné.
 
 **Ouvertes**
 
 - [ ] Quelles sources de zones existent réellement pour la Chartreuse et le Vercors (RPG, enquêtes pastorales) ?
 - [ ] Quelles conditions de réutilisation pour Map Patou ? (contacter le responsable)
 - [ ] Quelle relation avec Pasto'rando ?
-- [ ] Qui relit les conseils sur les patous ?
+- [ ] Qui relit les conseils sur les patous ? (à trouver pour la V1)
+- [ ] Strava, Komoot ou Garmin affichent-ils déjà des données pastorales ?
 - [ ] Quel rayon de halo par espèce ? (à fixer avec un berger)
 - [ ] Quel critère d'activité pour passer de la V1 à la V2 ?
 - [ ] Qui valide le rôle berger en V2 ?
