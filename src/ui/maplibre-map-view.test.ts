@@ -41,8 +41,10 @@ const maplibre = vi.hoisted(() => {
     getSource(id: string) {
       return this.sources.get(id);
     }
-    addLayer(layer: (typeof this.layers)[number]) {
-      this.layers.push(layer);
+    addLayer(layer: (typeof this.layers)[number], beforeId?: string) {
+      const index = beforeId ? this.layers.findIndex((l) => l.id === beforeId) : -1;
+      if (index >= 0) this.layers.splice(index, 0, layer);
+      else this.layers.push(layer);
     }
     removeLayer(id: string) {
       this.layers = this.layers.filter((l) => l.id !== id);
@@ -50,6 +52,9 @@ const maplibre = vi.hoisted(() => {
     moveLayer(id: string) {
       const layer = this.getLayer(id);
       if (layer) this.layers = [...this.layers.filter((l) => l.id !== id), layer];
+    }
+    removeSource(id: string) {
+      this.sources.delete(id);
     }
     getLayer(id: string) {
       return this.layers.find((l) => l.id === id);
@@ -489,5 +494,41 @@ describe('MapLibreMapView observations', () => {
     lastMap().emit('style.load');
 
     expect(lastMap().getLayer('observations-point')).toBeDefined();
+  });
+});
+
+describe('MapLibreMapView marked trails overlay', () => {
+  beforeEach(() => {
+    maplibre.maps.length = 0;
+  });
+
+  it('adds the Waymarked Trails hiking overlay, credited, under the zones', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showPastoralZones(zones);
+
+    view.showMarkedTrails(true);
+
+    const source = lastMap().getSource('marked-trails') as unknown as { data?: unknown } | undefined;
+    expect(source).toBeDefined();
+    expect(lastMap().layers[0]?.id).toBe('marked-trails');
+  });
+
+  it('removes the overlay when turned off', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showMarkedTrails(true);
+
+    view.showMarkedTrails(false);
+
+    expect(lastMap().getLayer('marked-trails')).toBeUndefined();
+  });
+
+  it('keeps the overlay when the base map changes', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showMarkedTrails(true);
+
+    view.showBaseMap('topo');
+    lastMap().emit('style.load');
+
+    expect(lastMap().getLayer('marked-trails')).toBeDefined();
   });
 });

@@ -4,13 +4,15 @@ export interface BaseMapSwitcherOptions {
   baseMaps: BaseMap[];
   selected: BaseMapId;
   onChange: (id: BaseMapId) => void;
+  /** When given, offers the marked trails overlay. */
+  onTrailsChange?: (visible: boolean) => void;
 }
 
 /**
  * A collapsible "Fond de carte" panel with one radio button per base map.
  * Native <details> and radios: keyboard and screen reader support for free.
  */
-export function createBaseMapSwitcher({ baseMaps, selected, onChange }: BaseMapSwitcherOptions): HTMLElement {
+export function createBaseMapSwitcher({ baseMaps, selected, onChange, onTrailsChange }: BaseMapSwitcherOptions): HTMLElement {
   const panel = document.createElement('details');
   panel.className = 'base-map-switcher';
 
@@ -37,6 +39,19 @@ export function createBaseMapSwitcher({ baseMaps, selected, onChange }: BaseMapS
     fieldset.append(label);
   }
   panel.append(fieldset);
+
+  if (onTrailsChange) {
+    const trails = document.createElement('input');
+    trails.type = 'checkbox';
+    trails.name = 'marked-trails';
+    trails.addEventListener('change', () => onTrailsChange(trails.checked));
+    const text = document.createElement('span');
+    text.textContent = 'Sentiers balisés';
+    const label = document.createElement('label');
+    label.className = 'base-map-trails';
+    label.append(trails, text);
+    panel.append(label);
+  }
 
   return panel;
 }

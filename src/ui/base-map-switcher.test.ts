@@ -39,3 +39,18 @@ describe('createBaseMapSwitcher', () => {
     element.remove();
   });
 });
+
+describe('createBaseMapSwitcher marked trails', () => {
+  it('offers to show the marked trails over any base map', () => {
+    const onTrailsChange = vi.fn();
+    const element = createBaseMapSwitcher({ baseMaps: BASE_MAPS, selected: 'ign-plan', onChange: vi.fn(), onTrailsChange });
+    document.body.append(element);
+    const trails = element.querySelector<HTMLInputElement>('input[name="marked-trails"]')!;
+
+    trails.click();
+
+    expect(trails.closest('label')?.textContent).toBe('Sentiers balisés');
+    expect(onTrailsChange).toHaveBeenCalledWith(true);
+    element.remove();
+  });
+});

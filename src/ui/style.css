@@ -430,3 +430,9 @@ body {
   background: #f1efe8;
   font-size: 12px;
 }
+
+.base-map-trails {
+  margin: 0 8px 8px;
+  padding-top: 6px;
+  border-top: 1px solid #ece9e0;
+}

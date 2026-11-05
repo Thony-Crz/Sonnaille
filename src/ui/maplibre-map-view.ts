@@ -18,6 +18,10 @@ const TRACK_LAYERS = ['track-casing', 'track-line'];
 const TRACK_COLOR = '#23395b';
 const HIGHLIGHT_LAYER = 'zones-highlight';
 const OBSERVATIONS_SOURCE = 'observations';
+const TRAILS = 'marked-trails';
+const TRAILS_TILES = 'https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png';
+const TRAILS_ATTRIBUTION =
+  'Sentiers balisés : © <a href="https://hiking.waymarkedtrails.org" target="_blank" rel="noopener">Waymarked Trails</a> (CC-BY-SA), données © contributeurs OpenStreetMap';
 const OBSERVATION_COLOR = '#6a3d9a';
 
 const fillLayerId = (status: ZoneStatus) => `zones-${status}-fill`;
@@ -35,6 +39,7 @@ export class MapLibreMapView implements MapView {
    * which would leave overlays out when they arrive after the style.
    */
   private styleReady = false;
+  private markedTrails = false;
   private readonly visible: Record<ZoneStatus, boolean> = { 'flock-with-dogs': true, flock: true, 'no-flock': true };
 
   constructor(
@@ -53,6 +58,7 @@ export class MapLibreMapView implements MapView {
     // A new base map replaces the whole style: overlays are added again each time.
     this.map.on('style.load', () => {
       this.styleReady = true;
+      this.addMarkedTrails();
       this.addZoneLayers();
       this.addObservationLayers();
       this.addTrackLayers();
@@ -127,6 +133,17 @@ export class MapLibreMapView implements MapView {
     }
   }
 
+  /** Marked hiking trails (GR, PR…) over any base map, under the zones. */
+  showMarkedTrails(visible: boolean): void {
+    this.markedTrails = visible;
+    if (!visible) {
+      if (this.map.getLayer(TRAILS)) this.map.removeLayer(TRAILS);
+      if (this.map.getSource(TRAILS)) this.map.removeSource(TRAILS);
+    } else if (this.isReady()) {
+      this.addMarkedTrails();
+    }
+  }
+
   /** Field sightings: a point and a halo per species, sharp while recent, faded afterwards. */
   showObservations(items: ObservationOnMap[]): void {
     this.observations = {
@@ -185,6 +202,13 @@ export class MapLibreMapView implements MapView {
       },
       position,
     );
+  }
+
+  private addMarkedTrails(): void {
+    if (!this.markedTrails || this.map.getSource(TRAILS)) return;
+    this.map.addSource(TRAILS, { type: 'raster', tiles: [TRAILS_TILES], tileSize: 256, maxzoom: 18, attribution: TRAILS_ATTRIBUTION });
+    const firstOverlay = [fillLayerId('no-flock'), 'observations-halo', 'track-casing'].find((id) => this.map.getLayer(id));
+    this.map.addLayer({ id: TRAILS, type: 'raster', source: TRAILS, paint: { 'raster-opacity': 0.9 } }, firstOverlay);
   }
 
   private isReady(): boolean {

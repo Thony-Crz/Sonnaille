@@ -75,7 +75,7 @@ const framePadding = () => {
 };
 const view = new MapLibreMapView(container, baseMap, { framePadding, styles: createBaseMapStyles({ scan25Key }) });
 view.addPanel(
-  createBaseMapSwitcher({ baseMaps, selected: baseMap, onChange: (id) => chooseBaseMap(view, baseMapPreferences, id) }),
+  createBaseMapSwitcher({ baseMaps, selected: baseMap, onTrailsChange: (visible) => view.showMarkedTrails(visible), onChange: (id) => chooseBaseMap(view, baseMapPreferences, id) }),
 );
 showTerritory(view);
 

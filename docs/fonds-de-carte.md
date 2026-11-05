@@ -8,6 +8,10 @@
 | Photos aériennes IGN | WMTS `ORTHOIMAGERY.ORTHOPHOTOS` | Données IGN ouvertes, sans clé | Repérer parcs, pistes, pelouses |
 | OpenStreetMap | Tuiles `tile.openstreetmap.org` | Politique d'usage OSM : faible trafic toléré, à remplacer avant une ouverture large | Carte générale |
 
+## Surcouche « Sentiers balisés »
+
+Case à cocher dans le panneau « Fond de carte » : les itinéraires balisés (GR, PR, itinéraires locaux) de [Waymarked Trails](https://hiking.waymarkedtrails.org), d'après OpenStreetMap, par-dessus n'importe quel fond, sous les zones et le tracé. Licence CC-BY-SA, attribution affichée ; usage raisonnable.
+
 ## Activer la carte IGN 1:25 000
 
 Le SCAN 25 n'est proposé que si une clé IGN est fournie au moment du build.
