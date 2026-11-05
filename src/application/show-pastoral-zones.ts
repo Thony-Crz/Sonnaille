@@ -1,7 +1,15 @@
+import type { PastoralZone } from '../domain/pastoral-zone';
 import { zoneStatus, type ZoneStatus } from '../domain/zone-status';
 import type { MapView, PastoralZoneRepository } from './ports';
 
-export type ShowZonesResult = { available: false } | { available: true; source: string; fetchedAt: string; count: number };
+export type ShowZonesResult =
+  | { available: false }
+  | { available: true; source: string; fetchedAt: string; zones: PastoralZone[] };
+
+/** Shows the zones with what to expect on that day. */
+export function showZonesOn(map: MapView, zones: PastoralZone[], day: string): void {
+  map.showPastoralZones(zones.map((zone) => ({ zone, status: zoneStatus(zone, day) })));
+}
 
 /** Loads the published zones and shows each one with what to expect on that day. */
 export async function showPastoralZones(
@@ -16,8 +24,8 @@ export async function showPastoralZones(
     return { available: false };
   }
 
-  map.showPastoralZones(dataset.zones.map((zone) => ({ zone, status: zoneStatus(zone, today) })));
-  return { available: true, source: dataset.source, fetchedAt: dataset.fetchedAt, count: dataset.zones.length };
+  showZonesOn(map, dataset.zones, today);
+  return { available: true, source: dataset.source, fetchedAt: dataset.fetchedAt, zones: dataset.zones };
 }
 
 /** Shows or hides the zones of one status. */

@@ -369,3 +369,35 @@ describe('MapLibreMapView track', () => {
     expect(lastMap().getSource('track')?.setData).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('MapLibreMapView highlighted zones', () => {
+  beforeEach(() => {
+    maplibre.maps.length = 0;
+  });
+
+  it('outlines the zones crossed by the track, between the zones and the track', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showPastoralZones(zones);
+    view.showTrack(track);
+
+    view.highlightZones(['A']);
+
+    expect(lastMap().getLayer('zones-highlight')).toMatchObject({
+      type: 'line',
+      source: 'pastoral-zones',
+      filter: ['in', ['get', 'id'], ['literal', ['A']]],
+    });
+    expect(lastMap().layers.slice(-3).map((l) => l.id)).toEqual(['zones-highlight', 'track-casing', 'track-line']);
+  });
+
+  it('keeps the highlight after a base map change', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showPastoralZones(zones);
+    view.highlightZones(['A']);
+
+    view.showBaseMap('osm');
+    lastMap().emit('style.load');
+
+    expect(lastMap().getLayer('zones-highlight')?.filter).toEqual(['in', ['get', 'id'], ['literal', ['A']]]);
+  });
+});

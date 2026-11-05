@@ -228,3 +228,42 @@ body {
   outline: 4px dashed #2f5d3a;
   outline-offset: -8px;
 }
+
+/* Outing report ("Votre sortie") */
+.outing-date {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.outing-date input {
+  min-height: 36px;
+  padding: 0 8px;
+  border: 1px solid #d3d1c7;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.outing-summary {
+  margin-top: 12px !important;
+  font-weight: 600;
+}
+
+.crossings {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.crossing {
+  padding: 8px 0;
+  border-top: 1px solid #ece9e0;
+}
+
+.crossing-period {
+  font-size: 13px;
+  color: #555;
+}

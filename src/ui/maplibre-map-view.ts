@@ -15,6 +15,7 @@ const ZONES_SOURCE = 'pastoral-zones';
 const TRACK_SOURCE = 'track';
 const TRACK_LAYERS = ['track-casing', 'track-line'];
 const TRACK_COLOR = '#23395b';
+const HIGHLIGHT_LAYER = 'zones-highlight';
 
 const fillLayerId = (status: ZoneStatus) => `zones-${status}-fill`;
 const lineLayerId = (status: ZoneStatus) => `zones-${status}-line`;
@@ -24,6 +25,7 @@ export class MapLibreMapView implements MapView {
   private zones: FeatureCollection | null = null;
   private shownZones: Record<string, ZoneOnMap> = {};
   private track: FeatureCollection | null = null;
+  private highlighted: string[] = [];
   private readonly visible: Record<ZoneStatus, boolean> = { 'flock-with-dogs': true, flock: true, 'no-flock': true };
 
   constructor(container: HTMLElement, baseMap: BaseMapId) {
@@ -90,6 +92,16 @@ export class MapLibreMapView implements MapView {
     this.map.on('mouseleave', layers, () => {
       this.map.getCanvas().style.cursor = '';
     });
+  }
+
+  /** Outlines the zones crossed by the track (by zone id), between the zones and the track. */
+  highlightZones(ids: string[]): void {
+    this.highlighted = ids;
+    if (this.map.getLayer(HIGHLIGHT_LAYER)) this.map.removeLayer(HIGHLIGHT_LAYER);
+    if (this.map.getSource(ZONES_SOURCE)) {
+      this.addHighlightLayer();
+      this.raiseTrack();
+    }
   }
 
   /** Draws the imported track, one line per segment, above the zones. */
@@ -161,6 +173,22 @@ export class MapLibreMapView implements MapView {
         paint: { 'line-color': color, 'line-width': status === 'no-flock' ? 1 : 1.6 },
       });
     }
+    this.addHighlightLayer();
+    this.raiseTrack();
+  }
+
+  private addHighlightLayer(): void {
+    if (this.highlighted.length === 0) return;
+    this.map.addLayer({
+      id: HIGHLIGHT_LAYER,
+      type: 'line',
+      source: ZONES_SOURCE,
+      filter: ['in', ['get', 'id'], ['literal', this.highlighted]],
+      paint: { 'line-color': '#1f1f1f', 'line-width': 3, 'line-opacity': 0.8 },
+    });
+  }
+
+  private raiseTrack(): void {
     for (const id of TRACK_LAYERS) if (this.map.getLayer(id)) this.map.moveLayer(id);
   }
 }

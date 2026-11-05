@@ -4,7 +4,7 @@ import type { Bounds } from '../domain/bounds';
 import type { PastoralZone, PastoralZoneDataset } from '../domain/pastoral-zone';
 import type { ZoneStatus } from '../domain/zone-status';
 import type { MapView, PastoralZoneRepository, ZoneOnMap } from './ports';
-import { showPastoralZones, toggleZoneLayer } from './show-pastoral-zones';
+import { showPastoralZones, showZonesOn, toggleZoneLayer } from './show-pastoral-zones';
 
 class FakeMapView implements MapView {
   zones: ZoneOnMap[][] = [];
@@ -63,7 +63,7 @@ describe('showPastoralZones', () => {
   it('returns where the data comes from, to credit it', async () => {
     const result = await showPastoralZones(repository(dataset), new FakeMapView(), '2026-07-15');
 
-    expect(result).toEqual({ available: true, source: dataset.source, fetchedAt: dataset.fetchedAt, count: 3 });
+    expect(result).toEqual({ available: true, source: dataset.source, fetchedAt: dataset.fetchedAt, zones: dataset.zones });
   });
 
   it('reports the zones as unavailable when they cannot be loaded', async () => {
@@ -83,5 +83,15 @@ describe('toggleZoneLayer', () => {
     toggleZoneLayer(map, 'no-flock', false);
 
     expect(map.visibility).toEqual([['no-flock', false]]);
+  });
+});
+
+describe('showZonesOn', () => {
+  it('shows the zones again with their status on another day', () => {
+    const map = new FakeMapView();
+
+    showZonesOn(map, dataset.zones, '2026-11-05');
+
+    expect(map.zones).toEqual([dataset.zones.map((zone) => ({ zone, status: 'no-flock' }))]);
   });
 });
