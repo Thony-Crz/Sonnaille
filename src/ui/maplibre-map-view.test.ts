@@ -26,8 +26,21 @@ const maplibre = vi.hoisted(() => {
     emitOnLayers(event: string, payload: unknown) {
       this.layerHandlers[event]?.handler(payload);
     }
+    canvas = { style: {} as Record<string, string> };
     getCanvas() {
-      return { style: {} as Record<string, string> };
+      return this.canvas;
+    }
+    onceHandlers: Record<string, (e: unknown) => void> = {};
+    once(event: string, handler: (e: unknown) => void) {
+      this.onceHandlers[event] = handler;
+    }
+    off(event: string, handler: (e: unknown) => void) {
+      if (this.onceHandlers[event] === handler) delete this.onceHandlers[event];
+    }
+    emitOnce(event: string, payload: unknown) {
+      const handler = this.onceHandlers[event];
+      delete this.onceHandlers[event];
+      handler?.(payload);
     }
     emit(event: string) {
       this.handlers[event]?.forEach((h) => h());
@@ -530,5 +543,32 @@ describe('MapLibreMapView marked trails overlay', () => {
     lastMap().emit('style.load');
 
     expect(lastMap().getLayer('marked-trails')).toBeDefined();
+  });
+});
+
+describe('MapLibreMapView picking a point', () => {
+  beforeEach(() => {
+    maplibre.maps.length = 0;
+  });
+
+  it('gives the point the user taps, with a crosshair cursor meanwhile', async () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+
+    const picked = view.pickLocation();
+    expect(lastMap().canvas.style.cursor).toBe('crosshair');
+    lastMap().emitOnce('click', { lngLat: { lng: 5.65, lat: 45.11 } });
+
+    await expect(picked).resolves.toEqual({ longitude: 5.65, latitude: 45.11 });
+    expect(lastMap().canvas.style.cursor).toBe('');
+  });
+
+  it('gives nothing when picking is cancelled', async () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+
+    const picked = view.pickLocation();
+    view.cancelPick();
+
+    await expect(picked).resolves.toBeNull();
+    expect(lastMap().onceHandlers.click).toBeUndefined();
   });
 });

@@ -4,7 +4,7 @@ import { GeolocateControl, Map, NavigationControl, type ControlPosition, type Ge
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { MapView, ObservationOnMap, ZoneOnMap } from '../application/ports';
 import type { BaseMapId } from '../domain/base-map';
-import type { Bounds } from '../domain/bounds';
+import type { Bounds, Position } from '../domain/bounds';
 import type { Track } from '../domain/track';
 import { ZONE_STATUSES, type ZoneStatus } from '../domain/zone-status';
 import { BASE_MAP_STYLES, withAttribution, type BaseMapStyles } from './base-map-styles';
@@ -40,6 +40,9 @@ export class MapLibreMapView implements MapView {
    */
   private styleReady = false;
   private markedTrails = false;
+  /** While the user picks a point, taps do not open zone sheets. */
+  private picking: { resolve: (position: Position | null) => void; handler: (e: { lngLat: { lng: number; lat: number } }) => void } | null = null;
+  private justPicked = false;
   private readonly visible: Record<ZoneStatus, boolean> = { 'flock-with-dogs': true, flock: true, 'no-flock': true };
 
   constructor(
@@ -109,6 +112,7 @@ export class MapLibreMapView implements MapView {
   onZoneSelected(handler: (zone: ZoneOnMap) => void): void {
     const layers = ZONE_STATUSES.map(fillLayerId);
     this.map.on('click', layers, (event: { features?: Array<{ properties?: { id?: unknown } }> }) => {
+      if (this.picking || this.justPicked) return;
       const tapped = (event.features ?? [])
         .map((f) => this.shownZones[String(f.properties?.id)])
         .filter((z): z is ZoneOnMap => z !== undefined)
@@ -131,6 +135,36 @@ export class MapLibreMapView implements MapView {
       this.addHighlightLayer();
       this.raiseTrack();
     }
+  }
+
+  /** Waits for the user to tap a point on the map (e.g. where animals were seen). */
+  pickLocation(): Promise<Position | null> {
+    this.cancelPick();
+    return new Promise((resolve) => {
+      const handler = (event: { lngLat: { lng: number; lat: number } }) => {
+        this.endPick();
+        // The same tap must not also open a zone sheet.
+        this.justPicked = true;
+        setTimeout(() => (this.justPicked = false), 0);
+        resolve({ longitude: event.lngLat.lng, latitude: event.lngLat.lat });
+      };
+      this.picking = { resolve, handler };
+      this.map.getCanvas().style.cursor = 'crosshair';
+      this.map.once('click', handler);
+    });
+  }
+
+  cancelPick(): void {
+    const picking = this.picking;
+    if (!picking) return;
+    this.map.off('click', picking.handler);
+    this.endPick();
+    picking.resolve(null);
+  }
+
+  private endPick(): void {
+    this.picking = null;
+    this.map.getCanvas().style.cursor = '';
   }
 
   /** Marked hiking trails (GR, PR…) over any base map, under the zones. */

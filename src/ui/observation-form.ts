@@ -20,7 +20,7 @@ export interface ObservationForm {
 }
 
 // Texts shown to users, hence in French.
-const SPECIES_LABELS: Record<Species, string> = {
+export const SPECIES_LABELS: Record<Species, string> = {
   sheep: 'Moutons (ovins)',
   cattle: 'Vaches (bovins)',
   goats: 'Chèvres (caprins)',
@@ -28,7 +28,7 @@ const SPECIES_LABELS: Record<Species, string> = {
   donkeys: 'Ânes',
   mixed: 'Troupeau mixte',
 };
-const HEADCOUNT_LABELS: Record<Headcount, string> = {
+export const HEADCOUNT_LABELS: Record<Headcount, string> = {
   few: 'Quelques bêtes',
   dozens: 'Quelques dizaines',
   hundreds: 'Des centaines',
