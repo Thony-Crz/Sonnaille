@@ -17,6 +17,12 @@ export interface Observation {
   guardDogs: boolean;
 }
 
+/** Published settings: how long a sighting stays sharp, and the halo drawn around it per species. */
+export interface ObservationSettings {
+  validityDays: number;
+  haloMeters: Record<Species, number>;
+}
+
 const DAY_MS = 86_400_000;
 
 /** Whether the sighting is recent enough to show sharply (3 days by default, see settings). */

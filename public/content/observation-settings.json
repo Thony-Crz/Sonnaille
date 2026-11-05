@@ -1,0 +1,10 @@
+{
+  "validityDays": 3,
+  "haloMeters": {
+    "sheep": 400,
+    "cattle": 500,
+    "goats": 300,
+    "horses": 500,
+    "mixed": 400
+  }
+}

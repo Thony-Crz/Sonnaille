@@ -1,6 +1,7 @@
 import type { Activity, Advice } from '../domain/advice';
 import type { BaseMapId } from '../domain/base-map';
 import type { Bounds } from '../domain/bounds';
+import type { Observation, ObservationSettings } from '../domain/observation';
 import type { PastoralZone, PastoralZoneDataset } from '../domain/pastoral-zone';
 import type { Track } from '../domain/track';
 import type { ZoneStatus } from '../domain/zone-status';
@@ -35,6 +36,16 @@ export interface BaseMapPreferences {
 export interface ActivityPreferences {
   load(): string | null;
   save(activity: Activity): void;
+}
+
+/** Where the published field observations come from. */
+export interface ObservationRepository {
+  load(): Promise<Observation[]>;
+}
+
+/** Where the observation settings (validity, halos) come from. */
+export interface ObservationSettingsSource {
+  load(): Promise<ObservationSettings>;
 }
 
 /** Whether the welcome message has been seen on this device. */
