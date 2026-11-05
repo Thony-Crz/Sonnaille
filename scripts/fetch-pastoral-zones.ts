@@ -22,13 +22,28 @@ async function readExisting(): Promise<PastoralZonesFeatureCollection | null> {
   }
 }
 
-const { fetched, geojson } = await updatePastoralZones({
-  now: new Date(),
-  date: process.env.MAP_PATOU_DATE || undefined,
-  existing: await readExisting(),
-  fetchFn: fetch,
-  territory: V0_TERRITORY,
-});
+/** Error message and its network cause (ECONNRESET, timeout…), never the data. */
+function describe(error: unknown): string {
+  if (!(error instanceof Error)) return String(error);
+  const cause = error.cause as { code?: string; message?: string } | undefined;
+  return cause ? `${error.message} (${cause.code ?? cause.message})` : error.message;
+}
+
+let result: Awaited<ReturnType<typeof updatePastoralZones>>;
+try {
+  result = await updatePastoralZones({
+    now: new Date(),
+    date: process.env.MAP_PATOU_DATE || undefined,
+    existing: await readExisting(),
+    fetchFn: (url, init) => fetch(url, { ...init, signal: AbortSignal.timeout(30_000) }),
+    territory: V0_TERRITORY,
+  });
+} catch (error) {
+  // "::error::" makes GitHub Actions show the message as an annotation.
+  console.error(`::error::Could not update pastoral zones: ${describe(error)}`);
+  process.exit(1);
+}
+const { fetched, geojson } = result;
 
 const errors = validatePastoralZonesGeoJson(geojson);
 if (errors.length > 0) {
