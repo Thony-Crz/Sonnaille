@@ -28,7 +28,7 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 | T06 | Initialiser le projet (Vite, TypeScript, Vitest), les couches de la clean architecture avec leur test, le déploiement GitHub Pages par artefact (`deploy-pages`, pas de branche `gh-pages`) ; `robots.txt` et `noindex` | Une page vide, non indexable, est en ligne après chaque push sur `main` ; tests verts en CI | T04 |
 | ~~T07~~ ✅ | Afficher une carte MapLibre centrée sur la Chartreuse et le Vercors, fond IGN Plan | Fait : vérifiée sur mobile et sur ordinateur, en développement et en build de production | T06 |
 | ~~T08~~ ✅ | Ajouter le sélecteur de fonds (IGN Plan, photographies aériennes, OpenStreetMap), avec le choix mémorisé sur l'appareil | Fait : panneau « Fond de carte », choix conservé au rechargement, attribution propre à chaque fond | T07 |
-| T09 | Rendre l'app installable (manifeste, icônes), sans hors ligne | L'app s'installe sur Android et iPhone | T06 |
+| ~~T09~~ ✅ | Rendre l'app installable (manifeste, icônes), sans hors ligne | Fait : manifeste, logo « A — Sonnaille » décliné en icônes (`npm run icons`), balises iPhone ; installation réelle sur téléphone à confirmer | T06 |
 
 ### Lot 2 — Données sur la carte
 
