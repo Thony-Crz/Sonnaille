@@ -35,6 +35,7 @@ npm run data     # fetch today's pastoral zones from Map Patou (never committed)
 - **Field sightings**: "Signaler animaux, ruches ou nids", tap the map, say what was seen (flock, beehives, wasp, bee or hornet nest), save: the sighting is kept on the device ("Mes signalements"). "Publier" copies the entries and opens the GitHub editor of `public/content/observations.geojson`: paste them into `features` and commit.
 - **Base maps**: see [fonds-de-carte.md](docs/fonds-de-carte.md), including how to enable the IGN 1:25,000 map with a personal IGN key.
 - **Demo**: [docs/demo](docs/demo/README.md).
+- **V1 sightings API** (.NET, in progress): [api/](api/README.md), `dotnet test` in `api/`.
 
 ## Conventions
 
