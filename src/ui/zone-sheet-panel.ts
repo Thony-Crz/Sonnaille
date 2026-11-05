@@ -1,43 +1,13 @@
 import type { ZoneSheet } from '../application/zone-sheet';
-import { ACTIVITIES, type Activity } from '../domain/advice';
-import type { Species } from '../domain/pastoral-zone';
+import type { Activity } from '../domain/advice';
+import { DISCLAIMER, renderActivityChoice, renderAdviceList, speciesText } from './advice-list';
+import { element, frenchDay } from './dom';
 import { ZONE_STYLES } from './zone-styles';
 
 export interface ZoneSheetPanel {
   element: HTMLElement;
   show(sheet: ZoneSheet): void;
   hide(): void;
-}
-
-// Texts shown to users, hence in French.
-const ACTIVITY_LABELS: Record<Activity, string> = { hiking: 'À pied', trail: 'En trail', mtb: 'À VTT' };
-const SPECIES_LABELS: Record<Species, string> = {
-  sheep: 'ovins',
-  cattle: 'bovins',
-  goats: 'caprins',
-  horses: 'équins',
-  mixed: 'troupeau mixte',
-};
-const DISCLAIMER =
-  "L'application ne garantit pas l'absence de troupeau ou de chien. " +
-  "Ces conseils, tirés de sources publiques, n'ont pas encore été relus par un professionnel du pastoralisme.";
-
-/** YYYY-MM-DD → DD/MM/YYYY. */
-const frenchDay = (day: string) => day.split('-').reverse().join('/');
-
-function element<K extends keyof HTMLElementTagNameMap>(
-  tag: K,
-  properties: Partial<HTMLElementTagNameMap[K]> = {},
-  ...children: Array<Node | string>
-): HTMLElementTagNameMap[K] {
-  const node = Object.assign(document.createElement(tag), properties);
-  node.append(...children);
-  return node;
-}
-
-function speciesText(species: Species[]): string {
-  const text = species.map((s) => SPECIES_LABELS[s]).join(', ');
-  return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 /**
@@ -80,35 +50,6 @@ export function createZoneSheetPanel({
       facts.push(element('p', { textContent: 'Pas de troupeau prévu ce jour-là dans le calendrier.' }));
     }
 
-    const activity = element('fieldset', { className: 'zone-sheet-activity' }, element('legend', { textContent: 'Je me déplace' }));
-    for (const a of ACTIVITIES) {
-      const input = element('input', { type: 'radio', name: 'activity', value: a, checked: a === sheet.activity });
-      input.addEventListener('change', () => {
-        if (input.checked) onActivityChange(a);
-      });
-      activity.append(element('label', {}, input, element('span', { textContent: ACTIVITY_LABELS[a] })));
-    }
-
-    const advice = element('ul', { className: 'zone-sheet-advice' });
-    for (const item of sheet.advice) {
-      const source = element('a', { href: item.source.url, target: '_blank', rel: 'noopener', textContent: item.source.label });
-      advice.append(
-        element(
-          'li',
-          { className: 'advice' },
-          element('p', { className: 'advice-situation', textContent: item.situation }),
-          element('strong', { textContent: item.message }),
-          element(
-            'details',
-            {},
-            element('summary', { textContent: 'En savoir plus' }),
-            element('p', { textContent: item.detail }),
-            element('p', { className: 'advice-source' }, 'Source : ', source),
-          ),
-        ),
-      );
-    }
-
     const fetched = new Date(sheet.fetchedAt).toLocaleDateString('fr-FR');
     panel.replaceChildren(
       close,
@@ -116,8 +57,8 @@ export function createZoneSheetPanel({
       ...(sheet.quarter && sheet.quarter !== sheet.name ? [element('p', { className: 'zone-sheet-quarter', textContent: sheet.quarter })] : []),
       element('p', { className: 'zone-sheet-status' }, swatch, element('span', { textContent: ZONE_STYLES[sheet.status].label })),
       ...facts,
-      activity,
-      ...(sheet.advice.length > 0 ? [element('h3', { textContent: 'Les bons réflexes' }), advice] : []),
+      renderActivityChoice(sheet.activity, 'activity', onActivityChange),
+      ...(sheet.advice.length > 0 ? [element('h3', { textContent: 'Les bons réflexes' }), renderAdviceList(sheet.advice)] : []),
       element(
         'footer',
         {},
