@@ -1,4 +1,4 @@
-import type { Advice } from '../domain/advice';
+import type { Activity, Advice } from '../domain/advice';
 import type { BaseMapId } from '../domain/base-map';
 import type { Bounds } from '../domain/bounds';
 import type { PastoralZone, PastoralZoneDataset } from '../domain/pastoral-zone';
@@ -22,6 +22,12 @@ export interface BaseMapPreferences {
   /** The saved value as stored, possibly stale or invalid; null if none. */
   load(): string | null;
   save(id: BaseMapId): void;
+}
+
+/** Where the user's activity (hiking, trail, mountain bike) is remembered, on their device. */
+export interface ActivityPreferences {
+  load(): string | null;
+  save(activity: Activity): void;
 }
 
 /** Where the advice texts come from (published content, editable without a release). */

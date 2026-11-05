@@ -1,31 +1,14 @@
 import type { BaseMapPreferences } from '../application/ports';
 import type { BaseMapId } from '../domain/base-map';
+import { LocalStorageValue, type KeyValueStorage } from './local-storage-value';
+
+export type { KeyValueStorage } from './local-storage-value';
 
 export const BASE_MAP_KEY = 'sonnaille.baseMap';
 
-export type KeyValueStorage = Pick<Storage, 'getItem' | 'setItem'>;
-
-/**
- * Remembers the base map choice in the browser storage.
- * Storage can be unavailable (private browsing, blocked site data): the app then
- * simply forgets the choice instead of failing.
- */
-export class LocalStorageBaseMapPreferences implements BaseMapPreferences {
-  constructor(private readonly storage: () => KeyValueStorage) {}
-
-  load(): string | null {
-    try {
-      return this.storage().getItem(BASE_MAP_KEY);
-    } catch {
-      return null;
-    }
-  }
-
-  save(id: BaseMapId): void {
-    try {
-      this.storage().setItem(BASE_MAP_KEY, id);
-    } catch {
-      // Not remembered this time; nothing else to do.
-    }
+/** Remembers the base map choice in the browser storage. */
+export class LocalStorageBaseMapPreferences extends LocalStorageValue<BaseMapId> implements BaseMapPreferences {
+  constructor(storage: () => KeyValueStorage) {
+    super(BASE_MAP_KEY, storage);
   }
 }
