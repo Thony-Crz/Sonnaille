@@ -36,3 +36,40 @@ export function trackLengthMeters(track: Track): number {
 export function trackBounds(track: Track): Bounds | undefined {
   return boundsOf(track.segments.flat().map((p) => [p.longitude, p.latitude]));
 }
+
+export interface TrackSample {
+  position: Position;
+  distance: number;
+  /** Whether the previous sample belongs to the same segment (no gap in between). */
+  continues: boolean;
+}
+
+/** Points along the track at most `step` meters apart, with the distance from the start. */
+export function sampleTrack(track: Track, step: number): TrackSample[] {
+  const samples: TrackSample[] = [];
+  let distance = 0;
+  for (const segment of track.segments) {
+    segment.forEach((point, index) => {
+      if (index === 0) {
+        samples.push({ position: point, distance, continues: false });
+        return;
+      }
+      const previous = segment[index - 1]!;
+      const length = distanceMeters(previous, point);
+      const parts = Math.max(1, Math.ceil(length / step));
+      for (let k = 1; k <= parts; k++) {
+        const t = k / parts;
+        samples.push({
+          position: {
+            longitude: previous.longitude + t * (point.longitude - previous.longitude),
+            latitude: previous.latitude + t * (point.latitude - previous.latitude),
+          },
+          distance: distance + t * length,
+          continues: true,
+        });
+      }
+      distance += length;
+    });
+  }
+  return samples;
+}

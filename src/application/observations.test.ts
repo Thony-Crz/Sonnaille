@@ -85,7 +85,7 @@ describe('showObservations', () => {
         { observation: observations[1], recent: false, haloMeters: 400 },
       ],
     ]);
-    expect(result).toEqual({ available: true, recent: 1, total: 2 });
+    expect(result).toEqual({ available: true, recent: 1, total: 2, items: map.observations[0] });
   });
 
   it('reports observations as unavailable when they cannot be loaded', async () => {

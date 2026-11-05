@@ -1,7 +1,7 @@
 import type { OutingReport } from '../application/prepare-outing';
 import type { Activity } from '../domain/advice';
 import { parseDay } from '../domain/zone-status';
-import { DISCLAIMER, renderActivityChoice, renderAdviceList } from './advice-list';
+import { DISCLAIMER, renderActivityChoice, renderAdviceList, speciesText } from './advice-list';
 import { element, frenchDay, frenchNumber } from './dom';
 import { ZONE_STYLES } from './zone-styles';
 
@@ -12,6 +12,27 @@ export interface OutingReportPanel {
 }
 
 const plural = (count: number, singular: string, several: string) => `${count} ${count === 1 ? singular : several}`;
+
+const HEADCOUNT_TEXT = { few: 'quelques bêtes', dozens: 'quelques dizaines', hundreds: 'des centaines' } as const;
+
+/** "Troupeaux vus récemment près du tracé": one line per sighting, structured facts only. */
+function renderSightings(report: OutingReport): HTMLElement[] {
+  if (report.sightings.length === 0) return [];
+  const list = element('ul', { className: 'crossings' });
+  for (const { observation, km, distanceMeters } of report.sightings) {
+    const day = new Date(observation.observedAt).toLocaleDateString('fr-FR');
+    const what = `${speciesText([observation.species])}, ${HEADCOUNT_TEXT[observation.headcount]}${observation.guardDogs ? ', chiens de protection vus' : ''}`;
+    list.append(
+      element(
+        'li',
+        { className: 'crossing' },
+        element('p', { className: 'zone-sheet-status', textContent: what }),
+        element('p', { textContent: `Vu le ${day}, au km ${frenchNumber(km)}, à ${distanceMeters} m du tracé` }),
+      ),
+    );
+  }
+  return [element('section', { className: 'sightings' }, element('h3', { textContent: 'Troupeaux vus récemment près du tracé' }), list)];
+}
 
 /** "Votre tracé traverse 3 zones pastorales, dont 1 avec chiens de protection." */
 function summary({ crossings }: OutingReport): string {
@@ -96,6 +117,7 @@ export function createOutingReportPanel({
       renderActivityChoice(report.activity, 'outing-activity', onActivityChange),
       element('p', { className: 'outing-summary', textContent: summary(report) }),
       ...(report.crossings.length > 0 ? [crossings] : []),
+      ...renderSightings(report),
       ...(report.advice.length > 0 ? [element('h3', { textContent: 'Les bons réflexes' }), renderAdviceList(report.advice)] : []),
       ...(extra ? [extra] : []),
       element(

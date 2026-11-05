@@ -4,7 +4,7 @@ import './ui/style.css';
 import { chooseBaseMap, initialBaseMap } from './application/base-map-choice';
 import { importTrack } from './application/import-track';
 import { createObservation, showObservations } from './application/observations';
-import type { ZoneOnMap } from './application/ports';
+import type { ObservationOnMap, ZoneOnMap } from './application/ports';
 import { prepareOuting } from './application/prepare-outing';
 import { showPastoralZones, showZonesOn, toggleZoneLayer, type ShowZonesResult } from './application/show-pastoral-zones';
 import { showTerritory } from './application/show-territory';
@@ -57,6 +57,7 @@ let advice: Advice[] = [];
 let track: Track | null = null;
 let selectedZone: ZoneOnMap | null = null;
 let recentObservations = 0;
+let sightings: ObservationOnMap[] = [];
 
 // --- Map and panels --------------------------------------------------------
 const baseMap = initialBaseMap(baseMapPreferences);
@@ -87,7 +88,11 @@ const observationForm = createObservationForm({
     const { observation, timeFromTrack } = createObservation({ ...answers, track, outingDate: day });
     observationForm.showResult(JSON.stringify(observationFeature(observation), null, 2), timeFromTrack);
     const withPreview = { load: async () => [...(await observationRepository.load().catch(() => [])), observation] };
-    void showObservations(withPreview, observationSettings, view, new Date());
+    void showObservations(withPreview, observationSettings, view, new Date()).then((result) => {
+      if (!result.available) return;
+      sightings = result.items;
+      showOutingReport();
+    });
   },
 });
 
@@ -128,7 +133,7 @@ function updateLegendNote(): void {
 /** Shows the outing report (T16-T18) for the imported track, on the current day and activity. */
 function showOutingReport(): void {
   if (!track || !zones.available) return;
-  const report = prepareOuting({ track, zones: zones.zones, date: day, activity, advice });
+  const report = prepareOuting({ track, zones: zones.zones, date: day, activity, advice, sightings });
   view.highlightZones(report.crossings.map((c) => c.zone.id));
   zoneSheet.hide();
   outingReport.show(report);
@@ -177,7 +182,10 @@ understandButton.addEventListener('click', () => {
 
 // --- Start -----------------------------------------------------------------
 void showObservations(observationRepository, observationSettings, view, new Date()).then((result) => {
-  if (result.available) recentObservations = result.recent;
+  if (result.available) {
+    recentObservations = result.recent;
+    sightings = result.items;
+  }
   updateLegendNote();
 });
 

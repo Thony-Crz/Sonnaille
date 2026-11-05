@@ -106,3 +106,44 @@ describe('prepareOuting', () => {
     expect(report.advice).toEqual([]);
   });
 });
+
+describe('prepareOuting with field sightings', () => {
+  const sighting = (guardDogs: boolean, recent = true) => ({
+    observation: {
+      id: 'o',
+      observedAt: '2026-07-14T08:00:00Z',
+      position: { longitude: 5.745, latitude: 45.006 },
+      species: 'cattle' as const,
+      headcount: 'hundreds' as const,
+      guardDogs,
+    },
+    recent,
+    haloMeters: 500,
+  });
+
+  it('lists the recent sightings near the track', () => {
+    const report = prepareOuting({ track, zones, date: '2026-07-15', activity: 'hiking', advice: allAdvice, sightings: [sighting(false)] });
+
+    expect(report.sightings.map((s) => [s.observation.id, s.km])).toEqual([['o', 4.3]]);
+  });
+
+  it('ignores sightings that are no longer recent', () => {
+    const report = prepareOuting({ track, zones, date: '2026-07-15', activity: 'hiking', advice: allAdvice, sightings: [sighting(true, false)] });
+
+    expect(report.sightings).toEqual([]);
+  });
+
+  it('becomes as cautious as a recent sighting with guard dogs', () => {
+    const report = prepareOuting({
+      track,
+      zones: [],
+      date: '2026-11-05',
+      activity: 'hiking',
+      advice: allAdvice,
+      sightings: [sighting(true)],
+    });
+
+    expect(report.mostCautious).toBe('flock-with-dogs');
+    expect(report.advice.map((a) => a.id)).toEqual(['flock', 'dogs']);
+  });
+});

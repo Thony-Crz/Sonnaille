@@ -1,7 +1,7 @@
 import { isRecent, pointAtKm, type Headcount, type Observation } from '../domain/observation';
 import type { Species } from '../domain/pastoral-zone';
 import type { Track } from '../domain/track';
-import type { MapView, ObservationRepository, ObservationSettingsSource } from './ports';
+import type { MapView, ObservationOnMap, ObservationRepository, ObservationSettingsSource } from './ports';
 
 /**
  * A sighting reported after an outing, at a km of the GPX track. Its time comes from
@@ -38,7 +38,7 @@ export async function showObservations(
   settingsSource: ObservationSettingsSource,
   map: MapView,
   now: Date,
-): Promise<{ available: false } | { available: true; recent: number; total: number }> {
+): Promise<{ available: false } | { available: true; recent: number; total: number; items: ObservationOnMap[] }> {
   let observations;
   let settings;
   try {
@@ -53,5 +53,5 @@ export async function showObservations(
     haloMeters: settings.haloMeters[observation.species],
   }));
   map.showObservations(items);
-  return { available: true, recent: items.filter((i) => i.recent).length, total: items.length };
+  return { available: true, recent: items.filter((i) => i.recent).length, total: items.length, items };
 }

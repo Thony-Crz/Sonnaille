@@ -22,6 +22,7 @@ const report: OutingReport = {
     { zone: zone('B', 'Alpage B', true), status: 'flock-with-dogs', entry: { longitude: 5.7, latitude: 45 }, entryKm: 7.8, insideKm: 3.4 },
   ],
   mostCautious: 'flock-with-dogs',
+  sightings: [],
   advice: [
     {
       id: 'dog',
@@ -160,5 +161,35 @@ describe('createOutingReportPanel extra section', () => {
 
     expect(panel.element.contains(extra)).toBe(true);
     expect(panel.element.querySelectorAll('section')).toHaveLength(1);
+  });
+});
+
+describe('createOutingReportPanel sightings', () => {
+  it('lists the flocks seen recently near the track', () => {
+    const panel = createOutingReportPanel({ onDateChange: vi.fn(), onActivityChange: vi.fn(), onClose: vi.fn() });
+    document.body.append(panel.element);
+
+    panel.show({
+      ...report,
+      sightings: [
+        {
+          observation: {
+            id: 'o',
+            observedAt: '2026-07-14T08:00:00Z',
+            position: { longitude: 5.7, latitude: 45 },
+            species: 'cattle',
+            headcount: 'hundreds',
+            guardDogs: true,
+          },
+          km: 3,
+          distanceMeters: 240,
+        },
+      ],
+    });
+
+    const text = panel.element.querySelector('.sightings')?.textContent ?? '';
+    expect(text).toContain('Troupeaux vus récemment près du tracé');
+    expect(text).toContain('Bovins, des centaines, chiens de protection vus');
+    expect(text).toContain('le 14/07/2026, au km 3, à 240 m du tracé');
   });
 });
