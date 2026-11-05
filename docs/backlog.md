@@ -12,9 +12,10 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 
 | ID | Tâche | Terminé quand | Dépend de |
 | --- | --- | --- | --- |
-| T01 | Inventorier les sources de zones pastorales : RPG, enquêtes pastorales (Isère, Drôme), Pasto'rando | `docs/sources.md` liste chaque source : couverture, licence, format, date, précision, réutilisation autorisée | — |
-| T02 | Étudier Map Patou : comment les données sont exposées, géométries, calendriers, fréquence de mise à jour | Note de faisabilité du scraping et échantillon de données récupéré à la main | — |
-| T03 | Écrire au responsable de Map Patou | Mail envoyé (non bloquant) | — |
+| ~~T01~~ ✅ | Inventorier les sources de zones pastorales : RPG, enquêtes pastorales (Isère, Drôme), Pasto'rando | Fait : [sources.md](sources.md) | — |
+| ~~T02~~ ✅ | Étudier Map Patou : comment les données sont exposées, géométries, calendriers, fréquence de mise à jour | Fait : [map-patou.md](map-patou.md) | — |
+| T30 | **Bloquant.** Revoir le positionnement face à Visorando, qui affiche Map Patou et alerte quand un itinéraire traverse une zone depuis juillet 2026 | Différenciation réécrite dans la section 1 du cahier des charges, lots 3 à 5 ajustés si besoin | T01 |
+| T03 | Écrire au responsable de Map Patou, en demandant les mêmes conditions de réutilisation que Visorando | Mail envoyé (non bloquant) | — |
 | T04 | Décider où vivent les données scrapées : dépôt privé (Pages payant) ou données hors du dépôt public | Décision notée dans `docs/decisions.md` | T02 |
 | T05 | Vérifier les conditions d'usage des tuiles IGN (Géoplateforme) : Plan IGN, photographies aériennes | Conditions notées dans `docs/sources.md` | — |
 
@@ -32,8 +33,8 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 | ID | Tâche | Terminé quand | Dépend de |
 | --- | --- | --- | --- |
 | T10 | Définir le format GeoJSON commun (zones, secteurs, observations, lieux, chemins) et le valider en CI | Schémas dans le dépôt, CI en échec si un fichier est invalide | T06 |
-| T11 | Script d'import de la zone large depuis les données ouvertes, découpé sur les deux massifs | `zones.geojson` généré et valide | T01, T10 |
-| T12 | Scraper Map Patou, isolé dans son propre module, lancé une fois par jour par GitHub Actions | `secteurs.geojson` mis à jour automatiquement, au plus une requête par jour | T02, T04, T10 |
+| T11 | Zone large : contours de tous les quartiers Map Patou découpés sur les deux massifs ; repli sur le RPG si la réutilisation est refusée | `zones.geojson` généré et valide | T01, T10 |
+| T12 | Scraper Map Patou (`POST /api/v1/map/geojson`), isolé dans son propre module, lancé une fois par jour par GitHub Actions ; normaliser `type_animal` | `secteurs.geojson` mis à jour automatiquement, au plus une requête par jour | T02, T04, T10 |
 | T13 | Afficher les couches activables, avec une légende | Chaque couche s'active et se désactive indépendamment | T07, T11 |
 | T14 | Fiche d'une zone : nom, période de présence, source, date de mise à jour | Un toucher sur une zone ouvre sa fiche | T13 |
 
