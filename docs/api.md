@@ -10,7 +10,7 @@ ASP.NET Core (.NET 10) dans `api/`, en clean architecture, comme l'app web :
 |---|---|---|
 | `Sonnaille.Domain` | Règles d'un signalement (troupeau ou nid, coordonnées, champs autorisés) | rien |
 | `Sonnaille.Application` | Cas d'usage : déposer, valider, lister ; port `ISightingRepository` | Domain |
-| `Sonnaille.Infrastructure` | Adaptateurs : stockage en mémoire (PostGIS plus tard) | Application |
+| `Sonnaille.Infrastructure` | Adaptateurs : stockage PostgreSQL et PostGIS, ou en mémoire | Application |
 | `Sonnaille.Api` | Endpoints HTTP, lecture et écriture du GeoJSON, racine de composition | Application, Infrastructure |
 
 Un test d'architecture (`ArchitectureTests`) vérifie ces dépendances. Tout est écrit en TDD (`dotnet test` dans `api/`, lancé par la CI).
@@ -50,6 +50,12 @@ Moderation__Key=une-cle-locale dotnet run --project src/Sonnaille.Api
 
 Sous Windows, si le dossier du dépôt est très profond (limite de 260 caractères), définir `SONNAILLE_BUILD_DIR` vers un dossier court (`C:\Temp\snb`) avant de compiler.
 
+## Stockage
+
+Avec une chaîne de connexion `ConnectionStrings:Sightings` (variable d'environnement `ConnectionStrings__Sightings`, un secret), les signalements sont gardés dans PostgreSQL avec PostGIS ; la table `sightings` est créée au démarrage si besoin (position en `geography(Point, 4326)`). Sans elle, ils sont gardés en mémoire et perdus au redémarrage.
+
+Les mêmes tests de contrat passent sur les deux stockages : en mémoire partout, sur PostGIS quand `SONNAILLE_TEST_POSTGRES` est fournie (la CI lance une base PostGIS jetable).
+
 ## Branchement de l'app web
 
 Si l'adresse de l'API est donnée à la construction du site (variable `VITE_SIGHTINGS_API_URL`, variable de dépôt `SIGHTINGS_API_URL` en CI) :
@@ -61,6 +67,5 @@ Sans cette variable, la publication reste celle de la V0 (copier, coller dans Gi
 
 ## Reste à faire
 
-- Stockage PostgreSQL et PostGIS (les signalements en mémoire sont perdus au redémarrage).
 - Hébergement de l'API.
 - Comptes contributeurs et rôles à la place de la clé de modérateur.

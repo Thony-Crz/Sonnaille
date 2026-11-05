@@ -77,7 +77,7 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 
 ## V1 — Alpes (à découper plus tard)
 
-- API ASP.NET Core, base PostgreSQL et PostGIS — en cours : squelette clean archi dans `api/` ([docs/api.md](api.md)), signalements GeoJSON et modération par clé, stockage en mémoire ; restent PostGIS, l'hébergement et le branchement de l'app web
+- API ASP.NET Core, base PostgreSQL et PostGIS — en cours : squelette clean archi dans `api/` ([docs/api.md](api.md)), signalements GeoJSON et modération par clé, stockage PostGIS (ou en mémoire), app web branchée si `VITE_SIGHTINGS_API_URL` est fournie ; reste l'hébergement
 - Comptes contributeurs (connexion Google, etc.) et rôles
 - Signalements par les contributeurs et modération — côté serveur : dépôt en attente, validation par un modérateur, seuls les signalements validés sont publics
 - Question « les bêtes y sont toujours ? »

@@ -6,7 +6,18 @@ using Sonnaille.Infrastructure;
 var builder = WebApplication.CreateBuilder(args);
 
 // Composition root.
-builder.Services.AddSingleton<ISightingRepository, InMemorySightingRepository>();
+// PostGIS when a database is configured (ConnectionStrings:Sightings, a secret), else in memory.
+var connectionString = builder.Configuration.GetConnectionString("Sightings");
+if (string.IsNullOrEmpty(connectionString))
+{
+    builder.Services.AddSingleton<ISightingRepository, InMemorySightingRepository>();
+}
+else
+{
+    var postgres = new PostgresSightingRepository(connectionString);
+    await postgres.EnsureSchema();
+    builder.Services.AddSingleton<ISightingRepository>(postgres);
+}
 builder.Services.AddSingleton<SightingService>();
 var origins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? ["https://thony-crz.github.io"];
 builder.Services.AddCors(o => o.AddDefaultPolicy(p => p.WithOrigins(origins).WithMethods("GET", "POST").WithHeaders("Content-Type")));
