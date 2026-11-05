@@ -18,8 +18,16 @@ const maplibre = vi.hoisted(() => {
     constructor(public options: Record<string, unknown>) {
       maps.push(this);
     }
-    on(event: string, handler: () => void) {
-      (this.handlers[event] ??= []).push(handler);
+    layerHandlers: Record<string, { layers: string[]; handler: (e: unknown) => void }> = {};
+    on(event: string, layersOrHandler: string[] | (() => void), handler?: (e: unknown) => void) {
+      if (typeof layersOrHandler === 'function') (this.handlers[event] ??= []).push(layersOrHandler);
+      else this.layerHandlers[event] = { layers: layersOrHandler, handler: handler! };
+    }
+    emitOnLayers(event: string, payload: unknown) {
+      this.layerHandlers[event]?.handler(payload);
+    }
+    getCanvas() {
+      return { style: {} as Record<string, string> };
     }
     emit(event: string) {
       this.handlers[event]?.forEach((h) => h());
@@ -243,5 +251,49 @@ describe('MapLibreMapView pastoral zones', () => {
     lastMap().emit('style.load');
 
     expect(lastMap().getLayer('zones-flock-fill')?.layout).toEqual({ visibility: 'none' });
+  });
+});
+
+describe('MapLibreMapView zone selection', () => {
+  beforeEach(() => {
+    maplibre.maps.length = 0;
+  });
+
+  it('reports the zone the user taps, with its status', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showPastoralZones(zones);
+    const onSelected = vi.fn();
+
+    view.onZoneSelected(onSelected);
+    lastMap().emitOnLayers('click', { features: [{ properties: { id: 'A' } }] });
+
+    expect(onSelected).toHaveBeenCalledWith({ zone: zoneA, status: 'no-flock' });
+  });
+
+  it('listens to taps on every zone fill layer', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+
+    view.onZoneSelected(vi.fn());
+
+    expect(lastMap().layerHandlers.click?.layers).toEqual([
+      'zones-flock-with-dogs-fill',
+      'zones-flock-fill',
+      'zones-no-flock-fill',
+    ]);
+  });
+
+  it('picks the most cautious zone when several overlap', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    const zoneB = { ...zoneA, id: 'B' };
+    view.showPastoralZones([
+      { zone: zoneA, status: 'no-flock' },
+      { zone: zoneB, status: 'flock-with-dogs' },
+    ]);
+    const onSelected = vi.fn();
+    view.onZoneSelected(onSelected);
+
+    lastMap().emitOnLayers('click', { features: [{ properties: { id: 'A' } }, { properties: { id: 'B' } }] });
+
+    expect(onSelected).toHaveBeenCalledWith({ zone: zoneB, status: 'flock-with-dogs' });
   });
 });

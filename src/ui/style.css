@@ -63,3 +63,135 @@ body {
   font-size: 12px;
   color: #555;
 }
+
+/* Zone sheet: bottom sheet on phones, side panel on larger screens */
+.zone-sheet {
+  position: fixed;
+  z-index: 10;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 16px 16px 20px;
+  background: #fff;
+  color: #222;
+  border-radius: 14px 14px 0 0;
+  box-shadow: 0 -4px 20px rgb(0 0 0 / 20%);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.zone-sheet[hidden] {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .zone-sheet {
+    left: auto;
+    top: 10px;
+    right: 56px;
+    bottom: auto;
+    width: 360px;
+    max-height: calc(100vh - 20px);
+    border-radius: 10px;
+  }
+}
+
+.zone-sheet h2 {
+  margin: 0 32px 4px 0;
+  font-size: 19px;
+}
+
+.zone-sheet h3 {
+  margin: 16px 0 8px;
+  font-size: 16px;
+}
+
+.zone-sheet p {
+  margin: 4px 0;
+}
+
+.zone-sheet-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #f1efe8;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.zone-sheet-quarter {
+  color: #555;
+}
+
+.zone-sheet-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.zone-sheet-activity {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 12px 0 0;
+  padding: 8px 10px;
+  border: 1px solid #e3e0d6;
+  border-radius: 8px;
+}
+
+.zone-sheet-activity legend {
+  padding: 0 4px;
+  font-size: 13px;
+  color: #555;
+}
+
+.zone-sheet-activity label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  cursor: pointer;
+}
+
+.zone-sheet-advice {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zone-sheet-advice .advice {
+  padding: 10px 0;
+  border-top: 1px solid #ece9e0;
+}
+
+.advice-situation {
+  font-size: 13px;
+  color: #5f7a45;
+}
+
+.zone-sheet-advice details summary {
+  margin-top: 4px;
+  cursor: pointer;
+  color: #2f5d3a;
+}
+
+.advice-source {
+  font-size: 13px;
+  color: #555;
+}
+
+.zone-sheet footer {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #ece9e0;
+  font-size: 12px;
+  color: #555;
+}

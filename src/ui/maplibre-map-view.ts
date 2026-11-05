@@ -18,6 +18,7 @@ const lineLayerId = (status: ZoneStatus) => `zones-${status}-line`;
 export class MapLibreMapView implements MapView {
   private readonly map: Map;
   private zones: FeatureCollection | null = null;
+  private shownZones: Record<string, ZoneOnMap> = {};
   private readonly visible: Record<ZoneStatus, boolean> = { 'flock-with-dogs': true, flock: true, 'no-flock': true };
 
   constructor(container: HTMLElement, baseMap: BaseMapId) {
@@ -47,6 +48,7 @@ export class MapLibreMapView implements MapView {
   }
 
   showPastoralZones(zones: ZoneOnMap[]): void {
+    this.shownZones = Object.fromEntries(zones.map((z) => [z.zone.id, z]));
     this.zones = {
       type: 'FeatureCollection',
       features: zones.map(({ zone, status }) => ({
@@ -59,6 +61,27 @@ export class MapLibreMapView implements MapView {
     const source = this.map.getSource(ZONES_SOURCE) as GeoJSONSource | undefined;
     if (source) source.setData(this.zones);
     else if (this.map.isStyleLoaded()) this.addZoneLayers();
+  }
+
+  /**
+   * Calls the handler with the zone the user taps. Where zones overlap,
+   * the most cautious one wins (guard dogs first).
+   */
+  onZoneSelected(handler: (zone: ZoneOnMap) => void): void {
+    const layers = ZONE_STATUSES.map(fillLayerId);
+    this.map.on('click', layers, (event: { features?: Array<{ properties?: { id?: unknown } }> }) => {
+      const tapped = (event.features ?? [])
+        .map((f) => this.shownZones[String(f.properties?.id)])
+        .filter((z): z is ZoneOnMap => z !== undefined)
+        .sort((a, b) => ZONE_STATUSES.indexOf(a.status) - ZONE_STATUSES.indexOf(b.status));
+      if (tapped[0]) handler(tapped[0]);
+    });
+    this.map.on('mouseenter', layers, () => {
+      this.map.getCanvas().style.cursor = 'pointer';
+    });
+    this.map.on('mouseleave', layers, () => {
+      this.map.getCanvas().style.cursor = '';
+    });
   }
 
   setZoneLayerVisible(status: ZoneStatus, visible: boolean): void {
