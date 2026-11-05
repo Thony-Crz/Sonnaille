@@ -32,6 +32,14 @@ Inventaire du 5 novembre 2026 pour la Chartreuse et le Vercors. Une case « à v
 
 Map Patou charge le Plan IGN en tuiles vectorielles (`data.geopf.fr/tms/1.0.0/PLAN.IGN`) et une image satellite SPOT 2023 en WMTS, **sans clé**. Les conditions d'usage de la Géoplateforme, notamment pour la mise en cache hors ligne en V1, restent à lire.
 
+Fonds utilisés par Sonnaille depuis T08 :
+
+| Fond | Source | Point d'attention |
+| --- | --- | --- |
+| Plan IGN | Style vectoriel `PLAN.IGN/standard.json` de la Géoplateforme | Le style ne déclare pas d'attribution : l'app ajoute « © IGN » |
+| Photos aériennes IGN | WMTS `ORTHOIMAGERY.ORTHOPHOTOS` de la Géoplateforme | Attribution « © IGN » ajoutée par l'app |
+| OpenStreetMap | Tuiles `tile.openstreetmap.org` | La politique d'usage des tuiles OSM tolère un faible trafic avec attribution, mais interdit un usage intensif : à remplacer par un autre fournisseur si l'app est ouverte largement (V1 et après) |
+
 ## Concurrence
 
 | Outil | Ce qu'il fait | Couverture | Source |

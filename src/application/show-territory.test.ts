@@ -9,6 +9,7 @@ class FakeMapView implements MapView {
   fitTo(bounds: Bounds): void {
     this.fits.push(bounds);
   }
+  showBaseMap(): void {}
 }
 
 describe('showTerritory', () => {
