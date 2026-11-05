@@ -22,7 +22,11 @@ export function createObservation({
   guardDogs: boolean;
   outingDate: string;
 }): { observation: Observation; timeFromTrack: boolean } {
-  const { position, time } = pointAtKm(track, km);
+  const point = pointAtKm(track, km);
+  const time = point.time;
+  // Five decimals: about one metre, more than enough for a flock.
+  const round = (degrees: number) => Math.round(degrees * 1e5) / 1e5;
+  const position = { longitude: round(point.position.longitude), latitude: round(point.position.latitude) };
   const observedAt = time ?? new Date(`${outingDate}T12:00:00`).toISOString();
   const id = `obs-${observedAt}-${position.latitude.toFixed(4)}-${position.longitude.toFixed(4)}`;
   return { observation: { id, observedAt, position, species, headcount, guardDogs }, timeFromTrack: time !== undefined };

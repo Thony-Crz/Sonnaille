@@ -3,7 +3,7 @@
 import './ui/style.css';
 import { chooseBaseMap, initialBaseMap } from './application/base-map-choice';
 import { importTrack } from './application/import-track';
-import { showObservations } from './application/observations';
+import { createObservation, showObservations } from './application/observations';
 import type { ZoneOnMap } from './application/ports';
 import { prepareOuting } from './application/prepare-outing';
 import { showPastoralZones, showZonesOn, toggleZoneLayer, type ShowZonesResult } from './application/show-pastoral-zones';
@@ -16,7 +16,7 @@ import type { Track } from './domain/track';
 import { dayOf, parseDay } from './domain/zone-status';
 import { HttpAdviceRepository } from './infrastructure/advice-content';
 import { readGpx } from './infrastructure/gpx-reader';
-import { HttpObservationRepository, HttpObservationSettings } from './infrastructure/observations-content';
+import { HttpObservationRepository, HttpObservationSettings, observationFeature } from './infrastructure/observations-content';
 import { HttpPastoralZoneRepository } from './infrastructure/http-pastoral-zone-repository';
 import { LocalStorageActivityPreferences } from './infrastructure/local-storage-activity-preferences';
 import { LocalStorageBaseMapPreferences } from './infrastructure/local-storage-base-map-preferences';
@@ -26,6 +26,7 @@ import { configureMapLibre } from './ui/configure-maplibre';
 import { element, frenchNumber } from './ui/dom';
 import { createUnderstandPanel, createWelcomeDialog } from './ui/info-panels';
 import { MapLibreMapView } from './ui/maplibre-map-view';
+import { createObservationForm } from './ui/observation-form';
 import { createOutingReportPanel } from './ui/outing-report-panel';
 import { createTrackImport, enableFileDrop } from './ui/track-import';
 import { createZoneLegend } from './ui/zone-legend';
@@ -78,7 +79,20 @@ const zoneSheet = createZoneSheetPanel({
     selectedZone = null;
   },
 });
+// Field sighting after the outing (T24): a GeoJSON entry to add to content/observations.geojson,
+// previewed on the map right away.
+const observationForm = createObservationForm({
+  onSubmit: (answers) => {
+    if (!track) return;
+    const { observation, timeFromTrack } = createObservation({ ...answers, track, outingDate: day });
+    observationForm.showResult(JSON.stringify(observationFeature(observation), null, 2), timeFromTrack);
+    const withPreview = { load: async () => [...(await observationRepository.load().catch(() => [])), observation] };
+    void showObservations(withPreview, observationSettings, view, new Date());
+  },
+});
+
 const outingReport = createOutingReportPanel({
+  extra: observationForm.element,
   onDateChange: (date) => {
     day = date;
     refresh();
@@ -137,6 +151,7 @@ async function importFile(file: File): Promise<void> {
     return;
   }
   track = result.track;
+  observationForm.setTrackLength(result.lengthKm);
   trackImport.setStatus(`${result.track.name} — ${frenchNumber(result.lengthKm)} km`);
   if (zones.available) showOutingReport();
   else trackImport.setStatus(`${result.track.name} — zones pastorales indisponibles, analyse impossible pour le moment.`);

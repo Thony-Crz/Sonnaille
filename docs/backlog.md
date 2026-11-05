@@ -63,7 +63,7 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 
 | ID | Tâche | Terminé quand | Dépend de |
 | --- | --- | --- | --- |
-| T24 | Écran de signalement : choix d'un point ou d'un kilomètre du GPX, heure déduite, champs structurés (espèce, effectif, patou vu) | L'écran produit une entrée GeoJSON à ajouter au dépôt (pas de serveur en V0) | T15, T10 |
+| ~~T24~~ ✅ | Écran de signalement : choix d'un point ou d'un kilomètre du GPX, heure déduite, champs structurés (espèce, effectif, patou vu) | Fait : « Signaler un troupeau vu » dans « Votre sortie » (km, espèce, effectif, chiens vus, aucun texte libre), heure tirée du GPX, entrée GeoJSON à copier dans `content/observations.geojson`, aperçu sur la carte | T15, T10 |
 | ~~T25~~ ✅ | Afficher les observations : halo par espèce (paramètres en JSON), nettes pendant 3 jours puis pâlies, historique conservé | Fait : point et halo violets par espèce (paramètres dans `content/observation-settings.json`, provisoires), nets 3 jours puis estompés, compte des récentes dans la légende | T13, T24 |
 
 ### Lot 6 — Finition et démo

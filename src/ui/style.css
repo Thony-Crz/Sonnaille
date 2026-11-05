@@ -333,3 +333,100 @@ body {
   font-weight: 600;
   cursor: pointer;
 }
+
+/* "Signaler un troupeau vu" (T24) */
+.observation-section {
+  margin-top: 14px;
+  padding: 8px 10px;
+  border: 1px solid #d9cfe6;
+  border-radius: 8px;
+  background: #faf7fd;
+}
+
+.observation-section summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #6a3d9a;
+}
+
+.observation-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.observation-form > label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 36px;
+}
+
+.observation-form input[type='number'],
+.observation-form select {
+  min-height: 36px;
+  padding: 0 8px;
+  border: 1px solid #d3d1c7;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.observation-form input[type='number'] {
+  width: 90px;
+}
+
+.observation-headcount {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  padding: 6px 8px;
+  border: 1px solid #e3e0d6;
+  border-radius: 6px;
+}
+
+.observation-headcount label,
+.observation-dogs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  cursor: pointer;
+}
+
+.observation-dogs {
+  justify-content: flex-start !important;
+}
+
+.observation-form button[type='submit'],
+.observation-copy {
+  min-height: 40px;
+  border: 0;
+  border-radius: 6px;
+  background: #6a3d9a;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.observation-error:empty {
+  display: none;
+}
+
+.observation-error,
+.observation-warning {
+  margin: 0;
+  color: #9a3a1c;
+  font-size: 13px;
+}
+
+.observation-result pre {
+  overflow-x: auto;
+  padding: 8px;
+  border-radius: 6px;
+  background: #f1efe8;
+  font-size: 12px;
+}

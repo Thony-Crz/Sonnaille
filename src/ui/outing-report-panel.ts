@@ -37,10 +37,13 @@ export function createOutingReportPanel({
   onDateChange,
   onActivityChange,
   onClose,
+  extra,
 }: {
   onDateChange: (date: string) => void;
   onActivityChange: (activity: Activity) => void;
   onClose: () => void;
+  /** A section kept as is across refreshes (e.g. the observation form, with what the user typed). */
+  extra?: HTMLElement;
 }): OutingReportPanel {
   const panel = element('aside', { className: 'zone-sheet outing-report', hidden: true });
   panel.setAttribute('role', 'dialog');
@@ -94,6 +97,7 @@ export function createOutingReportPanel({
       element('p', { className: 'outing-summary', textContent: summary(report) }),
       ...(report.crossings.length > 0 ? [crossings] : []),
       ...(report.advice.length > 0 ? [element('h3', { textContent: 'Les bons réflexes' }), renderAdviceList(report.advice)] : []),
+      ...(extra ? [extra] : []),
       element(
         'footer',
         {},

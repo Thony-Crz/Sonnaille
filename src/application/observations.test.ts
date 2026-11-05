@@ -42,6 +42,13 @@ describe('createObservation', () => {
     expect(result.observation.id).toBe('obs-2026-07-15T06:20:00.000Z-45.0090-5.7000');
   });
 
+  it('rounds the position to about one metre', () => {
+    const { observation } = createObservation({ track: timed, km: 0.3333, species: 'sheep', headcount: 'few', guardDogs: false, outingDate: '2026-07-15' });
+
+    expect(String(observation.position.latitude).split('.')[1]?.length).toBeLessThanOrEqual(5);
+    expect(observation.position.longitude).toBe(5.7);
+  });
+
   it('uses noon on the outing day when the GPX has no time', () => {
     const result = createObservation({ track: untimed, km: 1, species: 'cattle', headcount: 'dozens', guardDogs: false, outingDate: '2026-07-15' });
 

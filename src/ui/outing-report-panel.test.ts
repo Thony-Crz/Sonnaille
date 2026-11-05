@@ -149,3 +149,16 @@ describe('createOutingReportPanel', () => {
     expect(onClose).toHaveBeenCalled();
   });
 });
+
+describe('createOutingReportPanel extra section', () => {
+  it('keeps the same extra section (e.g. the observation form) across refreshes', () => {
+    const extra = document.createElement('section');
+    const panel = createOutingReportPanel({ onDateChange: vi.fn(), onActivityChange: vi.fn(), onClose: vi.fn(), extra });
+
+    panel.show(report);
+    panel.show({ ...report, date: '2026-08-01' });
+
+    expect(panel.element.contains(extra)).toBe(true);
+    expect(panel.element.querySelectorAll('section')).toHaveLength(1);
+  });
+});
