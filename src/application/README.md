@@ -1,6 +1,8 @@
+**English** · [Français](README.fr.md)
+
 # application
 
-Les cas d'usage (préparer une sortie, signaler une observation, consulter une zone) et les **ports** : les interfaces dont ils ont besoin pour obtenir des données (dépôt de zones, lecteur de GPX…).
+The use cases (prepare an outing, report an observation, look at a zone) and the **ports**: the interfaces they need to get data or drive the display (zone repository, GPX reader, map view…).
 
-- Dépend seulement de `domain`. Aucune bibliothèque externe.
-- Testée avec des implémentations en mémoire des ports.
+- Depends only on `domain`. No external library.
+- Tested with in-memory implementations of the ports.

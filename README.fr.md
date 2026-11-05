@@ -1,0 +1,37 @@
+[English](README.md) · **Français**
+
+# Sonnaille
+
+Sonnaille aide les traileurs, vététistes et randonneurs à **préparer leur sortie** en territoire pastoral et à **signaler ce qu'ils ont vu après**. L'application montre les zones pastorales et les troupeaux prévus, croise un tracé GPX avec ces zones, et donne des conseils adaptés à la zone et à l'activité sur les troupeaux et les chiens de protection (patous).
+
+Ce n'est pas un GPS. Sonnaille complète [Map Patou](https://www.pasto-kezako.fr/) : Map Patou dit où les troupeaux sont prévus, Sonnaille ajoute la préparation de sortie, les conseils et les observations de terrain.
+
+## État
+
+V0 en cours : une démo sur la Chartreuse et le Vercors. Voir le [backlog](docs/backlog.md).
+
+## Documentation
+
+- [Cahier des charges](docs/cahier-des-charges.md)
+- [Backlog](docs/backlog.md)
+- [Décisions](docs/decisions.md)
+- [Sources de données](docs/sources.md) et [étude Map Patou](docs/map-patou.md)
+
+## Développement
+
+Nécessite Node.js 22.
+
+```bash
+npm install
+npm run dev      # http://localhost:5173/Sonnaille/
+npm test         # tests unitaires et d'architecture
+npm run build    # vérification des types et build de production
+```
+
+## Conventions
+
+- **TDD** : tout code de production commence par un test qui échoue.
+- **Clean architecture** : `src/domain`, `src/application`, `src/infrastructure`, `src/ui`, assemblés dans `src/main.ts`. Un test dans `tests/architecture/` vérifie la règle de dépendance.
+- **Langue** : le code en anglais ; la documentation et les textes de l'interface en français ; les README dans les deux langues.
+
+Détails dans [decisions.md](docs/decisions.md) (D2, D3).

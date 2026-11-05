@@ -57,3 +57,22 @@ Le code reste public. Les données Map Patou ne sont jamais committées.
 
 - Turf.js, MapLibre et la lecture de GPX restent dans `infrastructure` ou `ui`. Le domaine manipule ses propres types (point, ligne, polygone) et l'infrastructure les convertit.
 - La détection de traversée (T17) est découpée : la règle métier (zones actives à la date, observations de moins de 3 jours, marge) dans `domain`, le calcul géométrique derrière un port, implémenté avec Turf.js.
+
+## D3 — Langues : code en anglais, README bilingues
+
+5 novembre 2026 · Statut : adoptée
+
+**Décision**
+
+| Élément | Langue |
+| --- | --- |
+| Code : identifiants, noms de fichiers, commentaires, descriptions de tests, messages d'erreur techniques, workflows | Anglais |
+| Textes affichés aux utilisateurs (interface, attributions, libellés d'accessibilité) | Français |
+| Documents de `docs/` | Français |
+| README (racine et couches) | Les deux : `README.md` en anglais, `README.fr.md` en français, avec un lien en tête de chacun pour passer de l'un à l'autre |
+| Messages de commit | Français |
+
+**Conséquences**
+
+- Le vocabulaire métier a une traduction fixe dans le code : emprise → `Bounds`, territoire → `territory`, massif → `Massif`, zone pastorale → `PastoralZone`, secteur prévu → `PlannedSector`, observation → `Observation`, conseil → `Advice`, tracé → `Track`, sortie → `Outing`.
+- Tout README modifié l'est dans les deux langues, dans le même commit.

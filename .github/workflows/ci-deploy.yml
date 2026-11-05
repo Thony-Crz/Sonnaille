@@ -1,6 +1,6 @@
-# Tests à chaque push et pull request ; déploiement GitHub Pages par artefact depuis main.
-# Pas de branche gh-pages : les données Map Patou ne doivent jamais être versionnées (docs/decisions.md, D1).
-name: CI et déploiement
+# Tests on every push and pull request; GitHub Pages deployment by artifact from main.
+# No gh-pages branch: Map Patou data must never be committed (docs/decisions.md, D1).
+name: CI and deployment
 
 on:
   push:
@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  tests:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,16 +32,16 @@ jobs:
         with:
           path: dist
 
-  deploiement:
+  deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    needs: tests
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       pages: write
       id-token: write
     environment:
       name: github-pages
-      url: ${{ steps.deploiement.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deploiement
+      - id: deployment
         uses: actions/deploy-pages@v4

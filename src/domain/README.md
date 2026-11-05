@@ -1,6 +1,8 @@
+**English** · [Français](README.fr.md)
+
 # domain
 
-Le cœur métier : zones pastorales, secteurs prévus, observations, conseils, et les règles pures (traversée d'un tracé, validité de 3 jours d'une observation, choix d'un conseil selon le contexte).
+The business core: pastoral zones, planned sectors, observations, advice, and the pure rules (a track crossing a zone, the 3-day validity of an observation, picking advice from the context).
 
-- Ne dépend de rien d'autre que de lui-même : ni `application`, ni `infrastructure`, ni `ui`, ni aucune bibliothèque externe.
-- Fonctions pures, testées en premier (TDD).
+- Depends on nothing but itself: no `application`, no `infrastructure`, no `ui`, no external library.
+- Pure functions, tested first (TDD).

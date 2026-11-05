@@ -1,6 +1,8 @@
+**English** · [Français](README.fr.md)
+
 # infrastructure
 
-Les **adaptateurs** qui implémentent les ports de `application` : lecture des GeoJSON, données Map Patou, lecture de GPX, stockage local, calcul géographique (Turf.js).
+The **adapters** implementing the `application` ports for data: GeoJSON reading, Map Patou data, GPX reading, local storage, geographic computation (Turf.js).
 
-- Peut dépendre de `domain`, de `application` et de bibliothèques externes. Jamais de `ui`.
-- Le scraper Map Patou vit ici, isolé dans son propre module (voir `docs/decisions.md`, D1).
+- May depend on `domain`, `application` and external libraries. Never on `ui`.
+- The Map Patou scraper lives here, isolated in its own module (see `docs/decisions.md`, D1).

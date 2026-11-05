@@ -1,10 +1,10 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 
-// Le site est servi par GitHub Pages sous https://<compte>.github.io/Sonnaille/
+// Served by GitHub Pages under https://<account>.github.io/Sonnaille/
 export default defineConfig({
   base: '/Sonnaille/',
-  // Le worker MapLibre reste un module ES une fois empaqueté (voir src/ui/configurer-maplibre.ts).
+  // Keep the MapLibre worker an ES module once bundled (see src/ui/configure-maplibre.ts).
   worker: { format: 'es' },
   test: {
     include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],

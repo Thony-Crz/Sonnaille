@@ -1,6 +1,6 @@
-import type { Emprise } from '../domain/emprise';
+import type { Bounds } from '../domain/bounds';
 
-/** Ce que les cas d'usage attendent de la carte affichée. Implémenté dans `ui`. */
-export interface Carte {
-  cadrerSur(emprise: Emprise): void;
+/** What the use cases expect from the displayed map. Implemented in `ui`. */
+export interface MapView {
+  fitTo(bounds: Bounds): void;
 }

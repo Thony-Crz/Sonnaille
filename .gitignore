@@ -1,7 +1,7 @@
-# Données Map Patou : jamais versionnées (voir docs/decisions.md, D1)
+# Map Patou data: never committed (see docs/decisions.md, D1)
 data/map-patou/
 
-# Secrets locaux
+# Local secrets
 .env
 .env.*
 node_modules/
