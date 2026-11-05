@@ -52,7 +52,7 @@ describe('createZoneSheetPanel', () => {
     expect(text()).toContain('Quartier A');
     expect(text()).toContain('Troupeau avec chiens de protection');
     expect(text()).toContain('Troupeau prévu du 15/06/2026 au 30/09/2026');
-    expect(text()).toContain('Ovins, caprins');
+    expect(text()).toContain('Moutons, chèvres');
     expect(text()).toContain('Chiens de protection : oui');
   });
 

@@ -17,10 +17,11 @@ export interface ObservationForm {
 
 // Texts shown to users, hence in French.
 const SPECIES_LABELS: Record<Species, string> = {
-  sheep: 'Ovins',
-  cattle: 'Bovins',
-  goats: 'Caprins',
-  horses: 'Équins',
+  sheep: 'Moutons (ovins)',
+  cattle: 'Vaches (bovins)',
+  goats: 'Chèvres (caprins)',
+  horses: 'Chevaux',
+  donkeys: 'Ânes',
   mixed: 'Troupeau mixte',
 };
 const HEADCOUNT_LABELS: Record<Headcount, string> = {
@@ -30,7 +31,7 @@ const HEADCOUNT_LABELS: Record<Headcount, string> = {
 };
 
 /**
- * "Signaler un troupeau vu" (T24): where on the track, which animals, roughly how many,
+ * "Signaler un troupeau ou des animaux vus" (T24): where on the track, which animals, roughly how many,
  * guard dogs seen or not. Structured answers only: no free text, so nobody can be targeted.
  */
 export function createObservationForm({ onSubmit }: { onSubmit: (answers: ObservationAnswers) => void }): ObservationForm {
@@ -56,7 +57,7 @@ export function createObservationForm({ onSubmit }: { onSubmit: (answers: Observ
     'form',
     { className: 'observation-form', noValidate: true },
     element('label', {}, element('span', { textContent: 'Au kilomètre' }), km),
-    element('label', {}, element('span', { textContent: 'Animaux' }), species),
+    element('label', {}, element('span', { textContent: 'Quels animaux ?' }), species),
     headcount,
     element('label', { className: 'observation-dogs' }, guardDogs, element('span', { textContent: 'Chiens de protection vus' })),
     error,
@@ -80,7 +81,7 @@ export function createObservationForm({ onSubmit }: { onSubmit: (answers: Observ
     });
   });
 
-  const panel = element('details', { className: 'observation-section' }, element('summary', { textContent: 'Signaler un troupeau vu' }), form);
+  const panel = element('details', { className: 'observation-section' }, element('summary', { textContent: 'Signaler un troupeau ou des animaux vus' }), form);
 
   return {
     element: panel,

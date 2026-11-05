@@ -189,7 +189,7 @@ describe('createOutingReportPanel sightings', () => {
 
     const text = panel.element.querySelector('.sightings')?.textContent ?? '';
     expect(text).toContain('Troupeaux vus récemment près du tracé');
-    expect(text).toContain('Bovins, des centaines, chiens de protection vus');
+    expect(text).toContain('Vaches, des centaines, chiens de protection vus');
     expect(text).toContain('le 14/07/2026, au km 3, à 240 m du tracé');
   });
 });

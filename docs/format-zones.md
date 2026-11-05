@@ -48,7 +48,7 @@ Une `FeatureCollection` GeoJSON, plus un membre `metadata` :
 | `properties.quarter` | Nom du quartier | Texte, peut être vide |
 | `properties.presence` | Troupeau prévu, ou `null` si aucun | Voir ci-dessous |
 | `presence.start`, `presence.end` | Période de présence, bornes incluses | `YYYY-MM-DD`, fin ≥ début |
-| `presence.species` | Espèces | `sheep`, `cattle`, `goats`, `horses`, `mixed` |
+| `presence.species` | Espèces | `sheep`, `cattle`, `goats`, `horses`, `donkeys`, `mixed` |
 | `presence.guardDogs` | Chiens de protection présents | Booléen |
 | `presence.weekdays` | Jours de présence | 1 (lundi) à 7 (dimanche) |
 

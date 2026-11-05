@@ -31,6 +31,9 @@ const SPECIES_WORDS: Record<string, Species> = {
   bovins: 'cattle',
   caprins: 'goats',
   equins: 'horses',
+  asins: 'donkeys',
+  anes: 'donkeys',
+  'ânes': 'donkeys',
   mixte: 'mixed',
 };
 

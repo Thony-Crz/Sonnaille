@@ -5,6 +5,7 @@
     "cattle": 500,
     "goats": 300,
     "horses": 500,
+    "donkeys": 300,
     "mixed": 400
   }
 }

@@ -16,11 +16,11 @@ const setup = () => {
 };
 
 describe('createObservationForm', () => {
-  it('is a collapsible "Signaler un troupeau vu" section', () => {
+  it('is a collapsible "Signaler un troupeau ou des animaux vus" section', () => {
     const { form } = setup();
 
     expect(form.element.tagName).toBe('DETAILS');
-    expect(form.element.querySelector('summary')?.textContent).toBe('Signaler un troupeau vu');
+    expect(form.element.querySelector('summary')?.textContent).toBe('Signaler un troupeau ou des animaux vus');
   });
 
   it('asks only structured questions: no free text at all', () => {
@@ -35,10 +35,11 @@ describe('createObservationForm', () => {
 
     expect($<HTMLInputElement>('input[name="km"]').max).toBe('15.5');
     expect([...form.element.querySelectorAll<HTMLOptionElement>('select[name="species"] option')].map((o) => o.textContent)).toEqual([
-      'Ovins',
-      'Bovins',
-      'Caprins',
-      'Équins',
+      'Moutons (ovins)',
+      'Vaches (bovins)',
+      'Chèvres (caprins)',
+      'Chevaux',
+      'Ânes',
       'Troupeau mixte',
     ]);
     expect([...form.element.querySelectorAll<HTMLInputElement>('input[name="headcount"]')].map((r) => r.closest('label')?.textContent)).toEqual([

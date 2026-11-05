@@ -6,10 +6,11 @@ import { element } from './dom';
 export const ACTIVITY_LABELS: Record<Activity, string> = { hiking: 'À pied', trail: 'En trail', mtb: 'À VTT' };
 
 const SPECIES_LABELS: Record<Species, string> = {
-  sheep: 'ovins',
-  cattle: 'bovins',
-  goats: 'caprins',
-  horses: 'équins',
+  sheep: 'moutons',
+  cattle: 'vaches',
+  goats: 'chèvres',
+  horses: 'chevaux',
+  donkeys: 'ânes',
   mixed: 'troupeau mixte',
 };
 

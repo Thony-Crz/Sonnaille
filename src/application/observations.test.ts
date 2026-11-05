@@ -57,7 +57,7 @@ describe('createObservation', () => {
   });
 });
 
-const settings: ObservationSettings = { validityDays: 3, haloMeters: { sheep: 400, cattle: 500, goats: 300, horses: 500, mixed: 400 } };
+const settings: ObservationSettings = { validityDays: 3, haloMeters: { sheep: 400, cattle: 500, goats: 300, horses: 500, donkeys: 300, mixed: 400 } };
 const seen = (id: string, observedAt: string, species: Observation['species'] = 'sheep'): Observation => ({
   id,
   observedAt,

@@ -52,7 +52,7 @@ describe('observations file', () => {
 });
 
 describe('observation settings', () => {
-  const settings = { validityDays: 3, haloMeters: { sheep: 400, cattle: 500, goats: 300, horses: 500, mixed: 400 } };
+  const settings = { validityDays: 3, haloMeters: { sheep: 400, cattle: 500, goats: 300, horses: 500, donkeys: 300, mixed: 400 } };
 
   it('reads the validity and the halo of each species', () => {
     expect(parseObservationSettings(settings)).toEqual(settings);
@@ -70,7 +70,7 @@ describe('observation settings', () => {
 describe('HTTP repositories', () => {
   it('load the published observations and settings', async () => {
     const fetchFn = vi.fn(async (url: string) =>
-      new Response(JSON.stringify(url.endsWith('settings.json') ? { validityDays: 3, haloMeters: { sheep: 1, cattle: 1, goats: 1, horses: 1, mixed: 1 } } : collection())),
+      new Response(JSON.stringify(url.endsWith('settings.json') ? { validityDays: 3, haloMeters: { sheep: 1, cattle: 1, goats: 1, horses: 1, donkeys: 1, mixed: 1 } } : collection())),
     );
 
     expect(await new HttpObservationRepository('/o.geojson', fetchFn).load()).toEqual([observation]);

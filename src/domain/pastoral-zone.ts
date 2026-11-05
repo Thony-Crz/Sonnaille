@@ -1,7 +1,7 @@
 /** GeoJSON-like MultiPolygon coordinates: [polygon][ring][point][longitude, latitude]. */
 export type MultiPolygon = number[][][][];
 
-export type Species = 'sheep' | 'cattle' | 'goats' | 'horses' | 'mixed';
+export type Species = 'sheep' | 'cattle' | 'goats' | 'horses' | 'donkeys' | 'mixed';
 
 /** A planned flock presence. Dates are ISO days (YYYY-MM-DD); weekdays are 1 (Monday) to 7 (Sunday). */
 export interface Presence {
@@ -29,7 +29,7 @@ export interface PastoralZoneDataset {
   fetchedAt: string;
 }
 
-export const SPECIES: Species[] = ['sheep', 'cattle', 'goats', 'horses', 'mixed'];
+export const SPECIES: Species[] = ['sheep', 'cattle', 'goats', 'horses', 'donkeys', 'mixed'];
 
 /** ISO weekday of a YYYY-MM-DD date: 1 (Monday) to 7 (Sunday). */
 function weekdayOf(date: string): number {

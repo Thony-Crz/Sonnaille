@@ -115,6 +115,8 @@ describe('parseSpecies', () => {
     ['caprins', ['goats']],
     ['Equins', ['horses']],
     ['mixte', ['mixed']],
+    ['asins', ['donkeys']],
+    ['Equins Asins', ['horses', 'donkeys']],
     ['Ovins Caprins', ['sheep', 'goats']],
     ['Equins Bovins', ['horses', 'cattle']],
     ['ovins ovins', ['sheep']],
