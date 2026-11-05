@@ -7,6 +7,8 @@ import type { BaseMapPreferences, MapView } from './ports';
 class FakeMapView implements MapView {
   shown: BaseMapId[] = [];
   fitTo(_bounds: Bounds): void {}
+  showPastoralZones(): void {}
+  setZoneLayerVisible(): void {}
   showBaseMap(id: BaseMapId): void {
     this.shown.push(id);
   }

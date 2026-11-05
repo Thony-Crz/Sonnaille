@@ -21,6 +21,14 @@ export interface PastoralZone {
   presence: Presence | null;
 }
 
+/** A set of zones as published, with who produced it and when. */
+export interface PastoralZoneDataset {
+  zones: PastoralZone[];
+  source: string;
+  requestedDate: string;
+  fetchedAt: string;
+}
+
 export const SPECIES: Species[] = ['sheep', 'cattle', 'goats', 'horses', 'mixed'];
 
 /** ISO weekday of a YYYY-MM-DD date: 1 (Monday) to 7 (Sunday). */

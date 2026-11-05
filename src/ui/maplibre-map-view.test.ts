@@ -2,20 +2,48 @@ import type { IControl, StyleSpecification } from 'maplibre-gl';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const maplibre = vi.hoisted(() => {
-  const maps: Array<{
-    options: Record<string, unknown>;
-    fitBounds: ReturnType<typeof vi.fn>;
-    addControl: ReturnType<typeof vi.fn>;
-    setStyle: ReturnType<typeof vi.fn>;
-  }> = [];
+  // A fake map keeping just enough style state: sources, layers, layout properties.
   class Map {
     fitBounds = vi.fn();
     addControl = vi.fn();
-    setStyle = vi.fn();
+    setStyle = vi.fn((_style: unknown, _options?: { transformStyle?: unknown }) => {
+      this.sources.clear();
+      this.layers.length = 0;
+    });
+    styleLoaded = true;
+    handlers: Record<string, Array<() => void>> = {};
+    sources = new globalThis.Map<string, { data: unknown; setData: ReturnType<typeof vi.fn> }>();
+    layers: Array<{ id: string; type: string; filter?: unknown; paint?: Record<string, unknown>; layout?: Record<string, unknown> }> = [];
+    layout: Record<string, Record<string, unknown>> = {};
     constructor(public options: Record<string, unknown>) {
       maps.push(this);
     }
+    on(event: string, handler: () => void) {
+      (this.handlers[event] ??= []).push(handler);
+    }
+    emit(event: string) {
+      this.handlers[event]?.forEach((h) => h());
+    }
+    isStyleLoaded() {
+      return this.styleLoaded;
+    }
+    addSource(id: string, source: { data: unknown }) {
+      this.sources.set(id, { data: source.data, setData: vi.fn() });
+    }
+    getSource(id: string) {
+      return this.sources.get(id);
+    }
+    addLayer(layer: (typeof this.layers)[number]) {
+      this.layers.push(layer);
+    }
+    getLayer(id: string) {
+      return this.layers.find((l) => l.id === id);
+    }
+    setLayoutProperty(id: string, property: string, value: unknown) {
+      (this.layout[id] ??= {})[property] = value;
+    }
   }
+  const maps: Map[] = [];
   class NavigationControl {
     constructor(public options: Record<string, unknown>) {}
   }
@@ -24,7 +52,10 @@ const maplibre = vi.hoisted(() => {
 
 vi.mock('maplibre-gl', () => ({ Map: maplibre.Map, NavigationControl: maplibre.NavigationControl }));
 
+import type { ZoneOnMap } from '../application/ports';
+import type { PastoralZone } from '../domain/pastoral-zone';
 import { BASE_MAP_STYLES } from './base-map-styles';
+import { ZONE_STYLES } from './zone-styles';
 import { MapLibreMapView } from './maplibre-map-view';
 
 const container = {} as HTMLElement;
@@ -89,6 +120,14 @@ describe('MapLibreMapView', () => {
     expect(control.onAdd(lastMap() as never)).toBe(panel);
   });
 
+  it('can add a panel in another corner', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+
+    view.addPanel({ remove: vi.fn() } as unknown as HTMLElement, 'bottom-left');
+
+    expect(lastMap().addControl.mock.calls.at(-1)?.[1]).toBe('bottom-left');
+  });
+
   it('fits the map to the requested bounds, with padding and no animation', () => {
     const view = new MapLibreMapView(container, 'ign-plan');
 
@@ -101,5 +140,108 @@ describe('MapLibreMapView', () => {
       ],
       { padding: 24, animate: false },
     );
+  });
+});
+
+const zoneA: PastoralZone = {
+  id: 'A',
+  name: 'Alpage A',
+  quarter: 'Quartier A',
+  geometry: [[[[5.7, 45.3], [5.8, 45.3], [5.8, 45.4], [5.7, 45.3]]]],
+  presence: null,
+};
+const zones: ZoneOnMap[] = [{ zone: zoneA, status: 'no-flock' }];
+
+describe('MapLibreMapView pastoral zones', () => {
+  beforeEach(() => {
+    maplibre.maps.length = 0;
+  });
+
+  it('adds the zones as a GeoJSON source, each with its id and status', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+
+    view.showPastoralZones(zones);
+
+    expect(lastMap().getSource('pastoral-zones')?.data).toEqual({
+      type: 'FeatureCollection',
+      features: [
+        { type: 'Feature', geometry: { type: 'MultiPolygon', coordinates: zoneA.geometry }, properties: { id: 'A', status: 'no-flock' } },
+      ],
+    });
+  });
+
+  it('draws a fill and an outline layer per status, the most cautious on top', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+
+    view.showPastoralZones(zones);
+
+    expect(lastMap().layers.map((l) => l.id)).toEqual([
+      'zones-no-flock-fill',
+      'zones-no-flock-line',
+      'zones-flock-fill',
+      'zones-flock-line',
+      'zones-flock-with-dogs-fill',
+      'zones-flock-with-dogs-line',
+    ]);
+    expect(lastMap().getLayer('zones-flock-fill')).toMatchObject({
+      type: 'fill',
+      source: 'pastoral-zones',
+      filter: ['==', ['get', 'status'], 'flock'],
+      paint: { 'fill-color': ZONE_STYLES.flock.color, 'fill-opacity': ZONE_STYLES.flock.fillOpacity },
+    });
+  });
+
+  it('waits for the style to load before adding the zones', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    lastMap().styleLoaded = false;
+
+    view.showPastoralZones(zones);
+    expect(lastMap().layers).toEqual([]);
+
+    lastMap().styleLoaded = true;
+    lastMap().emit('style.load');
+    expect(lastMap().layers).toHaveLength(6);
+  });
+
+  it('keeps the zones when the base map changes', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showPastoralZones(zones);
+
+    view.showBaseMap('osm');
+    lastMap().emit('style.load');
+
+    expect(lastMap().getSource('pastoral-zones')).toBeDefined();
+    expect(lastMap().layers).toHaveLength(6);
+  });
+
+  it('updates the source when the zones change', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showPastoralZones(zones);
+
+    view.showPastoralZones([{ zone: zoneA, status: 'flock' }]);
+
+    expect(lastMap().getSource('pastoral-zones')?.setData).toHaveBeenCalledTimes(1);
+    expect(lastMap().layers).toHaveLength(6);
+  });
+
+  it('hides and shows the layers of a status', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showPastoralZones(zones);
+
+    view.setZoneLayerVisible('no-flock', false);
+
+    expect(lastMap().layout['zones-no-flock-fill']).toEqual({ visibility: 'none' });
+    expect(lastMap().layout['zones-no-flock-line']).toEqual({ visibility: 'none' });
+  });
+
+  it('keeps a hidden status hidden after a base map change', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showPastoralZones(zones);
+    view.setZoneLayerVisible('flock', false);
+
+    view.showBaseMap('osm');
+    lastMap().emit('style.load');
+
+    expect(lastMap().getLayer('zones-flock-fill')?.layout).toEqual({ visibility: 'none' });
   });
 });

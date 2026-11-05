@@ -9,6 +9,8 @@ class FakeMapView implements MapView {
   fitTo(bounds: Bounds): void {
     this.fits.push(bounds);
   }
+  showPastoralZones(): void {}
+  setZoneLayerVisible(): void {}
   showBaseMap(): void {}
 }
 

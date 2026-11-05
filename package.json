@@ -14,6 +14,7 @@
     "data": "tsx scripts/fetch-pastoral-zones.ts"
   },
   "devDependencies": {
+    "@types/geojson": "^7946.0.16",
     "@types/node": "^26.6.6",
     "happy-dom": "^21.0.4",
     "sharp": "^0.35.5",
