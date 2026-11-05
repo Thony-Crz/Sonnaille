@@ -55,7 +55,7 @@ describe('observation settings', () => {
   const settings = { validityDays: 3, haloMeters: { sheep: 400, cattle: 500, goats: 300, horses: 500, donkeys: 300, mixed: 400 } };
 
   it('reads the validity and the halo of each species', () => {
-    expect(parseObservationSettings(settings)).toEqual(settings);
+    expect(parseObservationSettings(settings)).toMatchObject(settings);
   });
 
   it('rejects a missing species halo', () => {
@@ -81,5 +81,45 @@ describe('HTTP repositories', () => {
     const missing = vi.fn(async () => new Response('', { status: 404 }));
 
     await expect(new HttpObservationRepository('/o.geojson', missing).load()).rejects.toThrow('Observations not available (404)');
+  });
+});
+
+describe('nests and beehives', () => {
+  const nest = {
+    id: 'obs-nest',
+    observedAt: '2026-07-15T07:30:00.000Z',
+    position: { longitude: 5.65, latitude: 45.11 },
+    kind: 'hornet-nest' as const,
+  };
+
+  it('writes a nest with its kind and no animal fields', () => {
+    expect(observationFeature(nest).properties).toEqual({ observedAt: nest.observedAt, kind: 'hornet-nest' });
+  });
+
+  it('keeps writing flocks without a kind, as before', () => {
+    expect(observationFeature(observation).properties).not.toHaveProperty('kind');
+  });
+
+  it('reads nests back', () => {
+    expect(parseObservations({ type: 'FeatureCollection', features: [observationFeature(nest)] })).toEqual([nest]);
+  });
+
+  it('rejects an unknown kind', () => {
+    const feature = { ...observationFeature(nest), properties: { observedAt: nest.observedAt, kind: 'bears' } };
+
+    expect(observationsErrors({ type: 'FeatureCollection', features: [feature] })).toContain('features[0].properties.kind: unknown');
+  });
+
+  it('reads the validity and halo of each kind of nest, with defaults when missing', () => {
+    const base = { validityDays: 3, haloMeters: { sheep: 1, cattle: 1, goats: 1, horses: 1, donkeys: 1, mixed: 1 } };
+    const nests = {
+      beehives: { validityDays: 90, haloMeters: 50 },
+      'wasp-nest': { validityDays: 30, haloMeters: 30 },
+      'bee-nest': { validityDays: 30, haloMeters: 30 },
+      'hornet-nest': { validityDays: 30, haloMeters: 50 },
+    };
+
+    expect(parseObservationSettings({ ...base, nests }).nests).toEqual(nests);
+    expect(parseObservationSettings(base).nests['hornet-nest']).toEqual({ validityDays: 30, haloMeters: 50 });
   });
 });

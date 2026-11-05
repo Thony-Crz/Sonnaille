@@ -1,8 +1,9 @@
 import type { OutingReport } from '../application/prepare-outing';
 import type { Activity } from '../domain/advice';
 import { parseDay } from '../domain/zone-status';
-import { DISCLAIMER, renderActivityChoice, renderAdviceList, speciesText } from './advice-list';
+import { DISCLAIMER, renderActivityChoice, renderAdviceList } from './advice-list';
 import { element, frenchDay, frenchNumber } from './dom';
+import { describeSighting } from './sighting-labels';
 import { ZONE_STYLES } from './zone-styles';
 
 export interface OutingReportPanel {
@@ -13,7 +14,6 @@ export interface OutingReportPanel {
 
 const plural = (count: number, singular: string, several: string) => `${count} ${count === 1 ? singular : several}`;
 
-const HEADCOUNT_TEXT = { few: 'quelques bêtes', dozens: 'quelques dizaines', hundreds: 'des centaines' } as const;
 
 /** "Troupeaux vus récemment près du tracé": one line per sighting, structured facts only. */
 function renderSightings(report: OutingReport): HTMLElement[] {
@@ -21,7 +21,7 @@ function renderSightings(report: OutingReport): HTMLElement[] {
   const list = element('ul', { className: 'crossings' });
   for (const { observation, km, distanceMeters } of report.sightings) {
     const day = new Date(observation.observedAt).toLocaleDateString('fr-FR');
-    const what = `${speciesText([observation.species])}, ${HEADCOUNT_TEXT[observation.headcount]}${observation.guardDogs ? ', chiens de protection vus' : ''}`;
+    const what = describeSighting(observation);
     list.append(
       element(
         'li',
@@ -31,7 +31,7 @@ function renderSightings(report: OutingReport): HTMLElement[] {
       ),
     );
   }
-  return [element('section', { className: 'sightings' }, element('h3', { textContent: 'Troupeaux vus récemment près du tracé' }), list)];
+  return [element('section', { className: 'sightings' }, element('h3', { textContent: 'Signalé près du tracé' }), list)];
 }
 
 /** "Votre tracé traverse 3 zones pastorales, dont 1 avec chiens de protection." */

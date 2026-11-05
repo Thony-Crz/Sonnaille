@@ -147,3 +147,18 @@ describe('prepareOuting with field sightings', () => {
     expect(report.advice.map((a) => a.id)).toEqual(['flock', 'dogs']);
   });
 });
+
+describe('prepareOuting with nests near the track', () => {
+  it('lists them without changing the flock caution', () => {
+    const nest = {
+      observation: { id: 'n', observedAt: '2026-07-14T08:00:00Z', position: { longitude: 5.745, latitude: 45.006 }, kind: 'hornet-nest' as const },
+      recent: true,
+      haloMeters: 200,
+    };
+
+    const report = prepareOuting({ track, zones: [], date: '2026-11-05', activity: 'hiking', advice: allAdvice, sightings: [nest] });
+
+    expect(report.sightings.map((s) => s.observation.id)).toEqual(['n']);
+    expect(report.mostCautious).toBeNull();
+  });
+});

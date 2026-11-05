@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Observation, ObservationSettings } from '../domain/observation';
+import type { FlockObservation, Observation, ObservationSettings } from '../domain/observation';
 import type { Track } from '../domain/track';
 import { createObservation, showObservations } from './observations';
 import type { MapView, ObservationOnMap } from './ports';
@@ -79,8 +79,17 @@ describe('createObservation', () => {
   });
 });
 
-const settings: ObservationSettings = { validityDays: 3, haloMeters: { sheep: 400, cattle: 500, goats: 300, horses: 500, donkeys: 300, mixed: 400 } };
-const seen = (id: string, observedAt: string, species: Observation['species'] = 'sheep'): Observation => ({
+const settings: ObservationSettings = {
+  validityDays: 3,
+  haloMeters: { sheep: 400, cattle: 500, goats: 300, horses: 500, donkeys: 300, mixed: 400 },
+  nests: {
+    beehives: { validityDays: 90, haloMeters: 50 },
+    'wasp-nest': { validityDays: 30, haloMeters: 30 },
+    'bee-nest': { validityDays: 30, haloMeters: 30 },
+    'hornet-nest': { validityDays: 30, haloMeters: 50 },
+  },
+};
+const seen = (id: string, observedAt: string, species: FlockObservation['species'] = 'sheep'): Observation => ({
   id,
   observedAt,
   position: { longitude: 5.7, latitude: 45 },
@@ -122,5 +131,17 @@ describe('showObservations', () => {
 
     expect(result).toEqual({ available: false });
     expect(map.observations).toEqual([]);
+  });
+});
+
+describe('showObservations with nests', () => {
+  it('uses the validity and halo of each kind of nest', async () => {
+    const map = new FakeMapView();
+    const nest = { id: 'n', observedAt: '2026-06-20T08:00:00Z', position: { longitude: 5.7, latitude: 45 }, kind: 'beehives' as const };
+    const withNests = { ...settings, nests: { beehives: { validityDays: 90, haloMeters: 50 }, 'wasp-nest': { validityDays: 30, haloMeters: 30 }, 'bee-nest': { validityDays: 30, haloMeters: 30 }, 'hornet-nest': { validityDays: 30, haloMeters: 50 } } };
+
+    await showObservations({ load: async () => [nest] }, { load: async () => withNests }, map, new Date('2026-07-15T12:00:00Z'));
+
+    expect(map.observations[0]).toEqual([{ observation: nest, recent: true, haloMeters: 50 }]);
   });
 });

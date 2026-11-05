@@ -23,6 +23,8 @@ const TRAILS_TILES = 'https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png';
 const TRAILS_ATTRIBUTION =
   'Sentiers balisés : © <a href="https://hiking.waymarkedtrails.org" target="_blank" rel="noopener">Waymarked Trails</a> (CC-BY-SA), données © contributeurs OpenStreetMap';
 const OBSERVATION_COLOR = '#6a3d9a';
+const NEST_COLOR = '#d49a00';
+const sightingColor = ['case', ['==', ['get', 'what'], 'flock'], OBSERVATION_COLOR, NEST_COLOR] as unknown as string;
 
 const fillLayerId = (status: ZoneStatus) => `zones-${status}-fill`;
 const lineLayerId = (status: ZoneStatus) => `zones-${status}-line`;
@@ -185,12 +187,12 @@ export class MapLibreMapView implements MapView {
       features: items.flatMap(({ observation, recent, haloMeters }) => [
         {
           type: 'Feature' as const,
-          properties: { kind: 'halo', recent, id: observation.id },
+          properties: { kind: 'halo', recent, id: observation.id, what: observation.kind ?? 'flock' },
           geometry: { type: 'Polygon' as const, coordinates: [circleRing(observation.position, haloMeters)] },
         },
         {
           type: 'Feature' as const,
-          properties: { kind: 'point', recent, id: observation.id, guardDogs: observation.guardDogs },
+          properties: { kind: 'point', recent, id: observation.id, what: observation.kind ?? 'flock' },
           geometry: { type: 'Point' as const, coordinates: [observation.position.longitude, observation.position.latitude] },
         },
       ]),
@@ -298,14 +300,14 @@ export class MapLibreMapView implements MapView {
       type: 'fill',
       source: OBSERVATIONS_SOURCE,
       filter: ['==', ['get', 'kind'], 'halo'],
-      paint: { 'fill-color': OBSERVATION_COLOR, 'fill-opacity': recent(0.22, 0.06) },
+      paint: { 'fill-color': sightingColor, 'fill-opacity': recent(0.22, 0.06) },
     });
     this.map.addLayer({
       id: 'observations-halo-line',
       type: 'line',
       source: OBSERVATIONS_SOURCE,
       filter: ['==', ['get', 'kind'], 'halo'],
-      paint: { 'line-color': OBSERVATION_COLOR, 'line-width': 1.2, 'line-opacity': recent(0.8, 0.3), 'line-dasharray': [2, 2] },
+      paint: { 'line-color': sightingColor, 'line-width': 1.2, 'line-opacity': recent(0.8, 0.3), 'line-dasharray': [2, 2] },
     });
     this.map.addLayer({
       id: 'observations-point',
@@ -314,7 +316,7 @@ export class MapLibreMapView implements MapView {
       filter: ['==', ['get', 'kind'], 'point'],
       paint: {
         'circle-radius': 6,
-        'circle-color': OBSERVATION_COLOR,
+        'circle-color': sightingColor,
         'circle-opacity': recent(1, 0.35),
         'circle-stroke-color': '#ffffff',
         'circle-stroke-width': 2,

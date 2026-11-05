@@ -2,6 +2,7 @@ import { selectAdvice, type Activity, type Advice } from '../domain/advice';
 import type { Position } from '../domain/bounds';
 import { detectCrossings } from '../domain/crossing';
 import { nearbyObservations, type NearbyObservation } from '../domain/nearby-observations';
+import { isFlock } from '../domain/observation';
 import type { PastoralZone } from '../domain/pastoral-zone';
 import { trackLengthMeters, type Track } from '../domain/track';
 import { ZONE_STATUSES, zoneStatus, type ZoneStatus } from '../domain/zone-status';
@@ -69,7 +70,7 @@ export function prepareOuting({
   // A recent sighting is as telling as a planned flock: with dogs, the strongest caution.
   const statuses = [
     ...crossings.map((c) => c.status),
-    ...nearby.map((n): ZoneStatus => (n.observation.guardDogs ? 'flock-with-dogs' : 'flock')),
+    ...nearby.flatMap((n): ZoneStatus[] => (isFlock(n.observation) ? [n.observation.guardDogs ? 'flock-with-dogs' : 'flock'] : [])),
   ];
   const mostCautious = ZONE_STATUSES.find((status) => statuses.includes(status)) ?? null;
   return {

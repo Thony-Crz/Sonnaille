@@ -6,21 +6,51 @@ export type Headcount = 'few' | 'dozens' | 'hundreds';
 
 export const HEADCOUNTS: Headcount[] = ['few', 'dozens', 'hundreds'];
 
-/** A flock seen in the field, reported after an outing. No text about dog behaviour, no identity. */
-export interface Observation {
+/** Hazards other than flocks that hikers can report: beehives and wasp, bee or hornet nests. */
+export type NestKind = 'beehives' | 'wasp-nest' | 'bee-nest' | 'hornet-nest';
+
+export const NEST_KINDS: NestKind[] = ['beehives', 'wasp-nest', 'bee-nest', 'hornet-nest'];
+
+interface SightingBase {
   id: string;
   /** ISO date and time of the sighting. */
   observedAt: string;
   position: Position;
+}
+
+/** A flock seen in the field. No text about dog behaviour, no identity. `kind` is absent in older files. */
+export interface FlockObservation extends SightingBase {
+  kind?: 'flock';
   species: Species;
   headcount: Headcount;
   guardDogs: boolean;
 }
 
+/** Beehives or a nest seen near a path. */
+export interface NestObservation extends SightingBase {
+  kind: NestKind;
+}
+
+export type Observation = FlockObservation | NestObservation;
+
+export function isFlock(observation: Observation): observation is FlockObservation {
+  return observation.kind === undefined || observation.kind === 'flock';
+}
+
 /** Published settings: how long a sighting stays sharp, and the halo drawn around it per species. */
 export interface ObservationSettings {
+  /** Flocks move: a sighting stays sharp for a few days. */
   validityDays: number;
   haloMeters: Record<Species, number>;
+  /** Beehives and nests stay longer in place, each with its own validity and halo. */
+  nests: Record<NestKind, { validityDays: number; haloMeters: number }>;
+}
+
+/** How long a sighting stays sharp and how wide its halo is, by kind. */
+export function sightingRules(observation: Observation, settings: ObservationSettings): { validityDays: number; haloMeters: number } {
+  return isFlock(observation)
+    ? { validityDays: settings.validityDays, haloMeters: settings.haloMeters[observation.species] }
+    : settings.nests[observation.kind];
 }
 
 const DAY_MS = 86_400_000;

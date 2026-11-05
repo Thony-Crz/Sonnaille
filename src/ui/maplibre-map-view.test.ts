@@ -572,3 +572,21 @@ describe('MapLibreMapView picking a point', () => {
     expect(lastMap().onceHandlers.click).toBeUndefined();
   });
 });
+
+describe('MapLibreMapView nests', () => {
+  beforeEach(() => {
+    maplibre.maps.length = 0;
+  });
+
+  it('marks each point with what was seen, to color nests apart from flocks', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+
+    view.showObservations([
+      sighting('o1', true),
+      { observation: { id: 'n1', observedAt: '2026-07-14T08:00:00.000Z', position: { longitude: 5.7, latitude: 45.2 }, kind: 'hornet-nest' }, recent: true, haloMeters: 50 },
+    ]);
+
+    const data = lastMap().getSource('observations')?.data as { features: Array<{ properties: Record<string, unknown> }> };
+    expect(data.features.filter((f) => f.properties.kind === 'point').map((f) => f.properties.what)).toEqual(['flock', 'hornet-nest']);
+  });
+});

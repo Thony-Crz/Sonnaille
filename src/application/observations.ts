@@ -1,4 +1,4 @@
-import { isRecent, pointAtKm, type Headcount, type Observation } from '../domain/observation';
+import { isRecent, pointAtKm, sightingRules, type FlockObservation, type Headcount } from '../domain/observation';
 import type { Species } from '../domain/pastoral-zone';
 import type { Track } from '../domain/track';
 import type { MapView, ObservationOnMap, ObservationRepository, ObservationSettingsSource } from './ports';
@@ -25,7 +25,7 @@ export function createObservation({
   outingDate: string;
   /** HH:MM, used when the GPX has no time. */
   time?: string;
-}): { observation: Observation; timeFromTrack: boolean } {
+}): { observation: FlockObservation; timeFromTrack: boolean } {
   const point = pointAtKm(track, km);
   const time = point.time;
   // Five decimals: about one metre, more than enough for a flock.
@@ -51,11 +51,10 @@ export async function showObservations(
     return { available: false };
   }
 
-  const items = observations.map((observation) => ({
-    observation,
-    recent: isRecent(observation, now, settings.validityDays),
-    haloMeters: settings.haloMeters[observation.species],
-  }));
+  const items = observations.map((observation) => {
+    const { validityDays, haloMeters } = sightingRules(observation, settings);
+    return { observation, recent: isRecent(observation, now, validityDays), haloMeters };
+  });
   map.showObservations(items);
   return { available: true, recent: items.filter((i) => i.recent).length, total: items.length, items };
 }

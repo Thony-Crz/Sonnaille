@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { HEADCOUNTS, isRecent, pointAtKm, type Observation } from './observation';
+import { HEADCOUNTS, NEST_KINDS, isFlock, isRecent, pointAtKm, type Observation } from './observation';
 import type { Track } from './track';
 
 const observation = (observedAt: string): Observation => ({
@@ -75,5 +75,16 @@ describe('pointAtKm', () => {
   it('stays on the track for distances beyond its ends', () => {
     expect(pointAtKm(track, -1).position).toEqual({ longitude: 5.7, latitude: 45.0 });
     expect(pointAtKm(track, 99).position).toEqual({ longitude: 5.8, latitude: 45.108993 });
+  });
+});
+
+describe('kinds of sightings', () => {
+  it('covers flocks, beehives and wasp, bee or hornet nests', () => {
+    expect(NEST_KINDS).toEqual(['beehives', 'wasp-nest', 'bee-nest', 'hornet-nest']);
+  });
+
+  it('treats a sighting without kind as a flock (files written before nests existed)', () => {
+    expect(isFlock(observation('2026-07-15T08:00:00Z'))).toBe(true);
+    expect(isFlock({ id: 'n', observedAt: '2026-07-15T08:00:00Z', position: { longitude: 5.7, latitude: 45 }, kind: 'hornet-nest' })).toBe(false);
   });
 });

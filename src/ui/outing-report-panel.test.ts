@@ -188,8 +188,26 @@ describe('createOutingReportPanel sightings', () => {
     });
 
     const text = panel.element.querySelector('.sightings')?.textContent ?? '';
-    expect(text).toContain('Troupeaux vus récemment près du tracé');
+    expect(text).toContain('Signalé près du tracé');
     expect(text).toContain('Vaches, des centaines, chiens de protection vus');
     expect(text).toContain('le 14/07/2026, au km 3, à 240 m du tracé');
+  });
+});
+
+describe('createOutingReportPanel nests', () => {
+  it('lists the beehives and nests reported near the track', () => {
+    const panel = createOutingReportPanel({ onDateChange: vi.fn(), onActivityChange: vi.fn(), onClose: vi.fn() });
+    document.body.append(panel.element);
+
+    panel.show({
+      ...report,
+      sightings: [
+        { observation: { id: 'h', observedAt: '2026-07-10T08:00:00Z', position: { longitude: 5.7, latitude: 45 }, kind: 'beehives' }, km: 2, distanceMeters: 40 },
+      ],
+    });
+
+    const text = panel.element.querySelector('.sightings')?.textContent ?? '';
+    expect(text).toContain('Signalé près du tracé');
+    expect(text).toContain('Ruches');
   });
 });

@@ -7,5 +7,11 @@
     "horses": 500,
     "donkeys": 300,
     "mixed": 400
+  },
+  "nests": {
+    "beehives": { "validityDays": 90, "haloMeters": 50 },
+    "wasp-nest": { "validityDays": 30, "haloMeters": 30 },
+    "bee-nest": { "validityDays": 30, "haloMeters": 30 },
+    "hornet-nest": { "validityDays": 30, "haloMeters": 50 }
   }
 }

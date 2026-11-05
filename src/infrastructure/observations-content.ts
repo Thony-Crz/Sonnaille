@@ -1,5 +1,5 @@
 import type { ObservationRepository, ObservationSettingsSource } from '../application/ports';
-import { HEADCOUNTS, type Headcount, type Observation, type ObservationSettings } from '../domain/observation';
+import { HEADCOUNTS, NEST_KINDS, isFlock, type Headcount, type NestKind, type Observation, type ObservationSettings } from '../domain/observation';
 import { SPECIES, type Species } from '../domain/pastoral-zone';
 
 /*
@@ -8,17 +8,31 @@ import { SPECIES, type Species } from '../domain/pastoral-zone';
  * public/content/observation-settings.json: validity in days and halo radius per species.
  */
 
-const PROPERTIES = ['observedAt', 'species', 'headcount', 'guardDogs'];
+const FLOCK_PROPERTIES = ['observedAt', 'kind', 'species', 'headcount', 'guardDogs'];
+const NEST_PROPERTIES = ['observedAt', 'kind'];
+
+/** Used when the published settings do not give them (provisional values). */
+const DEFAULT_NESTS: ObservationSettings['nests'] = {
+  beehives: { validityDays: 90, haloMeters: 50 },
+  'wasp-nest': { validityDays: 30, haloMeters: 30 },
+  'bee-nest': { validityDays: 30, haloMeters: 30 },
+  'hornet-nest': { validityDays: 30, haloMeters: 50 },
+};
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-export function observationFeature({ id, observedAt, position, species, headcount, guardDogs }: Observation) {
+/** Flocks are written without a kind, as before nests existed; nests carry their kind only. */
+export function observationFeature(observation: Observation) {
+  const { id, observedAt, position } = observation;
+  const properties: Record<string, unknown> = isFlock(observation)
+    ? { observedAt, species: observation.species, headcount: observation.headcount, guardDogs: observation.guardDogs }
+    : { observedAt, kind: observation.kind };
   return {
     type: 'Feature' as const,
     id,
     geometry: { type: 'Point' as const, coordinates: [position.longitude, position.latitude] },
-    properties: { observedAt, species, headcount, guardDogs },
+    properties,
   };
 }
 
@@ -55,11 +69,19 @@ export function observationsErrors(data: unknown): string[] {
     if (typeof p.observedAt !== 'string' || Number.isNaN(Date.parse(p.observedAt))) {
       errors.push(`${at}.properties.observedAt: not a date and time`);
     }
-    if (!SPECIES.includes(p.species as Species)) errors.push(`${at}.properties.species: unknown`);
-    if (!HEADCOUNTS.includes(p.headcount as Headcount)) errors.push(`${at}.properties.headcount: unknown`);
-    if (typeof p.guardDogs !== 'boolean') errors.push(`${at}.properties.guardDogs: not a boolean`);
+    const flock = p.kind === undefined || p.kind === 'flock';
+    if (!flock && !NEST_KINDS.includes(p.kind as NestKind)) {
+      errors.push(`${at}.properties.kind: unknown`);
+      return;
+    }
+    if (flock) {
+      if (!SPECIES.includes(p.species as Species)) errors.push(`${at}.properties.species: unknown`);
+      if (!HEADCOUNTS.includes(p.headcount as Headcount)) errors.push(`${at}.properties.headcount: unknown`);
+      if (typeof p.guardDogs !== 'boolean') errors.push(`${at}.properties.guardDogs: not a boolean`);
+    }
+    const allowed = flock ? FLOCK_PROPERTIES : NEST_PROPERTIES;
     for (const key of Object.keys(p)) {
-      if (!PROPERTIES.includes(key)) errors.push(`${at}.properties: unexpected ${key}`);
+      if (!allowed.includes(key)) errors.push(`${at}.properties: unexpected ${key}`);
     }
   });
   return errors;
@@ -69,14 +91,16 @@ export function parseObservations(data: unknown): Observation[] {
   const errors = observationsErrors(data);
   if (errors.length > 0) throw new Error(`Invalid observations: ${errors.join('; ')}`);
 
-  return (data as { features: Array<ReturnType<typeof observationFeature>> }).features.map(({ id, geometry, properties }) => ({
-    id,
-    observedAt: properties.observedAt,
-    position: { longitude: geometry.coordinates[0]!, latitude: geometry.coordinates[1]! },
-    species: properties.species,
-    headcount: properties.headcount,
-    guardDogs: properties.guardDogs,
-  }));
+  type Stored = { id: string; geometry: { coordinates: number[] }; properties: Record<string, unknown> };
+  return (data as { features: Stored[] }).features.map(({ id, geometry, properties: p }): Observation => {
+    const base = {
+      id,
+      observedAt: p.observedAt as string,
+      position: { longitude: geometry.coordinates[0]!, latitude: geometry.coordinates[1]! },
+    };
+    if (p.kind !== undefined && p.kind !== 'flock') return { ...base, kind: p.kind as NestKind };
+    return { ...base, species: p.species as Species, headcount: p.headcount as Headcount, guardDogs: p.guardDogs as boolean };
+  });
 }
 
 export function parseObservationSettings(data: unknown): ObservationSettings {
@@ -87,7 +111,17 @@ export function parseObservationSettings(data: unknown): ObservationSettings {
     isObject(data.haloMeters) &&
     SPECIES.every((s) => typeof (data.haloMeters as Record<string, unknown>)[s] === 'number' && ((data.haloMeters as Record<string, number>)[s] ?? 0) > 0);
   if (!valid) throw new Error('Invalid observation settings: needs validityDays > 0 and a positive halo for every species');
-  return { validityDays: data.validityDays as number, haloMeters: data.haloMeters as Record<Species, number> };
+
+  const nests = { ...DEFAULT_NESTS };
+  if (isObject(data.nests)) {
+    for (const kind of NEST_KINDS) {
+      const rule = (data.nests as Record<string, unknown>)[kind];
+      if (isObject(rule) && typeof rule.validityDays === 'number' && rule.validityDays > 0 && typeof rule.haloMeters === 'number' && rule.haloMeters > 0) {
+        nests[kind] = { validityDays: rule.validityDays, haloMeters: rule.haloMeters };
+      }
+    }
+  }
+  return { validityDays: data.validityDays as number, haloMeters: data.haloMeters as Record<Species, number>, nests };
 }
 
 async function fetchJson(url: string, fetchFn: (url: string) => Promise<Response>, what: string): Promise<unknown> {

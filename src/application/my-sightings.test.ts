@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Observation } from '../domain/observation';
+import type { FlockObservation, Observation } from '../domain/observation';
 import { createObservationAt, deleteMySighting, mySightings, saveMySighting } from './my-sightings';
 import type { MySightingsStore } from './ports';
 
@@ -21,7 +21,7 @@ describe('createObservationAt', () => {
       position: { longitude: 5.6512345, latitude: 45.1123456 },
       date: '2026-07-15',
       time: '09:30',
-      ...answers,
+      what: { kind: 'flock', ...answers },
     });
 
     const observedAt = new Date(observation.observedAt);
@@ -33,7 +33,7 @@ describe('createObservationAt', () => {
 });
 
 describe('my sightings', () => {
-  const sighting = (id: string, observedAt: string): Observation => ({
+  const sighting = (id: string, observedAt: string): FlockObservation => ({
     id,
     observedAt,
     position: { longitude: 5.65, latitude: 45.11 },
@@ -56,7 +56,7 @@ describe('my sightings', () => {
     saveMySighting(store, { ...sighting('a', '2026-07-14T08:00:00Z'), guardDogs: true });
 
     expect(mySightings(store)).toHaveLength(1);
-    expect(mySightings(store)[0]?.guardDogs).toBe(true);
+    expect((mySightings(store)[0] as FlockObservation | undefined)?.guardDogs).toBe(true);
   });
 
   it('deletes a sighting', () => {
@@ -66,5 +66,14 @@ describe('my sightings', () => {
     deleteMySighting(store, 'a');
 
     expect(mySightings(store)).toEqual([]);
+  });
+});
+
+describe('createObservationAt for nests and beehives', () => {
+  it('records only the kind, with no animal fields', () => {
+    const observation = createObservationAt({ position: { longitude: 5.65, latitude: 45.11 }, date: '2026-07-15', time: '09:30', what: { kind: 'wasp-nest' } });
+
+    expect(observation).toMatchObject({ kind: 'wasp-nest' });
+    expect(observation).not.toHaveProperty('species');
   });
 });

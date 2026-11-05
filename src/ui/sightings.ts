@@ -1,18 +1,17 @@
+import type { SightingWhat } from '../application/my-sightings';
 import type { Position } from '../domain/bounds';
-import { HEADCOUNTS, type Headcount, type Observation } from '../domain/observation';
+import { HEADCOUNTS, type Headcount, type NestKind, type Observation } from '../domain/observation';
 import { SPECIES, type Species } from '../domain/pastoral-zone';
 import { parseDay } from '../domain/zone-status';
-import { speciesText } from './advice-list';
 import { element } from './dom';
 import { HEADCOUNT_LABELS, SPECIES_LABELS } from './observation-form';
+import { WHAT_CHOICES, describeSighting } from './sighting-labels';
 
 export interface SightingAnswers {
   position: Position;
   date: string;
   time: string;
-  species: Species;
-  headcount: Headcount;
-  guardDogs: boolean;
+  what: SightingWhat;
 }
 
 /**
@@ -38,6 +37,22 @@ export function createSightingForm({ onSave, onCancel }: { onSave: (answers: Sig
     );
   }
   const dogs = element('input', { type: 'checkbox', name: 'sighting-dogs' });
+  const animals = element(
+    'div',
+    { className: 'sighting-animals' },
+    element('label', {}, element('span', { textContent: 'Quels animaux ?' }), species),
+    headcount,
+    element('label', { className: 'observation-dogs' }, dogs, element('span', { textContent: 'Chiens de protection vus' })),
+  );
+  const what = element('fieldset', { className: 'observation-headcount sighting-what' }, element('legend', { textContent: 'Qu’avez-vous vu ?' }));
+  for (const choice of WHAT_CHOICES) {
+    const input = element('input', { type: 'radio', name: 'sighting-what', value: choice.value, checked: choice.value === 'flock' });
+    input.addEventListener('change', () => {
+      // Beehives and nests: no question about animals.
+      animals.hidden = input.checked && choice.value !== 'flock';
+    });
+    what.append(element('label', {}, input, element('span', { textContent: choice.label })));
+  }
   const error = element('p', { className: 'observation-error' });
   error.setAttribute('role', 'alert');
 
@@ -47,9 +62,8 @@ export function createSightingForm({ onSave, onCancel }: { onSave: (answers: Sig
     { className: 'observation-form', noValidate: true },
     element('label', {}, element('span', { textContent: 'Le' }), date),
     element('label', {}, element('span', { textContent: 'Vers' }), time),
-    element('label', {}, element('span', { textContent: 'Quels animaux ?' }), species),
-    headcount,
-    element('label', { className: 'observation-dogs' }, dogs, element('span', { textContent: 'Chiens de protection vus' })),
+    what,
+    animals,
     error,
     element('div', { className: 'sighting-actions' }, cancel, element('button', { type: 'submit', textContent: 'Enregistrer' })),
   );
@@ -57,12 +71,12 @@ export function createSightingForm({ onSave, onCancel }: { onSave: (answers: Sig
   const panel = element(
     'aside',
     { className: 'zone-sheet sighting-panel', hidden: true },
-    element('h2', { textContent: 'Signaler des animaux vus' }),
+    element('h2', { textContent: 'Signaler ce que vous avez vu' }),
     element('p', { className: 'zone-sheet-quarter', textContent: 'Au point touché sur la carte.' }),
     form,
   );
   panel.setAttribute('role', 'dialog');
-  panel.setAttribute('aria-label', 'Signaler des animaux vus');
+  panel.setAttribute('aria-label', 'Signaler ce que vous avez vu');
 
   const close = () => {
     panel.hidden = true;
@@ -81,13 +95,15 @@ export function createSightingForm({ onSave, onCancel }: { onSave: (answers: Sig
     }
     error.textContent = '';
     const chosen = form.querySelector<HTMLInputElement>('input[name="sighting-headcount"]:checked');
-    const answers = {
+    const kind = (form.querySelector<HTMLInputElement>('input[name="sighting-what"]:checked')?.value ?? 'flock') as 'flock' | NestKind;
+    const answers: SightingAnswers = {
       position,
       date: date.value,
       time: time.value,
-      species: species.value as Species,
-      headcount: (chosen?.value ?? 'dozens') as Headcount,
-      guardDogs: dogs.checked,
+      what:
+        kind === 'flock'
+          ? { kind, species: species.value as Species, headcount: (chosen?.value ?? 'dozens') as Headcount, guardDogs: dogs.checked }
+          : { kind },
     };
     close();
     onSave(answers);
@@ -100,13 +116,14 @@ export function createSightingForm({ onSave, onCancel }: { onSave: (answers: Sig
       date.value = defaults.date;
       time.value = defaults.time;
       error.textContent = '';
+      const flock = form.querySelector<HTMLInputElement>('input[name="sighting-what"][value="flock"]');
+      if (flock) flock.checked = true;
+      animals.hidden = false;
       panel.hidden = false;
     },
     close,
   };
 }
-
-const HEADCOUNT_TEXT: Record<Headcount, string> = { few: 'quelques bêtes', dozens: 'quelques dizaines', hundreds: 'des centaines' };
 
 /** Map panel: the "Signaler des animaux vus" button, and the sightings kept on this device. */
 export function createMySightings({
@@ -118,7 +135,7 @@ export function createMySightings({
   onDelete: (id: string) => void;
   onPublish: () => void;
 }) {
-  const report = element('button', { type: 'button', className: 'sighting-report', textContent: 'Signaler des animaux vus' });
+  const report = element('button', { type: 'button', className: 'sighting-report', textContent: 'Signaler animaux, ruches ou nids' });
   report.addEventListener('click', onReport);
   const hint = element('p', { className: 'sighting-hint' });
   const summary = element('summary');
@@ -140,9 +157,7 @@ export function createMySightings({
       return element(
         'div',
         { className: 'my-sighting' },
-        element('p', {
-          textContent: `${speciesText([o.species])}, ${HEADCOUNT_TEXT[o.headcount]}${o.guardDogs ? ', chiens de protection vus' : ''}`,
-        }),
+        element('p', { textContent: describeSighting(o) }),
         element('p', {
           className: 'sighting-hint',
           textContent: `${when.toLocaleDateString('fr-FR')} vers ${when.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`,
@@ -164,8 +179,8 @@ export function createMySightings({
     element: panel,
     setList,
     setPicking: (picking: boolean) => {
-      report.textContent = picking ? 'Annuler' : 'Signaler des animaux vus';
-      hint.textContent = picking ? 'Touchez la carte là où vous avez vu les animaux.' : '';
+      report.textContent = picking ? 'Annuler' : 'Signaler animaux, ruches ou nids';
+      hint.textContent = picking ? 'Touchez la carte là où vous avez vu les animaux, les ruches ou le nid.' : '';
     },
     setNote: (text: string) => {
       note.textContent = text;
