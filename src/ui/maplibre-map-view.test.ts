@@ -158,6 +158,15 @@ describe('MapLibreMapView', () => {
     expect(lastMap().addControl.mock.calls.at(-1)?.[1]).toBe('bottom-left');
   });
 
+  it('leaves room for the panels when framing, as the layout asks', () => {
+    const padding = { top: 200, bottom: 420, left: 16, right: 56 };
+    const view = new MapLibreMapView(container, 'ign-plan', { framePadding: () => padding });
+
+    view.fitTo({ west: 5.25, south: 44.68, east: 6.02, north: 45.58 });
+
+    expect(lastMap().fitBounds.mock.calls.at(-1)?.[1]).toEqual({ padding, animate: false });
+  });
+
   it('fits the map to the requested bounds, with padding and no animation', () => {
     const view = new MapLibreMapView(container, 'ign-plan');
 

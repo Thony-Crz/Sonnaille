@@ -29,6 +29,12 @@ describe('createZoneLegend', () => {
     expect(element.querySelector('summary')?.textContent).toBe('Légende');
   });
 
+  it('can start collapsed, for small screens', () => {
+    const { element } = createZoneLegend({ onToggle: vi.fn(), open: false });
+
+    expect((element as HTMLDetailsElement).open).toBe(false);
+  });
+
   it('lists the statuses from the most cautious, all shown', () => {
     const { element } = createZoneLegend({ onToggle: vi.fn() });
 

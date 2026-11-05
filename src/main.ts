@@ -61,7 +61,15 @@ let sightings: ObservationOnMap[] = [];
 
 // --- Map and panels --------------------------------------------------------
 const baseMap = initialBaseMap(baseMapPreferences);
-const view = new MapLibreMapView(container, baseMap);
+// Framing leaves room for the panels: on phones the outing sheet covers the bottom half,
+// on larger screens it sits on the right and the controls on the left.
+let framingForSheet = false;
+const framePadding = () => {
+  const phone = !window.matchMedia('(min-width: 768px)').matches;
+  if (phone) return framingForSheet ? { top: 210, bottom: Math.round(window.innerHeight * 0.5) + 16, left: 16, right: 56 } : 24;
+  return framingForSheet ? { top: 24, bottom: 24, left: 190, right: 430 } : { top: 24, bottom: 24, left: 190, right: 24 };
+};
+const view = new MapLibreMapView(container, baseMap, { framePadding });
 view.addPanel(
   createBaseMapSwitcher({ baseMaps: BASE_MAPS, selected: baseMap, onChange: (id) => chooseBaseMap(view, baseMapPreferences, id) }),
 );
@@ -71,7 +79,10 @@ const trackImport = createTrackImport({ onFile: (file) => void importFile(file) 
 view.addPanel(trackImport.element);
 enableFileDrop(container, (file) => void importFile(file));
 
-const legend = createZoneLegend({ onToggle: (status, visible) => toggleZoneLayer(view, status, visible) });
+const legend = createZoneLegend({
+  onToggle: (status, visible) => toggleZoneLayer(view, status, visible),
+  open: window.matchMedia('(min-width: 768px)').matches,
+});
 view.addPanel(legend.element, 'bottom-left');
 
 const zoneSheet = createZoneSheetPanel({
@@ -150,7 +161,9 @@ function refresh(): void {
 }
 
 async function importFile(file: File): Promise<void> {
+  framingForSheet = zones.available;
   const result = importTrack(await file.text(), file.name, { read: readGpx }, view);
+  framingForSheet = false;
   if (!result.ok) {
     trackImport.setStatus(result.error);
     return;

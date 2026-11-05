@@ -8,10 +8,17 @@ export interface ZoneLegend {
 }
 
 /** "Légende" panel: one checkbox per zone status, with its color, to show or hide it. */
-export function createZoneLegend({ onToggle }: { onToggle: (status: ZoneStatus, visible: boolean) => void }): ZoneLegend {
+export function createZoneLegend({
+  onToggle,
+  open = true,
+}: {
+  onToggle: (status: ZoneStatus, visible: boolean) => void;
+  /** Collapsed on small screens, where the map needs the room. */
+  open?: boolean;
+}): ZoneLegend {
   const panel = document.createElement('details');
   panel.className = 'map-panel zone-legend';
-  panel.open = true;
+  panel.open = open;
 
   const summary = document.createElement('summary');
   summary.textContent = 'Légende';

@@ -1,6 +1,6 @@
 import type { FilterSpecification } from '@maplibre/maplibre-gl-style-spec';
 import type { FeatureCollection } from 'geojson';
-import { GeolocateControl, Map, NavigationControl, type ControlPosition, type GeoJSONSource } from 'maplibre-gl';
+import { GeolocateControl, Map, NavigationControl, type ControlPosition, type GeoJSONSource, type PaddingOptions } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { MapView, ObservationOnMap, ZoneOnMap } from '../application/ports';
 import type { BaseMapId } from '../domain/base-map';
@@ -32,7 +32,12 @@ export class MapLibreMapView implements MapView {
   private observations: FeatureCollection | null = null;
   private readonly visible: Record<ZoneStatus, boolean> = { 'flock-with-dogs': true, flock: true, 'no-flock': true };
 
-  constructor(container: HTMLElement, baseMap: BaseMapId) {
+  constructor(
+    container: HTMLElement,
+    baseMap: BaseMapId,
+    /** Room to leave around framed areas, given by the layout (panels over the map). */
+    private readonly options: { framePadding?: () => number | PaddingOptions } = {},
+  ) {
     this.map = new Map({ container, style: EMPTY_STYLE });
     this.map.addControl(new NavigationControl({ showCompass: false }), 'top-right');
     // Where am I (T26): the position stays in the browser, shown once on request, never tracked.
@@ -55,7 +60,7 @@ export class MapLibreMapView implements MapView {
         [west, south],
         [east, north],
       ],
-      { padding: 24, animate: false },
+      { padding: this.options.framePadding?.() ?? 24, animate: false },
     );
   }
 
