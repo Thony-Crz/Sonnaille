@@ -29,3 +29,31 @@ Le code reste public. Les données Map Patou ne sont jamais committées.
 - Les données restent accessibles à qui connaît l'adresse du site. C'est un risque accepté pour la durée de la démo.
 - En développement local, un script récupère les données dans le dossier ignoré, avec la même limite d'une requête par jour.
 - Dès qu'un accord ou un export officiel existe (T03), cette décision est revue : les données pourront être versionnées si la licence le permet.
+
+## D2 — TDD et clean architecture
+
+5 novembre 2026 · Statut : adoptée
+
+**Décision**
+
+- **TDD** : tout code de production naît d'un test qui échoue. Cycle rouge, vert, refactor. Un test ne se modifie pas pour faire passer du code.
+- **Clean architecture** : le code de `src/` est rangé en quatre couches. Chaque couche ne dépend que des couches plus internes.
+
+| Couche | Rôle | Peut dépendre de |
+| --- | --- | --- |
+| `domain` | Entités et règles métier pures | `domain` seulement, aucune bibliothèque |
+| `application` | Cas d'usage et ports (interfaces) | `domain`, `application`, aucune bibliothèque |
+| `infrastructure` | Adaptateurs : GeoJSON, Map Patou, GPX, Turf.js, stockage | `domain`, `application`, `infrastructure`, bibliothèques |
+| `ui` | Carte MapLibre, écrans | `domain`, `application`, `ui`, bibliothèques |
+
+`src/main.ts` est le point de composition : le seul fichier qui assemble adaptateurs, cas d'usage et interface.
+
+**Vérification automatique**
+
+- `tests/architecture/` contient un test qui parcourt `src/` et échoue si une couche manque ou si un import viole la règle (imports statiques, dynamiques et réexports). Exception : un fichier `*.test.ts` peut importer `vitest`.
+- La CI lance les tests avant chaque build ; un test rouge bloque le déploiement.
+
+**Conséquences**
+
+- Turf.js, MapLibre et la lecture de GPX restent dans `infrastructure` ou `ui`. Le domaine manipule ses propres types (point, ligne, polygone) et l'infrastructure les convertit.
+- La détection de traversée (T17) est découpée : la règle métier (zones actives à la date, observations de moins de 3 jours, marge) dans `domain`, le calcul géométrique derrière un port, implémenté avec Turf.js.
