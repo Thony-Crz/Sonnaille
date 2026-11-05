@@ -81,7 +81,7 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 - Comptes contributeurs (connexion Google, etc.) et rôles
 - Signalements par les contributeurs et modération
 - Question « les bêtes y sont toujours ? »
-- Mode hors ligne
+- ~~Mode hors ligne~~ ✅ fait (service worker : application en cache, zones et contenus réseau puis cache, tuiles déjà consultées gardées 30 jours, bandeau « Hors ligne ») ; reste un téléchargement explicite d'un secteur
 - Accès officiel aux données de Map Patou (remplacement du scraper)
 - Extension aux Alpes
 - Relecture des conseils par un acteur du pastoralisme (la promesse d'expertise)

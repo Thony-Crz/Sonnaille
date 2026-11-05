@@ -530,3 +530,23 @@ body {
   border-radius: 6px;
   font: inherit;
 }
+
+/* Offline banner (V1) */
+.offline-notice {
+  position: fixed;
+  z-index: 15;
+  left: 50%;
+  top: 10px;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 120px);
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: #23395b;
+  color: #fff;
+  font-size: 13px;
+  text-align: center;
+}
+
+.offline-notice[hidden] {
+  display: none;
+}

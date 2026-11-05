@@ -29,6 +29,7 @@ import { configureMapLibre } from './ui/configure-maplibre';
 import { element, frenchNumber } from './ui/dom';
 import { createUnderstandPanel, createWelcomeDialog } from './ui/info-panels';
 import { MapLibreMapView } from './ui/maplibre-map-view';
+import { createOfflineNotice } from './ui/offline-notice';
 import { createObservationForm } from './ui/observation-form';
 import { createOutingReportPanel } from './ui/outing-report-panel';
 import { createMySightings, createSightingForm } from './ui/sightings';
@@ -122,7 +123,7 @@ const outingReport = createOutingReportPanel({
   onActivityChange: changeActivity,
   onClose: () => view.highlightZones([]),
 });
-document.body.append(zoneSheet.element, outingReport.element);
+document.body.append(zoneSheet.element, outingReport.element, createOfflineNotice(window));
 
 // --- Behaviour ---------------------------------------------------------------
 function changeActivity(chosen: Activity): void {
