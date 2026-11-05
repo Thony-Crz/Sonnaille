@@ -26,7 +26,13 @@ npm install
 npm run dev      # http://localhost:5173/Sonnaille/
 npm test         # tests unitaires et d'architecture
 npm run build    # vérification des types et build de production
+npm run data     # zones pastorales du jour depuis Map Patou (jamais versionnées)
 ```
+
+- **Zones d'un autre jour** : `MAP_PATOU_DATE=2026-07-15 npm run data`, puis ouvrir `/Sonnaille/?date=2026-07-15`. Au plus une requête par jour est envoyée à Map Patou.
+- **Observations de terrain** : le formulaire « Signaler un troupeau vu » produit une entrée GeoJSON ; l'ajouter à `public/content/observations.geojson` et pousser.
+- **Fonds de carte** : voir [fonds-de-carte.md](docs/fonds-de-carte.md), dont l'activation de la carte IGN 1:25 000 avec une clé IGN personnelle.
+- **Démo** : [docs/demo](docs/demo/README.md).
 
 ## Conventions
 
