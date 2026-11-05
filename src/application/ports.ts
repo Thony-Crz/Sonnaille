@@ -1,3 +1,4 @@
+import type { Advice } from '../domain/advice';
 import type { BaseMapId } from '../domain/base-map';
 import type { Bounds } from '../domain/bounds';
 import type { PastoralZone, PastoralZoneDataset } from '../domain/pastoral-zone';
@@ -21,6 +22,11 @@ export interface BaseMapPreferences {
   /** The saved value as stored, possibly stale or invalid; null if none. */
   load(): string | null;
   save(id: BaseMapId): void;
+}
+
+/** Where the advice texts come from (published content, editable without a release). */
+export interface AdviceRepository {
+  load(): Promise<Advice[]>;
 }
 
 /** Where the published pastoral zones come from. Implemented in `infrastructure`. */

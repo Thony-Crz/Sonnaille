@@ -1,0 +1,76 @@
+{
+  "advice": [
+    {
+      "id": "announce-and-bypass",
+      "situation": "En approchant d'un troupeau",
+      "message": "Annoncez-vous à voix haute et contournez largement le troupeau.",
+      "detail": "Le chien de protection ne doit pas être surpris. Contournez le troupeau à bonne distance, sans vous mettre en danger, plutôt que de le traverser.",
+      "source": { "label": "Pasto Kézako — Comment faire en cas de rencontre ?", "url": "https://www.pasto-kezako.fr/rencontre-chiens-de-protection/" },
+      "appliesTo": { "statuses": ["flock-with-dogs", "flock"] }
+    },
+    {
+      "id": "trail-walk",
+      "situation": "En trail",
+      "message": "Passez en marche bien avant le troupeau, jusqu'à l'avoir dépassé.",
+      "detail": "La vitesse de déplacement est perçue par le chien de protection comme une menace. La source ne traite pas du trail en particulier : ce conseil applique sa règle générale sur la vitesse.",
+      "source": { "label": "Pasto Kézako — Comment faire en cas de rencontre ?", "url": "https://www.pasto-kezako.fr/rencontre-chiens-de-protection/" },
+      "appliesTo": { "statuses": ["flock-with-dogs", "flock"], "activities": ["trail"] }
+    },
+    {
+      "id": "mtb-push",
+      "situation": "À VTT",
+      "message": "Descendez du vélo le plus tôt possible et poussez-le à pied.",
+      "detail": "Si cela vous rassure, gardez le vélo entre vous et le chien.",
+      "source": { "label": "Pasto Kézako — Comment faire en cas de rencontre ?", "url": "https://www.pasto-kezako.fr/rencontre-chiens-de-protection/" },
+      "appliesTo": { "statuses": ["flock-with-dogs", "flock"], "activities": ["mtb"] }
+    },
+    {
+      "id": "dog-comes",
+      "situation": "Un chien de protection s'approche",
+      "message": "Arrêtez-vous ou avancez lentement, sans fixer le chien, en lui parlant calmement.",
+      "detail": "Il vient vous identifier, souvent à l'odeur. Ne foncez pas droit sur lui. Il protège le troupeau : ce n'est pas de l'agressivité dirigée contre vous.",
+      "source": { "label": "Pasto Kézako — Comment faire en cas de rencontre ?", "url": "https://www.pasto-kezako.fr/rencontre-chiens-de-protection/" },
+      "appliesTo": { "statuses": ["flock-with-dogs"] }
+    },
+    {
+      "id": "dog-barks",
+      "situation": "Le chien aboie ou arrive en courant",
+      "message": "Ne tournez pas le dos : reculez pas à pas en parlant au chien.",
+      "detail": "Partir discrètement pousse le chien à vous suivre. S'il ne se calme pas, faites demi-tour plutôt que de forcer le passage. En groupe, faites une pause et attendez qu'il se calme : le troupeau finira par se déplacer.",
+      "source": { "label": "Pasto Kézako — Comment faire en cas de rencontre ?", "url": "https://www.pasto-kezako.fr/rencontre-chiens-de-protection/" },
+      "appliesTo": { "statuses": ["flock-with-dogs"] }
+    },
+    {
+      "id": "poles-down",
+      "situation": "Avec des bâtons",
+      "message": "Tenez vos bâtons dans une main, pointes vers le bas, sans jamais les brandir.",
+      "detail": "Un bâton levé est perçu comme une menace.",
+      "source": { "label": "Pasto Kézako — Comment faire en cas de rencontre ?", "url": "https://www.pasto-kezako.fr/rencontre-chiens-de-protection/" },
+      "appliesTo": { "statuses": ["flock-with-dogs"], "activities": ["hiking", "trail"] }
+    },
+    {
+      "id": "own-dog",
+      "situation": "Avec votre propre chien",
+      "message": "Évitez de venir avec votre chien ; sinon, tenez-le en laisse.",
+      "detail": "Le chien de protection peut le confondre avec un loup. En cas de rencontre, lâchez la laisse : tirer dessus augmente la tension. Ne prenez jamais un petit chien dans vos bras.",
+      "source": { "label": "Pasto Kézako — Comment faire en cas de rencontre ?", "url": "https://www.pasto-kezako.fr/rencontre-chiens-de-protection/" },
+      "appliesTo": { "statuses": ["flock-with-dogs", "flock"] }
+    },
+    {
+      "id": "incident",
+      "situation": "Après un pincement ou une morsure",
+      "message": "Signalez-le au dispositif « Mon expérience avec les chiens de protection ».",
+      "detail": "Les services pastoraux et de l'État sont alors prévenus et reprennent contact avec la personne concernée et l'éleveur. En cas de blessure, consultez un médecin.",
+      "source": { "label": "Pasto Kézako — Comment faire en cas de rencontre ?", "url": "https://www.pasto-kezako.fr/rencontre-chiens-de-protection/" },
+      "appliesTo": { "statuses": ["flock-with-dogs"] }
+    },
+    {
+      "id": "pastoral-zone",
+      "situation": "En zone pastorale sans troupeau prévu",
+      "message": "Un troupeau ou un chien peut être là quand même : restez attentif.",
+      "detail": "Les calendriers peuvent changer, et un chien de protection peut surprendre même sans troupeau visible. Si vous en croisez un, appliquez les mêmes réflexes.",
+      "source": { "label": "Pasto Kézako — Comment faire en cas de rencontre ?", "url": "https://www.pasto-kezako.fr/rencontre-chiens-de-protection/" },
+      "appliesTo": { "statuses": ["no-flock"] }
+    }
+  ]
+}

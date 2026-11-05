@@ -54,7 +54,7 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 
 | ID | Tâche | Terminé quand | Dépend de |
 | --- | --- | --- | --- |
-| T20 | Rédiger les conseils au format JSON, déclinés par espèce, présence de chiens et activité (message de 15 mots maximum, détail, source publique citée) | Fichier validé par schéma ; chaque conseil porte la mention « non encore relu par un professionnel » | T10 |
+| ~~T20~~ ✅ | Rédiger les conseils au format JSON, déclinés par espèce, présence de chiens et activité (message de 15 mots maximum, détail, source publique citée) | Fait : `public/content/advice.json`, 9 conseils tirés de Pasto Kézako, vérifiés par un test (15 mots max, source, couverture statut × activité) ; relecture par un professionnel à venir (V1) | T10 |
 | T21 | Résumé pédagogique au résultat de l'import (écran 4) et fiche conseil (écran 5), avec les conseils choisis selon le contexte | Un vététiste et un randonneur qui importent le même tracé ne voient pas les mêmes conseils | T18, T20 |
 | T22 | Page « Comprendre » | Accessible depuis le menu à tout moment | T20 |
 | T23 | Avertissement « l'application ne garantit rien » et mentions des sources | Visible au premier lancement et sur chaque résultat | T18 |
