@@ -51,6 +51,12 @@ export interface ObservationRepository {
   load(): Promise<Observation[]>;
 }
 
+/** The user's own sightings, kept on their device until published. */
+export interface MySightingsStore {
+  load(): Observation[];
+  save(observations: Observation[]): void;
+}
+
 /** Where the observation settings (validity, halos) come from. */
 export interface ObservationSettingsSource {
   load(): Promise<ObservationSettings>;
