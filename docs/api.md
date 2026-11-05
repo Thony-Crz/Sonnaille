@@ -50,9 +50,17 @@ Moderation__Key=une-cle-locale dotnet run --project src/Sonnaille.Api
 
 Sous Windows, si le dossier du dépôt est très profond (limite de 260 caractères), définir `SONNAILLE_BUILD_DIR` vers un dossier court (`C:\Temp\snb`) avant de compiler.
 
+## Branchement de l'app web
+
+Si l'adresse de l'API est donnée à la construction du site (variable `VITE_SIGHTINGS_API_URL`, variable de dépôt `SIGHTINGS_API_URL` en CI) :
+
+- « Publier » envoie chaque signalement gardé sur l'appareil à `POST /api/sightings` ; ceux reçus sont retirés de l'appareil, les autres restent pour un nouvel essai ;
+- la carte affiche les signalements publiés du fichier `content/observations.geojson` et ceux validés de `GET /api/sightings` ; si l'API ne répond pas, le fichier suffit.
+
+Sans cette variable, la publication reste celle de la V0 (copier, coller dans GitHub).
+
 ## Reste à faire
 
 - Stockage PostgreSQL et PostGIS (les signalements en mémoire sont perdus au redémarrage).
 - Hébergement de l'API.
-- Branchement de l'app web : bouton « Publier » vers `POST /api/sightings`, lecture de `GET /api/sightings`.
 - Comptes contributeurs et rôles à la place de la clé de modérateur.

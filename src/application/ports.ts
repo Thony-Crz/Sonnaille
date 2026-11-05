@@ -57,6 +57,11 @@ export interface MySightingsStore {
   save(observations: Observation[]): void;
 }
 
+/** The sightings server (V1): true when it received the sighting, to be moderated. */
+export interface SightingPublisher {
+  publish(observation: Observation): Promise<boolean>;
+}
+
 /** Where the observation settings (validity, halos) come from. */
 export interface ObservationSettingsSource {
   load(): Promise<ObservationSettings>;

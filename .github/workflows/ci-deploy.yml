@@ -46,6 +46,8 @@ jobs:
         env:
           # Personal IGN key for the 1:25,000 map (docs/fonds-de-carte.md). Optional: without it, the map is not offered.
           VITE_IGN_SCAN25_KEY: ${{ vars.IGN_SCAN25_KEY }}
+          # V1 sightings API (docs/api.md). Optional: without it, sightings are published by hand on GitHub (V0).
+          VITE_SIGHTINGS_API_URL: ${{ vars.SIGHTINGS_API_URL }}
       - if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v5
         with:

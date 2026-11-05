@@ -5,7 +5,8 @@ import { chooseBaseMap, initialBaseMap } from './application/base-map-choice';
 import { importTrack } from './application/import-track';
 import { createObservationAt, deleteMySighting, mySightings, saveMySighting } from './application/my-sightings';
 import { createObservation, showObservations } from './application/observations';
-import type { ObservationOnMap, ZoneOnMap } from './application/ports';
+import type { ObservationOnMap, SightingPublisher, ZoneOnMap } from './application/ports';
+import { publishMySightings } from './application/publish-sightings';
 import { prepareOuting } from './application/prepare-outing';
 import { showPastoralZones, showZonesOn, toggleZoneLayer, type ShowZonesResult } from './application/show-pastoral-zones';
 import { showTerritory } from './application/show-territory';
@@ -20,6 +21,7 @@ import { readGpx } from './infrastructure/gpx-reader';
 import { LocalStorageSightings, publicationText } from './infrastructure/local-storage-sightings';
 import { HttpObservationRepository, HttpObservationSettings, observationFeature } from './infrastructure/observations-content';
 import { HttpPastoralZoneRepository } from './infrastructure/http-pastoral-zone-repository';
+import { HttpSightingPublisher, MergedObservationRepository } from './infrastructure/sightings-api';
 import { LocalStorageActivityPreferences } from './infrastructure/local-storage-activity-preferences';
 import { LocalStorageBaseMapPreferences } from './infrastructure/local-storage-base-map-preferences';
 import { LocalStorageValue } from './infrastructure/local-storage-value';
@@ -49,7 +51,16 @@ const activityPreferences = new LocalStorageActivityPreferences(storage);
 const welcomePreferences = new LocalStorageValue<'seen'>('sonnaille.welcome', storage);
 const zoneRepository = new HttpPastoralZoneRepository(`${base}data/pastoral-zones.geojson`, (url) => fetch(url));
 const adviceRepository = new HttpAdviceRepository(`${base}content/advice.json`, (url) => fetch(url));
-const observationRepository = new HttpObservationRepository(`${base}content/observations.geojson`, (url) => fetch(url));
+// V1 sightings API (docs/api.md), given at build time. Without it, the V0 publication below.
+const sightingsApiUrl: string | undefined = import.meta.env.VITE_SIGHTINGS_API_URL || undefined;
+const publishedObservations = new HttpObservationRepository(`${base}content/observations.geojson`, (url) => fetch(url));
+const observationRepository = sightingsApiUrl
+  ? new MergedObservationRepository([
+      publishedObservations,
+      new HttpObservationRepository(`${sightingsApiUrl.replace(/\/+$/, '')}/api/sightings`, (url) => fetch(url)),
+    ])
+  : publishedObservations;
+const sightingPublisher = sightingsApiUrl ? new HttpSightingPublisher(sightingsApiUrl, (url, init) => fetch(url, init)) : null;
 const observationSettings = new HttpObservationSettings(`${base}content/observation-settings.json`, (url) => fetch(url));
 const sightingStore = new LocalStorageSightings(storage);
 // V0 publication: the sightings are pasted into this file on GitHub (only the repository owner can commit).
@@ -202,6 +213,10 @@ const mySightingsPanel = createMySightings({
     refreshSightings();
   },
   onPublish: () => {
+    if (sightingPublisher) {
+      void sendMySightings(sightingPublisher);
+      return;
+    }
     const text = publicationText(mySightings(sightingStore));
     void navigator.clipboard?.writeText(text);
     window.open(OBSERVATIONS_EDIT_URL, '_blank', 'noopener');
@@ -211,6 +226,17 @@ const mySightingsPanel = createMySightings({
   },
 });
 view.addPanel(mySightingsPanel.element);
+
+async function sendMySightings(publisher: SightingPublisher): Promise<void> {
+  mySightingsPanel.setNote('Envoi…');
+  const { sent, kept } = await publishMySightings(sightingStore, publisher);
+  refreshSightings();
+  mySightingsPanel.setNote(
+    kept === 0
+      ? `${sent} signalement${sent > 1 ? 's' : ''} envoyé${sent > 1 ? 's' : ''}. ${sent > 1 ? 'Ils seront visibles' : 'Il sera visible'} après vérification par un modérateur.`
+      : `${sent} envoyé${sent > 1 ? 's' : ''}, ${kept} non envoyé${kept > 1 ? 's' : ''} : gardé${kept > 1 ? 's' : ''} sur cet appareil, réessayez plus tard.`,
+  );
+}
 
 async function reportSighting(): Promise<void> {
   if (picking) {
