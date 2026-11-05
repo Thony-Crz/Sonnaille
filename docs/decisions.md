@@ -56,7 +56,7 @@ Le code reste public. Les données Map Patou ne sont jamais committées.
 **Conséquences**
 
 - Turf.js, MapLibre et la lecture de GPX restent dans `infrastructure` ou `ui`. Le domaine manipule ses propres types (point, ligne, polygone) et l'infrastructure les convertit.
-- La détection de traversée (T17) est découpée : la règle métier (zones actives à la date, observations de moins de 3 jours, marge) dans `domain`, le calcul géométrique derrière un port, implémenté avec Turf.js.
+- La détection de traversée (T17) est entièrement dans `domain`, en TypeScript pur, sans Turf.js : point dans un polygone (avec trous), distance au contour par projection locale, tracé échantillonné tous les 10 m. Ces trois opérations suffisent, restent rapides à l'échelle d'une sortie et sont testées directement. Révision du 5 novembre 2026 : la première version prévoyait Turf.js derrière un port.
 
 ## D3 — Langues : code en anglais, README bilingues
 
