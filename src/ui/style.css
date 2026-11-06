@@ -554,7 +554,7 @@ body {
 /* Demo mode banner (?demo): everything shown is fictional. */
 .demo-banner {
   position: fixed;
-  z-index: 5; /* under the sheets (10), which cover it when open */
+  z-index: 1; /* under the sheets (10) and the map panels (2), which cover it when open */
   left: 50%;
   bottom: 34px;
   transform: translateX(-50%);

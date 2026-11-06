@@ -195,7 +195,7 @@ function updateLegendNote(): void {
   const fetched = new Date(zones.fetchedAt).toLocaleDateString('fr-FR');
   const sightings =
     recentObservations > 0
-      ? ` ${recentObservations} observation${recentObservations > 1 ? 's' : ''} de terrain récente${recentObservations > 1 ? 's' : ''} (en violet).`
+      ? ` ${recentObservations} observation${recentObservations > 1 ? 's' : ''} de terrain récente${recentObservations > 1 ? 's' : ''}, touchez un pictogramme pour sa fiche.`
       : '';
   legend.setNote(
     `Troupeaux prévus le ${shownDay}. Source : ${zones.source}, données du ${fetched}.${sightings} Touchez une zone pour sa fiche.`,
