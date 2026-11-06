@@ -13,7 +13,7 @@ export function createDemoBanner({ gpxUrl, exitUrl, onReset }: { gpxUrl: string;
 
   const banner = element(
     'div',
-    { className: 'demo-banner' },
+    { className: 'map-panel demo-banner' },
     element('span', { textContent: 'Mode démo : zones, tracé et signalements fictifs. Rien n’est envoyé.' }),
     gpx,
     reset,

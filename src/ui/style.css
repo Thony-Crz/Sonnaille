@@ -551,25 +551,16 @@ body {
   display: none;
 }
 
-/* Demo mode banner (?demo): everything shown is fictional. */
+/* Demo mode banner (?demo): first of the map panels, everything shown is fictional. */
 .demo-banner {
-  position: fixed;
-  z-index: 1; /* under the sheets (10) and the map panels (2), which cover it when open */
-  left: 50%;
-  bottom: 34px;
-  transform: translateX(-50%);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: 6px 12px;
-  max-width: calc(100vw - 24px);
-  padding: 6px 12px;
-  border-radius: 6px;
+  gap: 4px 10px;
+  padding: 8px 10px;
   background: #d49a00;
   color: #1d1d1b;
   font-size: 0.85rem;
-  box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
 }
 
 .demo-banner a,

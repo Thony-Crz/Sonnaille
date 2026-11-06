@@ -114,6 +114,20 @@ const framePadding = () => {
   return framingForSheet ? { top: 24, bottom: 24, left: 190, right: 430 } : { top: 24, bottom: 24, left: 190, right: 24 };
 };
 const view = new MapLibreMapView(container, baseMap, { framePadding, styles: createBaseMapStyles({ scan25Key }) });
+// Demo mode: the banner heads the panels on the left, so it never covers the map's panels.
+if (demoServer) {
+  view.addPanel(
+    createDemoBanner({
+      gpxUrl: `${base}demo/hauts-plateaux-fictif.gpx`,
+      exitUrl: base,
+      onReset: () => {
+        demoServer.reset();
+        sightingStore.save([]);
+        window.location.reload();
+      },
+    }),
+  );
+}
 view.addPanel(
   createBaseMapSwitcher({ baseMaps, selected: baseMap, onTrailsChange: (visible) => view.showMarkedTrails(visible), onChange: (id) => chooseBaseMap(view, baseMapPreferences, id) }),
 );
@@ -165,20 +179,6 @@ view.onSightingSelected((item) => {
   sightingSheet.show(item);
 });
 document.body.append(zoneSheet.element, outingReport.element, sightingSheet.element, createOfflineNotice(window));
-if (demoServer) {
-  document.body.append(
-    createDemoBanner({
-      gpxUrl: `${base}demo/hauts-plateaux-fictif.gpx`,
-      exitUrl: base,
-      onReset: () => {
-        demoServer.reset();
-        sightingStore.save([]);
-        window.location.reload();
-      },
-    }),
-  );
-}
-
 // --- Behaviour ---------------------------------------------------------------
 function changeActivity(chosen: Activity): void {
   activity = chosen;
