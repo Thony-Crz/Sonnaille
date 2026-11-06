@@ -73,3 +73,24 @@ describe('createZoneLegend', () => {
     expect(legend.element.querySelector('.zone-legend-note')?.textContent).toBe('Source : Map Patou');
   });
 });
+
+describe('createZoneLegend note', () => {
+  it('can end with a link, e.g. to the demo when zones are unavailable', () => {
+    const legend = createZoneLegend({ onToggle: vi.fn() });
+
+    legend.setNote('Zones pastorales indisponibles pour le moment.', { href: '?demo', label: 'Voir la démo' });
+
+    const note = legend.element.querySelector('.zone-legend-note')!;
+    expect(note.textContent).toBe('Zones pastorales indisponibles pour le moment. Voir la démo');
+    expect(note.querySelector('a')?.getAttribute('href')).toBe('?demo');
+  });
+
+  it('drops the link when the note changes', () => {
+    const legend = createZoneLegend({ onToggle: vi.fn() });
+    legend.setNote('A', { href: '?demo', label: 'Voir la démo' });
+
+    legend.setNote('B');
+
+    expect(legend.element.querySelector('.zone-legend-note a')).toBeNull();
+  });
+});

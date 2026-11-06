@@ -21,6 +21,7 @@ import { readGpx } from './infrastructure/gpx-reader';
 import { LocalStorageSightings, publicationText } from './infrastructure/local-storage-sightings';
 import { HttpObservationRepository, HttpObservationSettings, observationFeature } from './infrastructure/observations-content';
 import { HttpPastoralZoneRepository } from './infrastructure/http-pastoral-zone-repository';
+import { DemoSightingsServer } from './infrastructure/demo-sightings-server';
 import { HttpSightingPublisher, MergedObservationRepository } from './infrastructure/sightings-api';
 import { LocalStorageActivityPreferences } from './infrastructure/local-storage-activity-preferences';
 import { LocalStorageBaseMapPreferences } from './infrastructure/local-storage-base-map-preferences';
@@ -28,6 +29,7 @@ import { LocalStorageValue } from './infrastructure/local-storage-value';
 import { createBaseMapStyles } from './ui/base-map-styles';
 import { createBaseMapSwitcher } from './ui/base-map-switcher';
 import { configureMapLibre } from './ui/configure-maplibre';
+import { createDemoBanner } from './ui/demo-banner';
 import { element, frenchNumber } from './ui/dom';
 import { createUnderstandPanel, createWelcomeDialog } from './ui/info-panels';
 import { MapLibreMapView } from './ui/maplibre-map-view';
@@ -49,27 +51,38 @@ const storage = () => window.localStorage;
 const baseMapPreferences = new LocalStorageBaseMapPreferences(storage);
 const activityPreferences = new LocalStorageActivityPreferences(storage);
 const welcomePreferences = new LocalStorageValue<'seen'>('sonnaille.welcome', storage);
-const zoneRepository = new HttpPastoralZoneRepository(`${base}data/pastoral-zones.geojson`, (url) => fetch(url));
+// Demo mode (?demo): fictional zones, track and sightings, and a sightings "server" living in the
+// browser, so the whole journey can be shown without Map Patou nor the V1 API (docs/demo/README.md).
+const query = new URLSearchParams(window.location.search);
+const demo = query.has('demo');
+const DEMO_DAY = '2026-07-15';
+const demoServer = demo ? new DemoSightingsServer(storage) : null;
+const zoneRepository = new HttpPastoralZoneRepository(`${base}${demo ? 'demo' : 'data'}/pastoral-zones.geojson`, (url) => fetch(url));
 const adviceRepository = new HttpAdviceRepository(`${base}content/advice.json`, (url) => fetch(url));
 // V1 sightings API (docs/api.md), given at build time. Without it, the V0 publication below.
 const sightingsApiUrl: string | undefined = import.meta.env.VITE_SIGHTINGS_API_URL || undefined;
-const publishedObservations = new HttpObservationRepository(`${base}content/observations.geojson`, (url) => fetch(url));
-const observationRepository = sightingsApiUrl
-  ? new MergedObservationRepository([
-      publishedObservations,
-      new HttpObservationRepository(`${sightingsApiUrl.replace(/\/+$/, '')}/api/sightings`, (url) => fetch(url)),
-    ])
-  : publishedObservations;
-const sightingPublisher = sightingsApiUrl ? new HttpSightingPublisher(sightingsApiUrl, (url, init) => fetch(url, init)) : null;
+const publishedObservations = new HttpObservationRepository(`${base}${demo ? 'demo' : 'content'}/observations.geojson`, (url) => fetch(url));
+const observationRepository = demoServer
+  ? new MergedObservationRepository([publishedObservations, demoServer])
+  : sightingsApiUrl
+    ? new MergedObservationRepository([
+        publishedObservations,
+        new HttpObservationRepository(`${sightingsApiUrl.replace(/\/+$/, '')}/api/sightings`, (url) => fetch(url)),
+      ])
+    : publishedObservations;
+const sightingPublisher: SightingPublisher | null =
+  demoServer ?? (sightingsApiUrl ? new HttpSightingPublisher(sightingsApiUrl, (url, init) => fetch(url, init)) : null);
 const observationSettings = new HttpObservationSettings(`${base}content/observation-settings.json`, (url) => fetch(url));
-const sightingStore = new LocalStorageSightings(storage);
+// In demo mode, the user's sightings are kept apart from their real ones.
+const sightingStore = new LocalStorageSightings(storage, demo ? 'sonnaille.demo.mySightings' : undefined);
 // V0 publication: the sightings are pasted into this file on GitHub (only the repository owner can commit).
 const OBSERVATIONS_EDIT_URL = 'https://github.com/Thony-Crz/Sonnaille/edit/main/public/content/observations.geojson';
 
 // --- State -----------------------------------------------------------------
 // Day shown on the map: today, or ?date=YYYY-MM-DD (e.g. a summer day for a demo),
 // then the outing date once a GPX is imported.
-let day = parseDay(new URLSearchParams(window.location.search).get('date')) ?? dayOf(new Date());
+// The demo opens on a summer day, when the fictional flocks are there.
+let day = parseDay(query.get('date')) ?? (demo ? DEMO_DAY : dayOf(new Date()));
 let activity: Activity = initialActivity(activityPreferences);
 let zones: ShowZonesResult = { available: false };
 let advice: Advice[] = [];
@@ -135,6 +148,19 @@ const outingReport = createOutingReportPanel({
   onClose: () => view.highlightZones([]),
 });
 document.body.append(zoneSheet.element, outingReport.element, createOfflineNotice(window));
+if (demoServer) {
+  document.body.append(
+    createDemoBanner({
+      gpxUrl: `${base}demo/hauts-plateaux-fictif.gpx`,
+      exitUrl: base,
+      onReset: () => {
+        demoServer.reset();
+        sightingStore.save([]);
+        window.location.reload();
+      },
+    }),
+  );
+}
 
 // --- Behaviour ---------------------------------------------------------------
 function changeActivity(chosen: Activity): void {
@@ -145,7 +171,7 @@ function changeActivity(chosen: Activity): void {
 
 function updateLegendNote(): void {
   if (!zones.available) {
-    legend.setNote('Zones pastorales indisponibles pour le moment.');
+    legend.setNote('Zones pastorales indisponibles pour le moment.', demo ? undefined : { href: `${base}?demo`, label: 'Voir la démo' });
     return;
   }
   const shownDay = new Date(`${day}T12:00:00`).toLocaleDateString('fr-FR');
@@ -233,7 +259,7 @@ async function sendMySightings(publisher: SightingPublisher): Promise<void> {
   refreshSightings();
   mySightingsPanel.setNote(
     kept === 0
-      ? `${sent} signalement${sent > 1 ? 's' : ''} envoyé${sent > 1 ? 's' : ''}. ${sent > 1 ? 'Ils seront visibles' : 'Il sera visible'} après vérification par un modérateur.`
+      ? `${sent} signalement${sent > 1 ? 's' : ''} envoyé${sent > 1 ? 's' : ''}. ${demo ? 'Démo : validation immédiate, voyez la carte.' : `${sent > 1 ? 'Ils seront visibles' : 'Il sera visible'} après vérification par un modérateur.`}`
       : `${sent} envoyé${sent > 1 ? 's' : ''}, ${kept} non envoyé${kept > 1 ? 's' : ''} : gardé${kept > 1 ? 's' : ''} sur cet appareil, réessayez plus tard.`,
   );
 }

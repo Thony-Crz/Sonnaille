@@ -59,3 +59,17 @@ describe('publicationText', () => {
     expect(JSON.parse(`[${text}]`).map((f: { id: string }) => f.id)).toEqual(['obs-1', 'obs-2']);
   });
 });
+
+describe('LocalStorageSightings under another key', () => {
+  it('keeps demo sightings apart from the real ones', () => {
+    const { items, storage } = memory();
+    new LocalStorageSightings(storage).save([sighting]);
+
+    const demo = new LocalStorageSightings(storage, 'sonnaille.demo.mySightings');
+    demo.save([]);
+
+    expect(new LocalStorageSightings(storage).load()).toEqual([sighting]);
+    expect(items.has('sonnaille.demo.mySightings')).toBe(true);
+    expect(MY_SIGHTINGS_KEY).toBe('sonnaille.mySightings');
+  });
+});

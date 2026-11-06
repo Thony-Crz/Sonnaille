@@ -1,0 +1,228 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "source": "Données fictives — mode démo de Sonnaille (aucun alpage réel)",
+    "requestedDate": "2026-07-15",
+    "fetchedAt": "2026-07-15T05:00:00.000Z"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "DEMO_SERRE",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                5.474,
+                44.962
+              ],
+              [
+                5.494,
+                44.962
+              ],
+              [
+                5.494,
+                44.984
+              ],
+              [
+                5.474,
+                44.984
+              ],
+              [
+                5.474,
+                44.962
+              ]
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Alpage fictif du Serre",
+        "quarter": "Quartier des Moutons",
+        "presence": {
+          "start": "2026-06-15",
+          "end": "2026-09-30",
+          "species": [
+            "sheep"
+          ],
+          "guardDogs": true,
+          "weekdays": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "DEMO_COMBE",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                5.504,
+                44.996
+              ],
+              [
+                5.524,
+                44.996
+              ],
+              [
+                5.524,
+                45.024
+              ],
+              [
+                5.504,
+                45.024
+              ],
+              [
+                5.504,
+                44.996
+              ]
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Alpage fictif de la Combe",
+        "quarter": "Quartier des Vaches",
+        "presence": {
+          "start": "2026-06-01",
+          "end": "2026-10-15",
+          "species": [
+            "cattle"
+          ],
+          "guardDogs": false,
+          "weekdays": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "DEMO_ANES",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                5.534,
+                45.054
+              ],
+              [
+                5.546,
+                45.054
+              ],
+              [
+                5.546,
+                45.069
+              ],
+              [
+                5.534,
+                45.069
+              ],
+              [
+                5.534,
+                45.054
+              ]
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Pâturage fictif des Ânes",
+        "quarter": "Quartier des Ânes",
+        "presence": {
+          "start": "2026-05-01",
+          "end": "2026-10-31",
+          "species": [
+            "horses",
+            "donkeys"
+          ],
+          "guardDogs": false,
+          "weekdays": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "DEMO_CRETES",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                5.4995,
+                44.988
+              ],
+              [
+                5.5035,
+                44.988
+              ],
+              [
+                5.5035,
+                44.995
+              ],
+              [
+                5.4995,
+                44.995
+              ],
+              [
+                5.4995,
+                44.988
+              ]
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Alpage fictif des Crêtes",
+        "quarter": "Quartier des Chèvres",
+        "presence": {
+          "start": "2026-08-01",
+          "end": "2026-09-15",
+          "species": [
+            "sheep",
+            "goats"
+          ],
+          "guardDogs": true,
+          "weekdays": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        }
+      }
+    }
+  ]
+}

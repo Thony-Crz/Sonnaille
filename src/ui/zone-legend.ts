@@ -4,7 +4,7 @@ import { ZONE_STYLES } from './zone-styles';
 export interface ZoneLegend {
   element: HTMLElement;
   /** A line under the legend: the data source and its date, or why zones are missing. */
-  setNote(text: string): void;
+  setNote(text: string, link?: { href: string; label: string }): void;
 }
 
 /** "Légende" panel: one checkbox per zone status, with its color, to show or hide it. */
@@ -52,8 +52,13 @@ export function createZoneLegend({
 
   return {
     element: panel,
-    setNote: (text) => {
+    setNote: (text, link) => {
       note.textContent = text;
+      if (!link) return;
+      const a = document.createElement('a');
+      a.href = link.href;
+      a.textContent = link.label;
+      note.append(' ', a);
     },
   };
 }

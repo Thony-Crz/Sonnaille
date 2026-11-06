@@ -10,11 +10,14 @@ export const MY_SIGHTINGS_KEY = 'sonnaille.mySightings';
  * format as content/observations.geojson. Damaged data or missing storage: empty list.
  */
 export class LocalStorageSightings implements MySightingsStore {
-  constructor(private readonly storage: () => KeyValueStorage) {}
+  constructor(
+    private readonly storage: () => KeyValueStorage,
+    private readonly key: string = MY_SIGHTINGS_KEY,
+  ) {}
 
   load(): Observation[] {
     try {
-      const saved = this.storage().getItem(MY_SIGHTINGS_KEY);
+      const saved = this.storage().getItem(this.key);
       return saved ? parseObservations(JSON.parse(saved)) : [];
     } catch {
       return [];
@@ -24,7 +27,7 @@ export class LocalStorageSightings implements MySightingsStore {
   save(observations: Observation[]): void {
     try {
       this.storage().setItem(
-        MY_SIGHTINGS_KEY,
+        this.key,
         JSON.stringify({ type: 'FeatureCollection', features: observations.map(observationFeature) }),
       );
     } catch {
