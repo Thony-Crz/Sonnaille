@@ -84,6 +84,14 @@ const OBSERVATIONS_EDIT_URL = 'https://github.com/Thony-Crz/Sonnaille/edit/main/
 // then the outing date once a GPX is imported.
 // The demo opens on a summer day, when the fictional flocks are there.
 let day = parseDay(query.get('date')) ?? (demo ? DEMO_DAY : dayOf(new Date()));
+
+/** The current time; in demo mode, the same time on the demo day, so the fictional sightings stay recent. */
+function clock(): Date {
+  const now = new Date();
+  if (!demo) return now;
+  const [year, month, date] = DEMO_DAY.split('-').map(Number) as [number, number, number];
+  return new Date(year, month - 1, date, now.getHours(), now.getMinutes());
+}
 let activity: Activity = initialActivity(activityPreferences);
 let zones: ShowZonesResult = { available: false };
 let advice: Advice[] = [];
@@ -287,7 +295,7 @@ async function reportSighting(): Promise<void> {
   picking = false;
   mySightingsPanel.setPicking(false);
   if (!position) return;
-  const now = new Date();
+  const now = clock();
   const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   sightingForm.open(position, { date: dayOf(now), time });
 }
@@ -302,7 +310,7 @@ function refreshSightings(): void {
       return [...published.filter((o) => !mine.some((m) => m.id === o.id)), ...mine];
     },
   };
-  void showObservations(withMine, observationSettings, view, new Date()).then((result) => {
+  void showObservations(withMine, observationSettings, view, clock()).then((result) => {
     if (result.available) {
       recentObservations = result.recent;
       sightings = result.items;
