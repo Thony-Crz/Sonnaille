@@ -684,3 +684,20 @@ describe('MapLibreMapView sighting selection', () => {
     expect(onZone).not.toHaveBeenCalled();
   });
 });
+
+describe('MapLibreMapView layer order', () => {
+  beforeEach(() => {
+    maplibre.maps.length = 0;
+  });
+
+  it('keeps the sighting pictures above the zones and their dogs, whatever arrives first', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showObservations([sighting('o1', true)]);
+
+    view.showPastoralZones(zones);
+
+    const ids = lastMap().layers.map((l) => l.id);
+    expect(ids.indexOf('zones-dogs')).toBeLessThan(ids.indexOf('observations-point'));
+    expect(ids.indexOf('zones-flock-with-dogs-fill')).toBeLessThan(ids.indexOf('observations-halo'));
+  });
+});

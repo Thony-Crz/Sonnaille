@@ -29,6 +29,7 @@ const NEST_COLOR = '#d49a00';
 const sightingColor = ['case', ['==', ['get', 'what'], 'flock'], OBSERVATION_COLOR, NEST_COLOR] as unknown as string;
 
 const ZONE_DOGS_LAYER = 'zones-dogs';
+const OBSERVATION_LAYERS = ['observations-halo', 'observations-halo-line', 'observations-point', 'observations-dogs'];
 
 type MapImage = HTMLImageElement | ImageBitmap;
 
@@ -330,6 +331,8 @@ export class MapLibreMapView implements MapView {
       },
     });
     this.addHighlightLayer();
+    // Sightings stay above the zones, even when the zones arrive after them.
+    for (const id of OBSERVATION_LAYERS) if (this.map.getLayer(id)) this.map.moveLayer(id);
     this.raiseTrack();
   }
 
