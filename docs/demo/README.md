@@ -25,8 +25,9 @@ Quand les vraies zones sont indisponibles (D4), la légende propose « Voir la d
 1. **La carte** (1 min) : la Chartreuse et le Vercors, les trois couleurs de la légende, la source et la date des données. Changer de fond : « Topographique », et cocher « Sentiers balisés ».
 2. **Une zone** (2 min) : toucher une zone rouille (troupeau avec chiens). La fiche donne la période, l'espèce, les chiens et les bons réflexes. Passer de « À pied » à « À VTT » : les conseils changent.
 3. **Préparer une sortie** (3 min) : importer le GPX fictif (lien dans le bandeau en mode démo). « Votre sortie » liste les zones traversées, au km près, avec les conseils du cas le plus prudent. Changer la date pour novembre : même zone, plus de troupeau prévu.
-4. **Après la sortie** (2 min) : « Signaler des animaux vus », toucher la carte, choisir « Ânes », enregistrer. Le point violet apparaît et reste après rechargement (« Mes signalements »). Montrer aussi la variante au kilomètre du tracé dans « Votre sortie », puis « Publier ».
-5. **Comprendre** (1 min) : le rôle du chien de protection, tous les conseils, les sources.
+4. **Les signalements** (2 min) : sur la carte, chaque signalement a son pictogramme (brebis, vache, chèvre, cheval, âne, ruche, abeille, guêpe, frelon), avec un petit chien quand des chiens de protection ont été vus ; les zones avec chiens portent aussi le chien. Toucher le nid de frelons : la fiche donne la date, la zone de prudence et le bon réflexe. La légende, rubrique « Signalements », explique chaque pictogramme.
+5. **Après la sortie** (2 min) : « Signaler animaux, ruches ou nids », toucher la carte, choisir « Un nid de guêpes » ou « Ânes », enregistrer, puis « Publier » : en mode démo, le pictogramme apparaît aussitôt sur la carte. « Votre sortie » liste ce qui est signalé près du tracé, avec le bon réflexe.
+6. **Comprendre** (1 min) : le rôle du chien de protection, tous les conseils, les sources.
 
 ## Messages clés
 
