@@ -37,6 +37,7 @@ import { createOfflineNotice } from './ui/offline-notice';
 import { createObservationForm } from './ui/observation-form';
 import { createOutingReportPanel } from './ui/outing-report-panel';
 import { createMySightings, createSightingForm } from './ui/sightings';
+import { createSightingSheet } from './ui/sighting-sheet';
 import { createTrackImport, enableFileDrop } from './ui/track-import';
 import { createZoneLegend } from './ui/zone-legend';
 import { createZoneSheetPanel } from './ui/zone-sheet-panel';
@@ -147,7 +148,15 @@ const outingReport = createOutingReportPanel({
   onActivityChange: changeActivity,
   onClose: () => view.highlightZones([]),
 });
-document.body.append(zoneSheet.element, outingReport.element, createOfflineNotice(window));
+// Tapping a sighting's picture opens its sheet: what it is, the distance to keep, the right move.
+const sightingSheet = createSightingSheet({ onClose: () => undefined });
+view.onSightingSelected((item) => {
+  if (picking) return;
+  zoneSheet.hide();
+  outingReport.hide();
+  sightingSheet.show(item);
+});
+document.body.append(zoneSheet.element, outingReport.element, sightingSheet.element, createOfflineNotice(window));
 if (demoServer) {
   document.body.append(
     createDemoBanner({
@@ -191,6 +200,7 @@ function showOutingReport(): void {
   const report = prepareOuting({ track, zones: zones.zones, date: day, activity, advice, sightings });
   view.highlightZones(report.crossings.map((c) => c.zone.id));
   zoneSheet.hide();
+  sightingSheet.hide();
   outingReport.show(report);
 }
 
@@ -334,6 +344,7 @@ void Promise.all([showPastoralZones(zoneRepository, view, day), adviceRepository
       if (!zones.available || picking) return;
       selectedZone = zone;
       outingReport.hide();
+      sightingSheet.hide();
       zoneSheet.show(buildZoneSheet(zone, { activity, advice, source: zones.source, fetchedAt: zones.fetchedAt }));
     });
     if (track) showOutingReport();

@@ -26,3 +26,21 @@ export function describeSighting(observation: Observation): string {
   const dogs = observation.guardDogs ? ', chiens de protection vus' : '';
   return `${speciesText([observation.species])}, ${HEADCOUNT_TEXT[observation.headcount]}${dogs}`;
 }
+
+/** Provisional advice, general caution to be reviewed by professionals (pastoralism, beekeeping). */
+const NEST_TIPS: Record<NestKind, string> = {
+  beehives: 'Passez sans vous arrêter, à distance, jamais devant l’entrée des ruches.',
+  'wasp-nest': 'Contournez le nid à distance, sans gestes brusques et sans le toucher.',
+  'bee-nest': 'Contournez calmement l’essaim ou le nid, sans le déranger.',
+  'hornet-nest': 'Éloignez-vous sans bruit ni gestes brusques ; ne vous arrêtez pas près du nid.',
+};
+
+export const STING_WARNING = 'Allergique aux piqûres ? Gardez votre traitement sur vous.';
+
+/** The right move near what was reported. */
+export function sightingTip(observation: Observation): string {
+  if (!isFlock(observation)) return NEST_TIPS[observation.kind];
+  return observation.guardDogs
+    ? 'Arrêtez-vous, laissez les chiens vous identifier, puis contournez calmement.'
+    : 'Contournez largement le troupeau, au pas, chien tenu en laisse.';
+}

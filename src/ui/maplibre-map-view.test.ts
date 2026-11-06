@@ -9,7 +9,19 @@ const maplibre = vi.hoisted(() => {
     setStyle = vi.fn((_style: unknown, _options?: { transformStyle?: unknown }) => {
       this.sources.clear();
       this.layers.length = 0;
+      this.images.clear();
     });
+    images = new globalThis.Map<string, unknown>();
+    addImage(id: string, image: unknown) {
+      this.images.set(id, image);
+    }
+    hasImage(id: string) {
+      return this.images.has(id);
+    }
+    rendered: unknown[] = [];
+    queryRenderedFeatures() {
+      return this.rendered;
+    }
     styleLoaded = true;
     handlers: Record<string, Array<() => void>> = {};
     sources = new globalThis.Map<string, { data: unknown; setData: ReturnType<typeof vi.fn> }>();
@@ -18,13 +30,15 @@ const maplibre = vi.hoisted(() => {
     constructor(public options: Record<string, unknown>) {
       maps.push(this);
     }
-    layerHandlers: Record<string, { layers: string[]; handler: (e: unknown) => void }> = {};
-    on(event: string, layersOrHandler: string[] | (() => void), handler?: (e: unknown) => void) {
+    layerHandlers: Record<string, Array<{ layers: string[]; handler: (e: unknown) => void }>> = {};
+    on(event: string, layersOrHandler: string | string[] | (() => void), handler?: (e: unknown) => void) {
       if (typeof layersOrHandler === 'function') (this.handlers[event] ??= []).push(layersOrHandler);
-      else this.layerHandlers[event] = { layers: layersOrHandler, handler: handler! };
+      else (this.layerHandlers[event] ??= []).push({ layers: [layersOrHandler].flat(), handler: handler! });
     }
-    emitOnLayers(event: string, payload: unknown) {
-      this.layerHandlers[event]?.handler(payload);
+    /** Fires the handler listening on `layer` (by default, the first one registered for the event). */
+    emitOnLayers(event: string, payload: unknown, layer?: string) {
+      const listeners = this.layerHandlers[event] ?? [];
+      (layer ? listeners.find((l) => l.layers.includes(layer)) : listeners[0])?.handler(payload);
     }
     canvas = { style: {} as Record<string, string> };
     getCanvas() {
@@ -245,6 +259,7 @@ describe('MapLibreMapView pastoral zones', () => {
       'zones-flock-line',
       'zones-flock-with-dogs-fill',
       'zones-flock-with-dogs-line',
+      'zones-dogs',
     ]);
     expect(lastMap().getLayer('zones-flock-fill')).toMatchObject({
       type: 'fill',
@@ -263,7 +278,7 @@ describe('MapLibreMapView pastoral zones', () => {
 
     lastMap().styleLoaded = true;
     lastMap().emit('style.load');
-    expect(lastMap().layers).toHaveLength(6);
+    expect(lastMap().layers).toHaveLength(7);
   });
 
   it('adds the zones once the style has loaded, even while raster tiles are still loading', () => {
@@ -273,7 +288,7 @@ describe('MapLibreMapView pastoral zones', () => {
 
     view.showPastoralZones(zones);
 
-    expect(lastMap().layers).toHaveLength(6);
+    expect(lastMap().layers).toHaveLength(7);
   });
 
   it('keeps the zones when the base map changes', () => {
@@ -284,7 +299,7 @@ describe('MapLibreMapView pastoral zones', () => {
     lastMap().emit('style.load');
 
     expect(lastMap().getSource('pastoral-zones')).toBeDefined();
-    expect(lastMap().layers).toHaveLength(6);
+    expect(lastMap().layers).toHaveLength(7);
   });
 
   it('updates the source when the zones change', () => {
@@ -294,7 +309,7 @@ describe('MapLibreMapView pastoral zones', () => {
     view.showPastoralZones([{ zone: zoneA, status: 'flock' }]);
 
     expect(lastMap().getSource('pastoral-zones')?.setData).toHaveBeenCalledTimes(1);
-    expect(lastMap().layers).toHaveLength(6);
+    expect(lastMap().layers).toHaveLength(7);
   });
 
   it('hides and shows the layers of a status', () => {
@@ -340,7 +355,7 @@ describe('MapLibreMapView zone selection', () => {
 
     view.onZoneSelected(vi.fn());
 
-    expect(lastMap().layerHandlers.click?.layers).toEqual([
+    expect(lastMap().layerHandlers.click?.[0]?.layers).toEqual([
       'zones-flock-with-dogs-fill',
       'zones-flock-fill',
       'zones-no-flock-fill',
@@ -487,7 +502,7 @@ describe('MapLibreMapView observations', () => {
       ['Polygon', 'halo', true],
       ['Point', 'point', true],
     ]);
-    expect(lastMap().layers.map((l) => l.id)).toEqual(['observations-halo', 'observations-halo-line', 'observations-point']);
+    expect(lastMap().layers.map((l) => l.id)).toEqual(['observations-halo', 'observations-halo-line', 'observations-point', 'observations-dogs']);
   });
 
   it('keeps the track above the sightings', () => {
@@ -588,5 +603,84 @@ describe('MapLibreMapView nests', () => {
 
     const data = lastMap().getSource('observations')?.data as { features: Array<{ properties: Record<string, unknown> }> };
     expect(data.features.filter((f) => f.properties.kind === 'point').map((f) => f.properties.what)).toEqual(['flock', 'hornet-nest']);
+  });
+});
+
+describe('MapLibreMapView pictures', () => {
+  beforeEach(() => {
+    maplibre.maps.length = 0;
+  });
+  const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+  const loadIcon = vi.fn(async (svg: string) => ({ svg }) as unknown as HTMLImageElement);
+
+  it('shows each sighting with its picture, and a dog badge when guard dogs were seen', () => {
+    const view = new MapLibreMapView(container, 'ign-plan', { loadIcon });
+
+    view.showObservations([sighting('o1', true)]);
+
+    const data = lastMap().getSource('observations')?.data as { features: Array<{ properties: Record<string, unknown> }> };
+    expect(data.features[1]?.properties).toMatchObject({ kind: 'point', icon: 'sighting-sheep', dogs: true });
+    const point = lastMap().getLayer('observations-point')!;
+    expect(point.type).toBe('symbol');
+    expect(point.layout).toMatchObject({ 'icon-image': ['get', 'icon'], 'icon-allow-overlap': true });
+    const dogs = lastMap().getLayer('observations-dogs')!;
+    expect(dogs.layout).toMatchObject({ 'icon-image': 'sighting-dog' });
+    expect(JSON.stringify(dogs.filter)).toContain('dogs');
+  });
+
+  it('loads the pictures into the map, and again after a base map change', async () => {
+    const view = new MapLibreMapView(container, 'ign-plan', { loadIcon });
+    lastMap().emit('style.load');
+    await flush();
+    expect(lastMap().hasImage('sighting-hornet-nest')).toBe(true);
+    expect(lastMap().hasImage('sighting-dog')).toBe(true);
+
+    view.showBaseMap('osm');
+    lastMap().emit('style.load');
+    await flush();
+
+    expect(lastMap().hasImage('sighting-beehives')).toBe(true);
+  });
+
+  it('puts a dog on the zones with guard dogs, hidden with them', () => {
+    const view = new MapLibreMapView(container, 'ign-plan', { loadIcon });
+    view.showPastoralZones(zones);
+
+    const dogs = lastMap().getLayer('zones-dogs')!;
+    expect(dogs.layout).toMatchObject({ 'icon-image': 'sighting-dog' });
+    expect(JSON.stringify(dogs.filter)).toContain('flock-with-dogs');
+    view.setZoneLayerVisible('flock-with-dogs', false);
+    expect(lastMap().layout['zones-dogs']).toEqual({ visibility: 'none' });
+  });
+});
+
+describe('MapLibreMapView sighting selection', () => {
+  beforeEach(() => {
+    maplibre.maps.length = 0;
+  });
+
+  it('tells which sighting the user taps', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    const item = sighting('o1', true);
+    view.showObservations([item]);
+    const handler = vi.fn();
+    view.onSightingSelected(handler);
+
+    lastMap().emitOnLayers('click', { features: [{ properties: { id: 'o1' } }] }, 'observations-point');
+
+    expect(handler).toHaveBeenCalledWith(item);
+  });
+
+  it('does not also open the zone under a tapped sighting', () => {
+    const view = new MapLibreMapView(container, 'ign-plan');
+    view.showPastoralZones(zones);
+    view.showObservations([sighting('o1', true)]);
+    const onZone = vi.fn();
+    view.onZoneSelected(onZone);
+    lastMap().rendered = [{ properties: { id: 'o1' } }];
+
+    lastMap().emitOnLayers('click', { features: [{ properties: { id: 'A' } }], point: { x: 1, y: 1 } });
+
+    expect(onZone).not.toHaveBeenCalled();
   });
 });

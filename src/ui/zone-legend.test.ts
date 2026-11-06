@@ -94,3 +94,33 @@ describe('createZoneLegend note', () => {
     expect(legend.element.querySelector('.zone-legend-note a')).toBeNull();
   });
 });
+
+describe('createZoneLegend pictures', () => {
+  it('puts the guard dog next to the "with guard dogs" zones', () => {
+    const legend = createZoneLegend({ onToggle: vi.fn() });
+
+    const row = legend.element.querySelector('input[value="flock-with-dogs"]')!.closest('label')!;
+
+    expect(row.querySelector('img')?.alt).toBe('Chiens de protection');
+  });
+
+  it('explains every sighting picture: animals, beehives, nests, guard dogs', () => {
+    const legend = createZoneLegend({ onToggle: vi.fn() });
+
+    const pictures = legend.element.querySelector('details.legend-pictures')!;
+    expect(pictures.querySelector('summary')?.textContent).toBe('Signalements');
+    expect([...pictures.querySelectorAll('img')].map((i) => i.alt)).toEqual([
+      'Moutons (ovins)',
+      'Vaches (bovins)',
+      'Chèvres (caprins)',
+      'Chevaux',
+      'Ânes',
+      'Troupeau mixte',
+      'Ruches',
+      'Nid de guêpes',
+      'Nid ou essaim d’abeilles',
+      'Nid de frelons',
+      'Chiens de protection vus',
+    ]);
+  });
+});

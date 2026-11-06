@@ -1,4 +1,9 @@
+import { NEST_KINDS } from '../domain/observation';
+import { SPECIES } from '../domain/pastoral-zone';
 import { ZONE_STATUSES, type ZoneStatus } from '../domain/zone-status';
+import { SPECIES_LABELS } from './observation-form';
+import { DOG_ICON, iconDataUrl } from './sighting-icons';
+import { NEST_LABELS } from './sighting-labels';
 import { ZONE_STYLES } from './zone-styles';
 
 export interface ZoneLegend {
@@ -42,9 +47,32 @@ export function createZoneLegend({
 
     const label = document.createElement('label');
     label.append(input, swatch, text);
+    if (status === 'flock-with-dogs') label.append(picture(DOG_ICON, 'Chiens de protection', 20));
     fieldset.append(label);
   }
   panel.append(fieldset);
+
+  // What each sighting picture means.
+  const pictures = document.createElement('details');
+  pictures.className = 'legend-pictures';
+  const pictureSummary = document.createElement('summary');
+  pictureSummary.textContent = 'Signalements';
+  const entries: Array<[string, string]> = [
+    ...SPECIES.map((s): [string, string] => [`sighting-${s}`, SPECIES_LABELS[s]]),
+    ...NEST_KINDS.map((k): [string, string] => [`sighting-${k}`, NEST_LABELS[k]]),
+    [DOG_ICON, 'Chiens de protection vus'],
+  ];
+  const list = document.createElement('ul');
+  for (const [id, label] of entries) {
+    const item = document.createElement('li');
+    const text = document.createElement('span');
+    text.textContent = label;
+    text.setAttribute('aria-hidden', 'true');
+    item.append(picture(id, label, id === DOG_ICON ? 16 : 24), text);
+    list.append(item);
+  }
+  pictures.append(pictureSummary, list);
+  panel.append(pictures);
 
   const note = document.createElement('p');
   note.className = 'zone-legend-note';
@@ -61,4 +89,14 @@ export function createZoneLegend({
       note.append(' ', a);
     },
   };
+}
+
+function picture(id: string, alt: string, size: number): HTMLImageElement {
+  const image = document.createElement('img');
+  image.src = iconDataUrl(id);
+  image.alt = alt;
+  image.width = size;
+  image.height = size;
+  image.className = 'legend-picture';
+  return image;
 }

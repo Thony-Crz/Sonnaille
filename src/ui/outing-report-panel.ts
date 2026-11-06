@@ -3,7 +3,9 @@ import type { Activity } from '../domain/advice';
 import { parseDay } from '../domain/zone-status';
 import { DISCLAIMER, renderActivityChoice, renderAdviceList } from './advice-list';
 import { element, frenchDay, frenchNumber } from './dom';
-import { describeSighting } from './sighting-labels';
+import { isFlock } from '../domain/observation';
+import { iconDataUrl, sightingIcon } from './sighting-icons';
+import { STING_WARNING, describeSighting, sightingTip } from './sighting-labels';
 import { ZONE_STYLES } from './zone-styles';
 
 export interface OutingReportPanel {
@@ -15,7 +17,7 @@ export interface OutingReportPanel {
 const plural = (count: number, singular: string, several: string) => `${count} ${count === 1 ? singular : several}`;
 
 
-/** "Troupeaux vus récemment près du tracé": one line per sighting, structured facts only. */
+/** "Signalé près du tracé": one line per sighting, with its picture and the right move. */
 function renderSightings(report: OutingReport): HTMLElement[] {
   if (report.sightings.length === 0) return [];
   const list = element('ul', { className: 'crossings' });
@@ -26,11 +28,19 @@ function renderSightings(report: OutingReport): HTMLElement[] {
       element(
         'li',
         { className: 'crossing' },
-        element('p', { className: 'zone-sheet-status', textContent: what }),
+        element(
+          'p',
+          { className: 'zone-sheet-status' },
+          element('img', { className: 'sighting-picture', src: iconDataUrl(sightingIcon(observation)), alt: what, width: 28, height: 28 }),
+          element('span', { textContent: what }),
+        ),
         element('p', { textContent: `Vu le ${day}, au km ${frenchNumber(km)}, à ${distanceMeters} m du tracé` }),
+        element('p', { className: 'sighting-tip', textContent: sightingTip(observation) }),
       ),
     );
   }
+  const stings = report.sightings.some(({ observation }) => !isFlock(observation));
+  if (stings) list.append(element('li', { className: 'sighting-hint', textContent: STING_WARNING }));
   return [element('section', { className: 'sightings' }, element('h3', { textContent: 'Signalé près du tracé' }), list)];
 }
 

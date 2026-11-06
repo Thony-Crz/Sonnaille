@@ -210,4 +210,21 @@ describe('createOutingReportPanel nests', () => {
     expect(text).toContain('Signalé près du tracé');
     expect(text).toContain('Ruches');
   });
+
+  it('shows the picture and the right move for each, with the sting warning', () => {
+    const panel = createOutingReportPanel({ onDateChange: vi.fn(), onActivityChange: vi.fn(), onClose: vi.fn() });
+    document.body.append(panel.element);
+
+    panel.show({
+      ...report,
+      sightings: [
+        { observation: { id: 'h', observedAt: '2026-07-10T08:00:00Z', position: { longitude: 5.7, latitude: 45 }, kind: 'hornet-nest' }, km: 2, distanceMeters: 40 },
+      ],
+    });
+
+    const section = panel.element.querySelector('.sightings')!;
+    expect(section.querySelector<HTMLImageElement>('img.sighting-picture')?.alt).toBe('Nid de frelons');
+    expect(section.textContent).toContain('Éloignez-vous sans bruit ni gestes brusques ; ne vous arrêtez pas près du nid.');
+    expect(section.textContent).toContain('Allergique aux piqûres ? Gardez votre traitement sur vous.');
+  });
 });

@@ -4,11 +4,13 @@ import { GeolocateControl, Map, NavigationControl, type ControlPosition, type Ge
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { MapView, ObservationOnMap, ZoneOnMap } from '../application/ports';
 import type { BaseMapId } from '../domain/base-map';
+import { isFlock } from '../domain/observation';
 import type { Bounds, Position } from '../domain/bounds';
 import type { Track } from '../domain/track';
 import { ZONE_STATUSES, type ZoneStatus } from '../domain/zone-status';
 import { BASE_MAP_STYLES, withAttribution, type BaseMapStyles } from './base-map-styles';
 import { circleRing } from './geo-circle';
+import { DOG_ICON, MAP_ICONS, sightingIcon } from './sighting-icons';
 import { ZONE_STYLES } from './zone-styles';
 
 const EMPTY_STYLE = { version: 8 as const, sources: {}, layers: [] };
@@ -25,6 +27,18 @@ const TRAILS_ATTRIBUTION =
 const OBSERVATION_COLOR = '#6a3d9a';
 const NEST_COLOR = '#d49a00';
 const sightingColor = ['case', ['==', ['get', 'what'], 'flock'], OBSERVATION_COLOR, NEST_COLOR] as unknown as string;
+
+const ZONE_DOGS_LAYER = 'zones-dogs';
+
+type MapImage = HTMLImageElement | ImageBitmap;
+
+/** Browser loader of the SVG pictures; replaced in tests. */
+async function loadSvgImage(svg: string): Promise<MapImage> {
+  const image = new Image(64, 64);
+  image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  await image.decode();
+  return image;
+}
 
 const fillLayerId = (status: ZoneStatus) => `zones-${status}-fill`;
 const lineLayerId = (status: ZoneStatus) => `zones-${status}-line`;
@@ -46,12 +60,19 @@ export class MapLibreMapView implements MapView {
   private picking: { resolve: (position: Position | null) => void; handler: (e: { lngLat: { lng: number; lat: number } }) => void } | null = null;
   private justPicked = false;
   private readonly visible: Record<ZoneStatus, boolean> = { 'flock-with-dogs': true, flock: true, 'no-flock': true };
+  private shownObservations: Record<string, ObservationOnMap> = {};
+  /** Pictures already decoded, added again to each new style. */
+  private readonly images = new globalThis.Map<string, MapImage>();
 
   constructor(
     container: HTMLElement,
     baseMap: BaseMapId,
     /** Room to leave around framed areas, given by the layout (panels over the map). */
-    private readonly options: { framePadding?: () => number | PaddingOptions; styles?: BaseMapStyles } = {},
+    private readonly options: {
+      framePadding?: () => number | PaddingOptions;
+      styles?: BaseMapStyles;
+      loadIcon?: (svg: string) => Promise<MapImage>;
+    } = {},
   ) {
     this.map = new Map({ container, style: EMPTY_STYLE, attributionControl: { compact: true } });
     this.map.addControl(new NavigationControl({ showCompass: false }), 'top-right');
@@ -63,6 +84,7 @@ export class MapLibreMapView implements MapView {
     // A new base map replaces the whole style: overlays are added again each time.
     this.map.on('style.load', () => {
       this.styleReady = true;
+      void this.addIcons();
       this.addMarkedTrails();
       this.addZoneLayers();
       this.addObservationLayers();
@@ -113,8 +135,8 @@ export class MapLibreMapView implements MapView {
    */
   onZoneSelected(handler: (zone: ZoneOnMap) => void): void {
     const layers = ZONE_STATUSES.map(fillLayerId);
-    this.map.on('click', layers, (event: { features?: Array<{ properties?: { id?: unknown } }> }) => {
-      if (this.picking || this.justPicked) return;
+    this.map.on('click', layers, (event: { features?: Array<{ properties?: { id?: unknown } }>; point?: { x: number; y: number } }) => {
+      if (this.picking || this.justPicked || this.sightingTapped(event)) return;
       const tapped = (event.features ?? [])
         .map((f) => this.shownZones[String(f.properties?.id)])
         .filter((z): z is ZoneOnMap => z !== undefined)
@@ -182,6 +204,7 @@ export class MapLibreMapView implements MapView {
 
   /** Field sightings: a point and a halo per species, sharp while recent, faded afterwards. */
   showObservations(items: ObservationOnMap[]): void {
+    this.shownObservations = Object.fromEntries(items.map((item) => [item.observation.id, item]));
     this.observations = {
       type: 'FeatureCollection',
       features: items.flatMap(({ observation, recent, haloMeters }) => [
@@ -192,7 +215,14 @@ export class MapLibreMapView implements MapView {
         },
         {
           type: 'Feature' as const,
-          properties: { kind: 'point', recent, id: observation.id, what: observation.kind ?? 'flock' },
+          properties: {
+            kind: 'point',
+            recent,
+            id: observation.id,
+            what: observation.kind ?? 'flock',
+            icon: sightingIcon(observation),
+            dogs: isFlock(observation) && observation.guardDogs,
+          },
           geometry: { type: 'Point' as const, coordinates: [observation.position.longitude, observation.position.latitude] },
         },
       ]),
@@ -224,7 +254,8 @@ export class MapLibreMapView implements MapView {
 
   setZoneLayerVisible(status: ZoneStatus, visible: boolean): void {
     this.visible[status] = visible;
-    for (const id of [fillLayerId(status), lineLayerId(status)]) {
+    const ids = [fillLayerId(status), lineLayerId(status), ...(status === 'flock-with-dogs' ? [ZONE_DOGS_LAYER] : [])];
+    for (const id of ids) {
       if (this.map.getLayer(id)) this.map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
     }
   }
@@ -286,6 +317,18 @@ export class MapLibreMapView implements MapView {
         paint: { 'line-color': color, 'line-width': status === 'no-flock' ? 1 : 1.6 },
       });
     }
+    // A guard dog on each zone where a flock with guard dogs is planned.
+    this.map.addLayer({
+      id: ZONE_DOGS_LAYER,
+      type: 'symbol',
+      source: ZONES_SOURCE,
+      filter: ['==', ['get', 'status'], 'flock-with-dogs'],
+      layout: {
+        'icon-image': DOG_ICON,
+        'icon-size': 1.4,
+        visibility: this.visible['flock-with-dogs'] ? 'visible' : 'none',
+      },
+    });
     this.addHighlightLayer();
     this.raiseTrack();
   }
@@ -311,17 +354,57 @@ export class MapLibreMapView implements MapView {
     });
     this.map.addLayer({
       id: 'observations-point',
-      type: 'circle',
+      type: 'symbol',
       source: OBSERVATIONS_SOURCE,
       filter: ['==', ['get', 'kind'], 'point'],
-      paint: {
-        'circle-radius': 6,
-        'circle-color': sightingColor,
-        'circle-opacity': recent(1, 0.35),
-        'circle-stroke-color': '#ffffff',
-        'circle-stroke-width': 2,
-      },
+      layout: { 'icon-image': ['get', 'icon'], 'icon-allow-overlap': true, 'icon-ignore-placement': true },
+      paint: { 'icon-opacity': recent(1, 0.45) },
     });
+    // A small dog on the sightings where guard dogs were seen.
+    this.map.addLayer({
+      id: 'observations-dogs',
+      type: 'symbol',
+      source: OBSERVATIONS_SOURCE,
+      filter: ['all', ['==', ['get', 'kind'], 'point'], ['==', ['get', 'dogs'], true]],
+      layout: { 'icon-image': DOG_ICON, 'icon-offset': [12, -12], 'icon-allow-overlap': true, 'icon-ignore-placement': true },
+      paint: { 'icon-opacity': recent(1, 0.45) },
+    });
+  }
+
+  /** Calls the handler with the sighting the user taps (its picture). */
+  onSightingSelected(handler: (item: ObservationOnMap) => void): void {
+    this.map.on('click', 'observations-point', (event: { features?: Array<{ properties?: { id?: unknown } }> }) => {
+      if (this.picking || this.justPicked) return;
+      const item = this.shownObservations[String(event.features?.[0]?.properties?.id)];
+      if (item) handler(item);
+    });
+    this.map.on('mouseenter', 'observations-point', () => {
+      this.map.getCanvas().style.cursor = 'pointer';
+    });
+    this.map.on('mouseleave', 'observations-point', () => {
+      this.map.getCanvas().style.cursor = '';
+    });
+  }
+
+  /** A tap on a sighting's picture opens the sighting, not the zone under it. */
+  private sightingTapped(event: { point?: { x: number; y: number } }): boolean {
+    if (!event.point || !this.map.getLayer('observations-point')) return false;
+    return this.map.queryRenderedFeatures([event.point.x, event.point.y], { layers: ['observations-point'] }).length > 0;
+  }
+
+  /** Decodes the pictures once, then adds them to the current style (a new style starts without them). */
+  private async addIcons(): Promise<void> {
+    const load = this.options.loadIcon ?? loadSvgImage;
+    await Promise.all(
+      Object.entries(MAP_ICONS).map(async ([id, svg]) => {
+        try {
+          if (!this.images.has(id)) this.images.set(id, await load(svg));
+          if (!this.map.hasImage(id)) this.map.addImage(id, this.images.get(id)!, { pixelRatio: 2 });
+        } catch {
+          // A picture that cannot be drawn: the map stays usable without it.
+        }
+      }),
+    );
   }
 
   private addHighlightLayer(): void {

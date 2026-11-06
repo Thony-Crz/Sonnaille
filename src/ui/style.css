@@ -586,3 +586,59 @@ body {
   background: transparent;
   cursor: pointer;
 }
+
+/* Sighting pictures: sheet, outing report, legend. */
+.sighting-pictures {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.sighting-pictures .sighting-dog-badge {
+  position: absolute;
+  right: -10px;
+  top: -6px;
+}
+
+.zone-sheet-status .sighting-picture {
+  width: 28px;
+  height: 28px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.sighting-tip {
+  margin-top: 2px;
+}
+
+.sighting-old {
+  font-style: italic;
+}
+
+.legend-picture {
+  vertical-align: middle;
+}
+
+.zone-legend label .legend-picture {
+  margin-left: 4px;
+}
+
+.legend-pictures summary {
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.legend-pictures ul {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
+.legend-pictures li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
