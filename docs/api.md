@@ -67,5 +67,5 @@ Sans cette variable, la publication reste celle de la V0 (copier, coller dans Gi
 
 ## Reste à faire
 
-- Hébergement de l'API.
+- Hébergement de l'API : options et recommandation dans [hebergement.md](hebergement.md).
 - Comptes contributeurs et rôles à la place de la clé de modérateur.
