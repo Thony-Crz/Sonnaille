@@ -1,0 +1,48 @@
+{
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "resources": {
+        "files": ["/index.html", "/manifest.webmanifest", "/*.css", "/*.js", "/maplibre/*.mjs"]
+      }
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": ["/icons/**", "/demo/*.gpx", "/robots.txt"]
+      }
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "zones-and-content",
+      "urls": ["data/**", "content/**", "demo/*.geojson"],
+      "cacheConfig": { "strategy": "freshness", "timeout": "5s", "maxSize": 20, "maxAge": "30d" }
+    },
+    {
+      "name": "tiles-ign",
+      "urls": ["https://data.geopf.fr/**"],
+      "cacheConfig": { "strategy": "performance", "maxSize": 4000, "maxAge": "30d" }
+    },
+    {
+      "name": "tiles-opentopomap",
+      "urls": ["https://a.tile.opentopomap.org/**", "https://b.tile.opentopomap.org/**", "https://c.tile.opentopomap.org/**"],
+      "cacheConfig": { "strategy": "performance", "maxSize": 2000, "maxAge": "30d" }
+    },
+    {
+      "name": "tiles-osm",
+      "urls": ["https://tile.openstreetmap.org/**"],
+      "cacheConfig": { "strategy": "performance", "maxSize": 2000, "maxAge": "30d" }
+    },
+    {
+      "name": "tiles-trails",
+      "urls": ["https://tile.waymarkedtrails.org/**"],
+      "cacheConfig": { "strategy": "performance", "maxSize": 2000, "maxAge": "30d" }
+    }
+  ]
+}

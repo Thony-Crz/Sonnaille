@@ -1,4 +1,5 @@
-import { type ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { type ApplicationConfig, inject, isDevMode, provideAppInitializer, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { provideServiceWorker, SwUpdate } from '@angular/service-worker';
 import { setWorkerUrl } from 'maplibre-gl';
 import { HttpAdviceRepository } from '../infrastructure/advice-content';
 import { DemoSightingsServer } from '../infrastructure/demo-sightings-server';
@@ -51,6 +52,16 @@ const mapStyles = createBaseMapStyles({ scan25Key: settings.scan25Key });
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    // Offline mode (V1): the app, the zones and the tiles already seen stay available (ngsw-config.json).
+    provideServiceWorker('ngsw-worker.js', { enabled: !isDevMode(), registrationStrategy: 'registerWhenStable:30000' }),
+    // A new version deployed is used at once, as before (autoUpdate).
+    provideAppInitializer(() => {
+      const updates = inject(SwUpdate);
+      if (!updates.isEnabled) return;
+      updates.versionUpdates.subscribe((event) => {
+        if (event.type === 'VERSION_READY') void updates.activateUpdate().then(() => window.location.reload());
+      });
+    }),
     { provide: APP_SETTINGS, useValue: settings },
     { provide: ZONE_REPOSITORY, useValue: new HttpPastoralZoneRepository(`${base}${demo ? 'demo' : 'data'}/pastoral-zones.geojson`, get) },
     { provide: ADVICE_REPOSITORY, useValue: new HttpAdviceRepository(`${base}content/advice.json`, get) },
