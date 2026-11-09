@@ -16,12 +16,15 @@ public sealed class FakeMapPatou : IMapPatou
 {
     public List<DateOnly> Requests { get; } = [];
     public bool Fails { get; set; }
+    /// <summary>When set, Map Patou answers only once the test opens the gate.</summary>
+    public TaskCompletionSource? Gate { get; set; }
 
-    public Task<IReadOnlyList<PastoralZone>> ZonesOn(DateOnly day, CancellationToken cancellation = default)
+    public async Task<IReadOnlyList<PastoralZone>> ZonesOn(DateOnly day, CancellationToken cancellation = default)
     {
-        Requests.Add(day);
+        lock (Requests) Requests.Add(day);
+        if (Gate is not null) await Gate.Task;
         if (Fails) throw new MapPatouException("unreachable");
-        return Task.FromResult<IReadOnlyList<PastoralZone>>([ZoneSamples.Zone("Q1")]);
+        return [ZoneSamples.Zone($"Q{day.Day}")];
     }
 }
 
@@ -52,7 +55,7 @@ public class ZoneServiceTests
         Assert.Equal(new DateOnly(2026, 7, 15), dataset.RequestedDate);
         Assert.Equal(_clock.Now, dataset.FetchedAt);
         Assert.Equal("Map Patou — Réseau Pastoral AuRA", dataset.Source);
-        Assert.Equal(["Q1"], dataset.Zones.Select(z => z.Id));
+        Assert.Equal(["Q15"], dataset.Zones.Select(z => z.Id));
     }
 
     [Fact]

@@ -60,7 +60,7 @@ sightings.MapPost("/", async (JsonElement feature, SightingService service) =>
 
 // The zones of the day, or 503 until the first fetch from Map Patou.
 app.MapGet("/api/zones", async (ZoneService zones) =>
-    await zones.Current() is { } dataset
+    await zones.ForVisitor() is { } dataset
         ? Results.Json(ZoneGeoJson.Collection(dataset))
         : Results.Json(new { error = "Zones pastorales indisponibles pour le moment." }, statusCode: StatusCodes.Status503ServiceUnavailable));
 

@@ -27,18 +27,18 @@ public class ZonesEndpointsTests(WebApplicationFactory<Program> factory) : IClas
     }
 
     [Fact]
-    public async Task Says_the_zones_are_unavailable_before_the_first_fetch()
+    public async Task Says_the_zones_are_unavailable_when_there_are_none_and_Map_Patou_is_down()
     {
-        var (client, _, _) = Start(refresh: false);
+        var (client, _, mapPatou) = Start(refresh: false);
+        mapPatou.Fails = true;
 
         Assert.Equal(HttpStatusCode.ServiceUnavailable, (await client.GetAsync("/api/zones")).StatusCode);
     }
 
     [Fact]
-    public async Task Serves_the_zones_of_the_day_with_their_source()
+    public async Task Serves_the_zones_of_the_day_with_their_source_fetching_them_on_the_first_visit()
     {
-        var (client, services, _) = Start(refresh: false);
-        await services.GetRequiredService<ZoneService>().Refresh();
+        var (client, _, _) = Start(refresh: false);
 
         var collection = (await client.GetFromJsonAsync<JsonObject>("/api/zones"))!;
 
@@ -47,11 +47,11 @@ public class ZonesEndpointsTests(WebApplicationFactory<Program> factory) : IClas
             """{"source":"Map Patou — Réseau Pastoral AuRA","requestedDate":"2026-07-15","fetchedAt":"2026-07-15T03:00:00.000Z"}""",
             collection["metadata"]!.ToJsonString(new System.Text.Json.JsonSerializerOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping }));
         var feature = collection["features"]![0]!;
-        Assert.Equal("Q1", feature["id"]!.GetValue<string>());
+        Assert.Equal("Q15", feature["id"]!.GetValue<string>());
         Assert.Equal("MultiPolygon", feature["geometry"]!["type"]!.GetValue<string>());
         Assert.Equal("[[[[5.6,45.1],[5.65,45.1],[5.65,45.15],[5.6,45.1]]]]", feature["geometry"]!["coordinates"]!.ToJsonString());
         Assert.Equal(
-            """{"name":"Alpage Q1","quarter":"Quartier Q1","presence":{"start":"2026-06-15","end":"2026-09-30","species":["sheep"],"guardDogs":true,"weekdays":[1,2,3,4,5,6,7]}}""",
+            """{"name":"Alpage Q15","quarter":"Quartier Q15","presence":{"start":"2026-06-15","end":"2026-09-30","species":["sheep"],"guardDogs":true,"weekdays":[1,2,3,4,5,6,7]}}""",
             feature["properties"]!.ToJsonString());
     }
 
