@@ -31,7 +31,6 @@ npm run data     # zones pastorales du jour depuis Map Patou (jamais versionnée
 
 - **Zones d'un autre jour** : `MAP_PATOU_DATE=2026-07-15 npm run data`, puis ouvrir `/Sonnaille/?date=2026-07-15`. Au plus une requête par jour est envoyée à Map Patou.
 - **Observations de terrain** : « Signaler animaux, ruches ou nids », toucher la carte, dire ce qui a été vu (troupeau, ruches, nid de guêpes, d’abeilles ou de frelons), enregistrer : le signalement est gardé sur l'appareil (« Mes signalements »). « Publier » copie les entrées et ouvre l'éditeur GitHub de `public/content/observations.geojson` : les coller dans `features` et valider.
-- **Zones en production** : un PC en France les publie chaque matin dans un dépôt privé lu par la CI, voir [donnees-zones.md](docs/donnees-zones.md).
 - **Fonds de carte** : voir [fonds-de-carte.md](docs/fonds-de-carte.md), dont l'activation de la carte IGN 1:25 000 avec une clé IGN personnelle.
 - **Démo** : [docs/demo](docs/demo/README.md), et en ligne sans API : [?demo](https://thony-crz.github.io/Sonnaille/?demo).
 - **API des signalements V1** (.NET, en cours) : [api/](api/README.fr.md), `dotnet test` dans `api/` ; voir [api.md](docs/api.md).

@@ -30,27 +30,18 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      # Pastoral zones (D1, D4): Map Patou is not reachable from GitHub runners, so a PC in France
-      # publishes them each morning to the private repository Sonnaille-data (docs/donnees-zones.md),
-      # read here with a read-only token. Never committed to this public repository.
-      # Not blocking: without the token or the data, the site deploys and says the zones are unavailable.
-      - id: zones
-        run: echo "token=${{ secrets.SONNAILLE_DATA_TOKEN != '' }}" >> "$GITHUB_OUTPUT"
-      - if: steps.zones.outputs.token == 'true'
-        uses: actions/checkout@v7
-        continue-on-error: true
+      # Pastoral zones from Map Patou: fetched at build time, never committed (D1).
+      # The cache is keyed by day, so the API is called at most once per day.
+      - id: day
+        run: echo "today=$(TZ=Europe/Paris date +%F)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
         with:
-          repository: Thony-Crz/Sonnaille-data
-          token: ${{ secrets.SONNAILLE_DATA_TOKEN }}
-          path: private-data
-          persist-credentials: false
-      - if: steps.zones.outputs.token == 'true'
+          path: public/data
+          key: pastoral-zones-${{ steps.day.outputs.today }}
+      # Not blocking: the Map Patou API is not reachable from GitHub runners (D4).
+      # Without data, the site deploys and the app says the zones are unavailable.
+      - run: npm run data
         continue-on-error: true
-        run: |
-          mkdir -p public/data
-          mv private-data/pastoral-zones.geojson public/data/
-          rm -rf private-data
-          npx tsx scripts/check-zones.ts
       # Angular front. Values given at build time (src/app/build-values.ts), both optional:
       # the personal IGN key for the 1:25,000 map (docs/fonds-de-carte.md) and the V1 sightings API (docs/api.md).
       - run: npm run build -- --define "SONNAILLE_SCAN25_KEY='$SCAN25_KEY'" --define "SONNAILLE_SIGHTINGS_API_URL='$SIGHTINGS_API_URL'"
