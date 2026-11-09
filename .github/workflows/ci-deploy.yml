@@ -40,7 +40,7 @@ jobs:
         with:
           path: dist/browser
 
-  # V1 sightings API (.NET): tested on every push, not deployed yet (docs/api.md).
+  # Sonnaille API (.NET): tested on every push; its image is built and started (docs/api.md).
   api:
     runs-on: ubuntu-latest
     # A throwaway PostGIS database, so the repository contract is also played on PostgreSQL.
@@ -63,6 +63,46 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - run: dotnet test
+      # The image the host runs: it must build and answer (without database nor Map Patou here).
+      - run: docker build --tag sonnaille-api .
+      - run: |
+          docker run --detach --publish 8080:8080 --env Zones__Refresh=false --name sonnaille-api sonnaille-api
+          curl --fail --silent --retry 30 --retry-connrefused --retry-delay 1 http://localhost:8080/api/health
+
+  # Deploys the API to Scaleway Serverless Containers (docs/deploiement-api.md), once the account is set up:
+  # skipped while the SCW_SECRET_KEY secret and the SCW_* variables are missing.
+  deploy-api:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: api
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: rg.fr-par.scw.cloud/${{ vars.SCW_REGISTRY_NAMESPACE }}/sonnaille-api:${{ github.sha }}
+    steps:
+      - id: scaleway
+        run: echo "ready=${{ secrets.SCW_SECRET_KEY != '' && vars.SCW_REGISTRY_NAMESPACE != '' && vars.SCW_CONTAINER_ID != '' }}" >> "$GITHUB_OUTPUT"
+      - if: steps.scaleway.outputs.ready == 'true'
+        uses: actions/checkout@v7
+      - if: steps.scaleway.outputs.ready == 'true'
+        name: Build and push the image to the Scaleway registry
+        env:
+          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+        run: |
+          echo "$SCW_SECRET_KEY" | docker login rg.fr-par.scw.cloud --username nologin --password-stdin
+          docker build --tag "$IMAGE" api
+          docker push "$IMAGE"
+      - if: steps.scaleway.outputs.ready == 'true'
+        name: Deploy the new image to the container
+        env:
+          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+          CONTAINER_ID: ${{ vars.SCW_CONTAINER_ID }}
+        run: |
+          curl --fail-with-body --silent --show-error --request PATCH \
+            "https://api.scaleway.com/containers/v1beta1/regions/fr-par/containers/$CONTAINER_ID" \
+            --header "X-Auth-Token: $SCW_SECRET_KEY" --header "Content-Type: application/json" \
+            --data "{\"registry_image\": \"$IMAGE\", \"redeploy\": true}" > /dev/null
+      - if: steps.scaleway.outputs.ready == 'true' && vars.SONNAILLE_API_URL != ''
+        name: Check that the deployed API answers
+        run: curl --fail --silent --retry 30 --retry-all-errors --retry-delay 10 "${{ vars.SONNAILLE_API_URL }}/api/health"
 
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
