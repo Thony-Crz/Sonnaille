@@ -98,6 +98,8 @@ Depuis les serveurs de GitHub Actions, la connexion à `mappatous-api.lessem.inr
 2. Un dépôt privé de données, alimenté depuis le poste d'Anthony par `npm run data`, que la CI lit avec un jeton.
 3. Un runner GitHub auto-hébergé sur un poste en France.
 
+**Choix du 9 novembre 2026** : la piste 2. Un PC en France publie les zones chaque matin de la saison dans le dépôt privé `Sonnaille-data` (scripts Windows `scripts/windows/`), que la CI lit avec un jeton en lecture seule (`SONNAILLE_DATA_TOKEN`). L'étape `npm run data` est retirée de la CI. Les zones sont contrôlées avant publication et avant déploiement (`scripts/check-zones.ts`). Mise en place : [donnees-zones.md](donnees-zones.md).
+
 ## D5 — Le front passe en Angular (9 novembre 2026)
 
 **Contexte** : le front était écrit en TypeScript sans framework (Vite, fonctions qui créent le DOM, orchestration dans `src/main.ts`). Anthony a demandé de le transformer en Angular.

@@ -25,7 +25,7 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 
 | ID | Tâche | Terminé quand | Dépend de |
 | --- | --- | --- | --- |
-| T06 | Initialiser le projet (Vite, TypeScript, Vitest), les couches de la clean architecture avec leur test, le déploiement GitHub Pages par artefact (`deploy-pages`, pas de branche `gh-pages`) ; `robots.txt` et `noindex` | Une page vide, non indexable, est en ligne après chaque push sur `main` ; tests verts en CI | T04 |
+| ~~T06~~ ✅ | Initialiser le projet (Vite, TypeScript, Vitest ; front passé en Angular depuis, D5), les couches de la clean architecture avec leur test, le déploiement GitHub Pages par artefact (`deploy-pages`, pas de branche `gh-pages`) ; `robots.txt` et `noindex` | Une page vide, non indexable, est en ligne après chaque push sur `main` ; tests verts en CI | T04 |
 | ~~T07~~ ✅ | Afficher une carte MapLibre centrée sur la Chartreuse et le Vercors, fond IGN Plan | Fait : vérifiée sur mobile et sur ordinateur, en développement et en build de production | T06 |
 | ~~T08~~ ✅ | Ajouter le sélecteur de fonds (IGN Plan, photographies aériennes, OpenStreetMap), avec le choix mémorisé sur l'appareil | Fait : panneau « Fond de carte », choix conservé au rechargement, attribution propre à chaque fond | T07 |
 | ~~T09~~ ✅ | Rendre l'app installable (manifeste, icônes), sans hors ligne | Fait : manifeste, logo « A — Sonnaille » décliné en icônes (`npm run icons`), balises iPhone ; installation réelle sur téléphone à confirmer | T06 |
@@ -82,6 +82,7 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 - Signalements par les contributeurs et modération — côté serveur : dépôt en attente, validation par un modérateur, seuls les signalements validés sont publics
 - Question « les bêtes y sont toujours ? »
 - ~~Mode hors ligne~~ ✅ fait (service worker : application en cache, zones et contenus réseau puis cache, tuiles déjà consultées gardées 30 jours, bandeau « Hors ligne ») ; reste un téléchargement explicite d'un secteur
+- Zones en production sans attendre Map Patou : dépôt privé `Sonnaille-data` alimenté chaque matin par un PC en France, lu par la CI ([donnees-zones.md](donnees-zones.md)) — code prêt, mise en place à faire par Anthony
 - Accès officiel aux données de Map Patou (remplacement du scraper)
 - Extension aux Alpes
 - Relecture des conseils par un acteur du pastoralisme (la promesse d'expertise)
