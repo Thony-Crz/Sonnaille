@@ -1,7 +1,6 @@
 import type { FilterSpecification } from '@maplibre/maplibre-gl-style-spec';
 import type { FeatureCollection } from 'geojson';
 import { GeolocateControl, Map, NavigationControl, type ControlPosition, type GeoJSONSource, type PaddingOptions } from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
 import type { MapView, ObservationOnMap, ZoneOnMap } from '../application/ports';
 import type { BaseMapId } from '../domain/base-map';
 import { isFlock } from '../domain/observation';

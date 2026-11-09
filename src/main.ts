@@ -1,5 +1,6 @@
 // Composition root: the only file that wires adapters together with
 // the use cases (application) and the interface (ui).
+import 'maplibre-gl/dist/maplibre-gl.css';
 import './ui/style.css';
 import { chooseBaseMap, initialBaseMap } from './application/base-map-choice';
 import { importTrack } from './application/import-track';

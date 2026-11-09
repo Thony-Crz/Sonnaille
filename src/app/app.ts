@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { MapComponent } from './map/map.component';
 
 @Component({
   selector: 'son-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<div class="app-map" role="region" aria-label="Carte du territoire pastoral"></div>`,
+  imports: [MapComponent],
+  template: `<son-map />`,
 })
 export class App {}

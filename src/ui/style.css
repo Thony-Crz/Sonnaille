@@ -6,7 +6,8 @@ body {
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
-#map {
+#map,
+.app-map {
   position: fixed;
   inset: 0;
 }
@@ -224,7 +225,8 @@ body {
   display: none;
 }
 
-#map.drop-active {
+#map.drop-active,
+.app-map.drop-active {
   outline: 4px dashed #2f5d3a;
   outline-offset: -8px;
 }
