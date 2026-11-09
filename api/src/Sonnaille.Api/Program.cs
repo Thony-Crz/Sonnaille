@@ -8,7 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Composition root.
 // PostGIS when a database is configured (ConnectionStrings:Sightings, a secret), else in memory.
-var connectionString = builder.Configuration.GetConnectionString("Sightings");
+// A URL as hosted databases give it (Neon…) is accepted too.
+var connectionString = builder.Configuration.GetConnectionString("Sightings") is { Length: > 0 } configured
+    ? DatabaseUrl.ToConnectionString(configured)
+    : null;
 if (string.IsNullOrEmpty(connectionString))
 {
     builder.Services.AddSingleton<ISightingRepository, InMemorySightingRepository>();
@@ -57,6 +60,9 @@ sightings.MapPost("/", async (JsonElement feature, SightingService service) =>
         ? Results.Created($"/api/sightings/{result.Value!.Id}", new { id = result.Value.Id, status = "pending" })
         : Results.BadRequest(new { errors = result.Errors });
 });
+
+// For the host checks.
+app.MapGet("/api/health", () => Results.Text("ok"));
 
 // The zones of the day, or 503 until the first fetch from Map Patou.
 app.MapGet("/api/zones", async (ZoneService zones) =>
