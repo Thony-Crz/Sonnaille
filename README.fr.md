@@ -26,9 +26,10 @@ npm install
 npm run dev      # front Angular : http://localhost:4200/Sonnaille/
 npm test         # tests unitaires, d'architecture et des composants Angular
 npm run build    # build de production (dist/browser)
-npm run data     # zones pastorales du jour depuis Map Patou (jamais versionnées)
+npm run data     # développement : zones du jour depuis Map Patou dans un fichier local (jamais versionné)
 ```
 
+- **Zones en production** : servies par l'API, qui les récupère chez Map Patou une fois par jour et les garde en base (D6, [api.md](docs/api.md)).
 - **Zones d'un autre jour** : `MAP_PATOU_DATE=2026-07-15 npm run data`, puis ouvrir `/Sonnaille/?date=2026-07-15`. Au plus une requête par jour est envoyée à Map Patou.
 - **Observations de terrain** : « Signaler animaux, ruches ou nids », toucher la carte, dire ce qui a été vu (troupeau, ruches, nid de guêpes, d’abeilles ou de frelons), enregistrer : le signalement est gardé sur l'appareil (« Mes signalements »). « Publier » copie les entrées et ouvre l'éditeur GitHub de `public/content/observations.geojson` : les coller dans `features` et valider.
 - **Fonds de carte** : voir [fonds-de-carte.md](docs/fonds-de-carte.md), dont l'activation de la carte IGN 1:25 000 avec une clé IGN personnelle.

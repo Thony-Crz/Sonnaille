@@ -27,6 +27,8 @@ L'[API des signalements](api.md) est un conteneur .NET 10 et une base PostgreSQL
 
 - créer les comptes chez l'hébergeur ;
 - créer les secrets `ConnectionStrings__Sightings` et `Moderation__Key`, et les identifiants de déploiement ;
-- ajouter la variable de dépôt `SIGHTINGS_API_URL` (adresse publique de l'API), pour que le site l'utilise.
+- ajouter la variable de dépôt `SONNAILLE_API_URL` (adresse publique de l'API), pour que le site l'utilise.
+
+**Condition pour l'hébergeur** : l'API va chercher elle-même les zones chez Map Patou (D6). Map Patou ne répond pas aux machines de GitHub (D4) : vérifier qu'il répond depuis l'hébergeur choisi (une requête de test) avant de s'engager. Un hébergement en France (option A, Scaleway Paris) est le meilleur candidat.
 
 En attendant, le [mode démo](demo/README.md) montre tout le parcours sans API.

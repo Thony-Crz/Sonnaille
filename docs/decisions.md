@@ -98,6 +98,8 @@ Depuis les serveurs de GitHub Actions, la connexion à `mappatous-api.lessem.inr
 2. Un dépôt privé de données, alimenté depuis le poste d'Anthony par `npm run data`, que la CI lit avec un jeton.
 3. Un runner GitHub auto-hébergé sur un poste en France.
 
+**Remplacée par D6** (9 novembre 2026) : les zones ne passent plus par la CI.
+
 ## D5 — Le front passe en Angular (9 novembre 2026)
 
 **Contexte** : le front était écrit en TypeScript sans framework (Vite, fonctions qui créent le DOM, orchestration dans `src/main.ts`). Anthony a demandé de le transformer en Angular.
@@ -116,3 +118,19 @@ Depuis les serveurs de GitHub Actions, la connexion à `mappatous-api.lessem.inr
 
 **Conséquences** : la migration s'est faite par étapes, l'app Vite restant déployée jusqu'à ce que le front Angular fasse tout ce qu'elle faisait ; les tests des anciennes fonctions DOM ont été portés en tests de composants.
 
+## D6 — Les zones vont en base, récupérées par le serveur (9 novembre 2026)
+
+**Contexte** : D4 laissait le site sans zones en production. Une solution d'attente (un PC qui publie les zones chaque matin dans un dépôt GitHub privé) a été écrite puis annulée par Anthony : les données n'ont rien à faire dans un dépôt, même privé, et aucun processus ne doit tourner sur un poste.
+
+**Décision**
+
+- L'API .NET récupère elle-même les zones chez Map Patou, au plus une fois par jour (heure de Paris), et les garde dans PostGIS (`pastoral_zones`, `zone_dataset`). Les zones précédentes restent servies si Map Patou échoue.
+- Le site les lit à `GET /api/zones`, au format qu'il lisait déjà ; plus de zones dans le build, plus de reconstruction quotidienne du site.
+- `npm run data` reste pour le développement (fichier local, jamais versionné).
+- Rien sur un poste personnel, aucune donnée Map Patou dans un dépôt Git (D1).
+
+**Conséquences**
+
+- Tant que l'API n'est pas hébergée, le site en ligne n'a pas de zones réelles (le mode démo reste disponible).
+- L'hébergeur doit pouvoir joindre Map Patou : à tester avant de le choisir ([hebergement.md](hebergement.md)).
+- Le réglage du site devient `SONNAILLE_API_URL` (zones et signalements).
