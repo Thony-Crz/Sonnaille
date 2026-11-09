@@ -16,11 +16,11 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "browser": "src/app/main.ts",
-            "index": "src/app/index.html",
+            "browser": "src/main.ts",
+            "index": "src/index.html",
             "tsConfig": "tsconfig.app.json",
             "baseHref": "/Sonnaille/",
-            "outputPath": "dist-angular",
+            "outputPath": "dist",
             "assets": [
               {
                 "glob": "**/*",
@@ -34,7 +34,7 @@
             ],
             "styles": [
               "node_modules/maplibre-gl/dist/maplibre-gl.css",
-              "src/ui/style.css"
+              "src/styles.css"
             ],
             "serviceWorker": "ngsw-config.json"
           },

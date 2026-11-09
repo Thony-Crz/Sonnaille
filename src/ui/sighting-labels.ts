@@ -1,5 +1,5 @@
 import { isFlock, type Headcount, type NestKind, type Observation } from '../domain/observation';
-import { speciesText } from './advice-list';
+import { speciesText } from './labels';
 
 // Texts shown to users, hence in French.
 export const NEST_LABELS: Record<NestKind, string> = {

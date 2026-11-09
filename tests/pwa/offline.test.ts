@@ -73,3 +73,16 @@ describe('offline mode (V1)', () => {
     expect(group?.cacheConfig.maxSize).toBeGreaterThan(0);
   });
 });
+
+describe('the former service worker (Vite PWA)', () => {
+  const sw = () => readFileSync(join(ROOT, 'public', 'sw.js'), 'utf8');
+
+  it('is replaced by one that unregisters itself, so devices that had it load the Angular app', () => {
+    expect(sw()).toContain('self.registration.unregister()');
+    expect(sw()).toContain('skipWaiting');
+  });
+
+  it('empties the old Workbox caches', () => {
+    expect(sw()).toMatch(/caches\s*\.keys\(\)[\s\S]*workbox[\s\S]*caches\.delete/);
+  });
+});

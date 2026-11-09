@@ -3,7 +3,7 @@ import type { Position } from '../../domain/bounds';
 import { HEADCOUNTS, type Headcount, type NestKind } from '../../domain/observation';
 import { SPECIES, type Species } from '../../domain/pastoral-zone';
 import { parseDay } from '../../domain/zone-status';
-import { HEADCOUNT_LABELS, SPECIES_LABELS } from '../../ui/observation-form';
+import { HEADCOUNT_LABELS, SPECIES_LABELS } from '../../ui/labels';
 import { WHAT_CHOICES } from '../../ui/sighting-labels';
 import type { SightingAnswers } from '../sonnaille.store';
 

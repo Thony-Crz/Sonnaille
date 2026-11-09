@@ -13,6 +13,6 @@
     "strictInputAccessModifiers": true,
     "strictTemplates": true
   },
-  "include": ["src/app/**/*.ts"],
+  "include": ["src/main.ts", "src/app/**/*.ts"],
   "exclude": ["src/app/**/*.spec.ts"]
 }

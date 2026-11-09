@@ -4,18 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
+    "ng": "ng",
+    "dev": "ng serve",
+    "build": "ng build",
     "test": "vitest run && ng test --watch=false",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
-    "icons": "node scripts/generate-icons.mjs",
-    "data": "tsx scripts/fetch-pastoral-zones.ts",
     "test:angular": "ng test",
-    "ng": "ng",
-    "start": "ng serve",
-    "build:angular": "ng build"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.app.json",
+    "icons": "node scripts/generate-icons.mjs",
+    "data": "tsx scripts/fetch-pastoral-zones.ts"
   },
   "devDependencies": {
     "@angular/build": "~22.2.6",
@@ -27,8 +24,6 @@
     "sharp": "^0.35.5",
     "tsx": "^4.23.15",
     "typescript": "~6.0",
-    "vite": "^8.3.6",
-    "vite-plugin-pwa": "^2.0.0",
     "vitest": "^5.1.0"
   },
   "dependencies": {

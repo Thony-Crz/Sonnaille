@@ -4,7 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["vite/client", "node"],
+    "types": ["node"],
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -13,7 +13,7 @@
     "isolatedModules": true,
     "skipLibCheck": true
   },
-  "include": ["src", "tests", "scripts", "vite.config.ts", "pwa.config.ts"],
+  "include": ["src", "tests", "scripts", "vitest.config.ts"],
   // The Angular front is checked by its own build (tsconfig.app.json).
-  "exclude": ["src/app"]
+  "exclude": ["src/app", "src/main.ts"]
 }

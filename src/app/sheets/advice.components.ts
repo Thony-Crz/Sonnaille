@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { ACTIVITIES, type Activity, type Advice } from '../../domain/advice';
-import { ACTIVITY_LABELS } from '../../ui/advice-list';
+import { ACTIVITY_LABELS } from '../../ui/labels';
 
-export { DISCLAIMER, speciesText } from '../../ui/advice-list';
+export { DISCLAIMER, speciesText } from '../../ui/labels';
 
 /** "Je me déplace" radio buttons; `name` keeps groups of different sheets apart. */
 @Component({

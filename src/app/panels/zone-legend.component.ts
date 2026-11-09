@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { NEST_KINDS } from '../../domain/observation';
 import { SPECIES } from '../../domain/pastoral-zone';
 import { ZONE_STATUSES, type ZoneStatus } from '../../domain/zone-status';
-import { SPECIES_LABELS } from '../../ui/observation-form';
+import { SPECIES_LABELS } from '../../ui/labels';
 import { DOG_ICON, iconDataUrl } from '../../ui/sighting-icons';
 import { NEST_LABELS } from '../../ui/sighting-labels';
 import { ZONE_STYLES } from '../../ui/zone-styles';

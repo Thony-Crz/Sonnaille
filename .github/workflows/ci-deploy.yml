@@ -42,16 +42,16 @@ jobs:
       # Without data, the site deploys and the app says the zones are unavailable.
       - run: npm run data
         continue-on-error: true
-      - run: npm run build
+      # Angular front. Values given at build time (src/app/build-values.ts), both optional:
+      # the personal IGN key for the 1:25,000 map (docs/fonds-de-carte.md) and the V1 sightings API (docs/api.md).
+      - run: npm run build -- --define "SONNAILLE_SCAN25_KEY='$SCAN25_KEY'" --define "SONNAILLE_SIGHTINGS_API_URL='$SIGHTINGS_API_URL'"
         env:
-          # Personal IGN key for the 1:25,000 map (docs/fonds-de-carte.md). Optional: without it, the map is not offered.
-          VITE_IGN_SCAN25_KEY: ${{ vars.IGN_SCAN25_KEY }}
-          # V1 sightings API (docs/api.md). Optional: without it, sightings are published by hand on GitHub (V0).
-          VITE_SIGHTINGS_API_URL: ${{ vars.SIGHTINGS_API_URL }}
+          SCAN25_KEY: ${{ vars.IGN_SCAN25_KEY }}
+          SIGHTINGS_API_URL: ${{ vars.SIGHTINGS_API_URL }}
       - if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v5
         with:
-          path: dist
+          path: dist/browser
 
   # V1 sightings API (.NET): tested on every push, not deployed yet (docs/api.md).
   api:

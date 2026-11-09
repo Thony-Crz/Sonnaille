@@ -14,7 +14,7 @@ interface ManifestIcon {
 }
 
 const readManifest = () => JSON.parse(readFileSync(manifestPath, 'utf8')) as Record<string, unknown> & { icons: ManifestIcon[] };
-const indexHtml = () => readFileSync(join(ROOT, 'index.html'), 'utf8');
+const indexHtml = () => readFileSync(join(ROOT, 'src', 'index.html'), 'utf8');
 const pngSize = (path: string) => {
   const png = readFileSync(path);
   return { width: png.readUInt32BE(16), height: png.readUInt32BE(20) };
@@ -58,8 +58,13 @@ describe('web app manifest', () => {
 });
 
 describe('index.html', () => {
+  // Links are relative to <base href>, which the build sets to /Sonnaille/.
+  it('lets the build set the base of every link', () => {
+    expect(indexHtml()).toContain('<base href="/" />');
+  });
+
   it('links the manifest', () => {
-    expect(indexHtml()).toContain('<link rel="manifest" href="/manifest.webmanifest" />');
+    expect(indexHtml()).toContain('<link rel="manifest" href="manifest.webmanifest" />');
   });
 
   it('sets the browser theme color to the manifest one', () => {
@@ -67,7 +72,7 @@ describe('index.html', () => {
   });
 
   it('gives iPhones a 180×180 home screen icon', () => {
-    expect(indexHtml()).toContain('<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />');
+    expect(indexHtml()).toContain('<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />');
     expect(pngSize(join(PUBLIC, 'icons', 'apple-touch-icon.png'))).toEqual({ width: 180, height: 180 });
   });
 
@@ -76,7 +81,7 @@ describe('index.html', () => {
   });
 
   it('has a favicon', () => {
-    expect(indexHtml()).toContain('<link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />');
+    expect(indexHtml()).toContain('<link rel="icon" href="icons/icon.svg" type="image/svg+xml" />');
     expect(existsSync(join(PUBLIC, 'icons', 'icon.svg'))).toBe(true);
   });
 });

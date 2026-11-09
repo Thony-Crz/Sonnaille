@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
 import { HEADCOUNTS, type Headcount } from '../../domain/observation';
 import { SPECIES, type Species } from '../../domain/pastoral-zone';
-import { HEADCOUNT_LABELS, SPECIES_LABELS } from '../../ui/observation-form';
+import { HEADCOUNT_LABELS, SPECIES_LABELS } from '../../ui/labels';
 import { frenchNumber } from '../french';
 import type { KmAnswers } from '../sonnaille.store';
 
