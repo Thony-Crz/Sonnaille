@@ -1,0 +1,18 @@
+/* Angular front (src/app), which reuses src/domain, src/application and src/infrastructure. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": [],
+    "module": "preserve",
+    "experimentalDecorators": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true
+  },
+  "angularCompilerOptions": {
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  },
+  "include": ["src/app/**/*.ts"],
+  "exclude": ["src/app/**/*.spec.ts"]
+}

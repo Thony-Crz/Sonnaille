@@ -82,4 +82,26 @@ describe('findDependencyViolations', () => {
 
     expect(violations.map((v) => v.imports)).toEqual(['../ui/x', '../infrastructure/y']);
   });
+
+  it('lets the Angular front (src/app) use the domain, the application and its own code', () => {
+    const violations = findDependencyViolations([
+      file(
+        'src/app/zone-sheet.ts',
+        ["import { zoneStatus } from '../domain/zone-status';", "import { Store } from './store';", "import { Component } from '@angular/core';"].join('\n'),
+      ),
+    ]);
+
+    expect(violations).toEqual([]);
+  });
+
+  it('reports the Angular front importing infrastructure outside its composition root', () => {
+    const violations = findDependencyViolations([
+      file('src/app/zone-sheet.ts', "import { readGpx } from '../infrastructure/gpx-reader';"),
+      file('src/app/app.config.ts', "import { readGpx } from '../infrastructure/gpx-reader';"),
+    ]);
+
+    expect(violations).toEqual([
+      { path: 'src/app/zone-sheet.ts', imports: '../infrastructure/gpx-reader', rule: 'app must not depend on infrastructure' },
+    ]);
+  });
 });

@@ -12,7 +12,7 @@ export interface Violation {
   rule: string;
 }
 
-type Layer = 'domain' | 'application' | 'infrastructure' | 'ui';
+type Layer = 'domain' | 'application' | 'infrastructure' | 'ui' | 'app';
 
 /**
  * Clean architecture dependency rule: each layer only depends on more inner layers.
@@ -23,7 +23,11 @@ const RULES: Record<Layer, { layers: Layer[]; libraries: boolean }> = {
   application: { layers: ['domain', 'application'], libraries: false },
   infrastructure: { layers: ['domain', 'application', 'infrastructure'], libraries: true },
   ui: { layers: ['domain', 'application', 'ui'], libraries: true },
+  // Angular front: its composition root (app.config.ts) alone wires the infrastructure.
+  app: { layers: ['domain', 'application', 'ui', 'app'], libraries: true },
 };
+
+const COMPOSITION_ROOTS = ['src/main.ts', 'src/app/app.config.ts'];
 
 const LAYERS = Object.keys(RULES) as Layer[];
 
@@ -44,7 +48,7 @@ export function findDependencyViolations(files: SourceFile[]): Violation[] {
 
   for (const { path, content } of files) {
     const layer = layerOf(path);
-    if (!layer) continue;
+    if (!layer || COMPOSITION_ROOTS.includes(path)) continue;
     const rule = RULES[layer];
 
     for (const [, imported] of content.matchAll(IMPORT)) {

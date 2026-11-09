@@ -1,0 +1,54 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": { "packageManager": "npm", "analytics": false },
+  "newProjectRoot": "projects",
+  "projects": {
+    "sonnaille": {
+      "projectType": "application",
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "son",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/app/main.ts",
+            "index": "src/app/index.html",
+            "tsConfig": "tsconfig.app.json",
+            "baseHref": "/Sonnaille/",
+            "outputPath": "dist-angular",
+            "assets": [
+              { "glob": "**/*", "input": "public" },
+              { "glob": "maplibre-gl-{worker,shared}.mjs", "input": "node_modules/maplibre-gl/dist", "output": "maplibre" }
+            ],
+            "styles": ["node_modules/maplibre-gl/dist/maplibre-gl.css", "src/ui/style.css"]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                { "type": "initial", "maximumWarning": "1.5MB", "maximumError": "2MB" },
+                { "type": "anyComponentStyle", "maximumWarning": "4kB", "maximumError": "8kB" }
+              ],
+              "outputHashing": "all"
+            },
+            "development": { "optimization": false, "extractLicenses": false, "sourceMap": true }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": { "buildTarget": "sonnaille:build:production" },
+            "development": { "buildTarget": "sonnaille:build:development" }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": { "tsConfig": "tsconfig.spec.json", "include": ["src/app/**/*.spec.ts"] }
+        }
+      }
+    }
+  }
+}

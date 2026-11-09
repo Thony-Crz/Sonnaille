@@ -9,3 +9,5 @@ dist/
 
 # Built by `npm run data` from Map Patou: never committed (docs/decisions.md, D1)
 public/data/
+dist-angular/
+.angular/
