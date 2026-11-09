@@ -13,7 +13,10 @@ public class SightingsEndpointsTests : IClassFixture<WebApplicationFactory<Progr
     private readonly HttpClient _client;
 
     public SightingsEndpointsTests(WebApplicationFactory<Program> factory) =>
-        _client = factory.WithWebHostBuilder(b => b.UseSetting("Moderation:Key", ModeratorKey)).CreateClient();
+        // Zones:Refresh off: the tests never call Map Patou.
+        _client = factory
+            .WithWebHostBuilder(b => b.UseSetting("Moderation:Key", ModeratorKey).UseSetting("Zones:Refresh", "false"))
+            .CreateClient();
 
     private static object Flock(double lon = 5.65, double lat = 45.11) => new
     {
@@ -132,7 +135,7 @@ public class ModerationWithoutKeyTests(WebApplicationFactory<Program> factory) :
     [Fact]
     public async Task Without_a_configured_key_moderation_stays_closed()
     {
-        var client = factory.CreateClient();
+        var client = factory.WithWebHostBuilder(b => b.UseSetting("Zones:Refresh", "false")).CreateClient();
         var request = new HttpRequestMessage(HttpMethod.Get, "/api/sightings/pending");
         request.Headers.Add("X-Moderator-Key", "");
 
