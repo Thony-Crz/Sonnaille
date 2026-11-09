@@ -635,3 +635,23 @@ body {
   align-items: center;
   gap: 6px;
 }
+
+/* Angular front: columns of panels over the map (instead of MapLibre controls). */
+.map-panels {
+  position: fixed;
+  z-index: 2;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  pointer-events: none;
+  max-height: 100vh;
+}
+
+.map-panels-top-left {
+  top: 0;
+}
+
+.map-panels-bottom-left {
+  bottom: 0;
+}

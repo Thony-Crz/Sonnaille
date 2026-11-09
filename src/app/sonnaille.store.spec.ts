@@ -1,135 +1,21 @@
 import { TestBed } from '@angular/core/testing';
-import type { ObservationOnMap, ZoneOnMap } from '../application/ports';
-import type { Position } from '../domain/bounds';
 import type { Observation } from '../domain/observation';
-import type { PastoralZone } from '../domain/pastoral-zone';
-import type { Track } from '../domain/track';
-import type { MapSurface } from './map-surface';
+import { FakeMap } from './testing/fake-map';
 import { DEMO_DAY, type AppSettings } from './settings';
 import { SonnailleStore } from './sonnaille.store';
-import {
-  ACTIVITY_PREFERENCES,
-  ADVICE_REPOSITORY,
-  APP_SETTINGS,
-  BASE_MAP_PREFERENCES,
-  DEMO_RESET,
-  MY_SIGHTINGS,
-  OBSERVATION_REPOSITORY,
-  OBSERVATION_SETTINGS,
-  SIGHTING_PUBLISHER,
-  SIGHTINGS_FORMAT,
-  TRACK_READER,
-  WELCOME_PREFERENCES,
-  ZONE_REPOSITORY,
-} from './tokens';
+import { fakePorts } from './testing/fake-ports';
 
-/** A map that records what it is asked, and lets the test tap zones, sightings and points. */
-class FakeMap implements MapSurface {
-  calls: string[] = [];
-  zones: ZoneOnMap[] = [];
-  observations: ObservationOnMap[] = [];
-  highlighted: string[] = [];
-  tapZone: (zone: ZoneOnMap) => void = () => undefined;
-  tapSighting: (item: ObservationOnMap) => void = () => undefined;
-  private picked: ((position: Position | null) => void) | null = null;
-  fitTo() {
-    this.calls.push('fitTo');
-  }
-  showBaseMap(id: string) {
-    this.calls.push(`base:${id}`);
-  }
-  showPastoralZones(zones: ZoneOnMap[]) {
-    this.zones = zones;
-  }
-  setZoneLayerVisible(status: string, visible: boolean) {
-    this.calls.push(`layer:${status}:${visible}`);
-  }
-  showTrack() {
-    this.calls.push('track');
-  }
-  showObservations(items: ObservationOnMap[]) {
-    this.observations = items;
-  }
-  highlightZones(ids: string[]) {
-    this.highlighted = ids;
-  }
-  showMarkedTrails(visible: boolean) {
-    this.calls.push(`trails:${visible}`);
-  }
-  onZoneSelected(handler: (zone: ZoneOnMap) => void) {
-    this.tapZone = handler;
-  }
-  onSightingSelected(handler: (item: ObservationOnMap) => void) {
-    this.tapSighting = handler;
-  }
-  pickLocation() {
-    return new Promise<Position | null>((resolve) => (this.picked = resolve));
-  }
-  cancelPick() {
-    this.picked?.(null);
-  }
-  pick(position: Position) {
-    this.picked?.(position);
-  }
-}
-
-const zone: PastoralZone = {
-  id: 'Z1',
-  name: 'Alpage du Serre',
-  quarter: 'Quartier haut',
-  geometry: [[[[5.47, 44.96], [5.49, 44.96], [5.49, 44.98], [5.47, 44.98], [5.47, 44.96]]]],
-  presence: { start: '2026-06-15', end: '2026-09-30', species: ['sheep'], guardDogs: true, weekdays: [1, 2, 3, 4, 5, 6, 7] },
-};
-const track: Track = {
-  name: 'Traversée',
-  segments: [[{ longitude: 5.48, latitude: 44.95 }, { longitude: 5.48, latitude: 44.99 }]],
-};
 const here = { longitude: 5.65, latitude: 45.11 };
 
-const memoryValue = <T>(initial: T | null = null) => {
-  let value = initial;
-  return { load: () => value, save: (v: T) => void (value = v) };
-};
-
 async function setup({ settings = {}, publisher = null }: { settings?: Partial<AppSettings>; publisher?: { publish: (o: Observation) => Promise<boolean> } | null } = {}) {
-  let mine: Observation[] = [];
   const copied: string[] = [];
-  TestBed.configureTestingModule({
-    providers: [
-      { provide: APP_SETTINGS, useValue: { base: '/Sonnaille/', demo: false, date: '2026-07-15', ...settings } },
-      { provide: ZONE_REPOSITORY, useValue: { load: async () => ({ zones: [zone], source: 'Map Patou', requestedDate: '2026-07-15', fetchedAt: '2026-07-15T05:00:00Z' }) } },
-      { provide: ADVICE_REPOSITORY, useValue: { load: async () => [] } },
-      { provide: OBSERVATION_REPOSITORY, useValue: { load: async () => [] } },
-      {
-        provide: OBSERVATION_SETTINGS,
-        useValue: {
-          load: async () => ({
-            validityDays: 3,
-            haloMeters: { sheep: 300, cattle: 300, goats: 300, horses: 300, donkeys: 300, mixed: 300 },
-            nests: {
-              beehives: { validityDays: 90, haloMeters: 50 },
-              'wasp-nest': { validityDays: 30, haloMeters: 30 },
-              'bee-nest': { validityDays: 30, haloMeters: 30 },
-              'hornet-nest': { validityDays: 30, haloMeters: 50 },
-            },
-          }),
-        },
-      },
-      { provide: MY_SIGHTINGS, useValue: { load: () => mine, save: (o: Observation[]) => void (mine = o) } },
-      { provide: SIGHTING_PUBLISHER, useValue: publisher },
-      { provide: BASE_MAP_PREFERENCES, useValue: memoryValue() },
-      { provide: ACTIVITY_PREFERENCES, useValue: memoryValue() },
-      { provide: WELCOME_PREFERENCES, useValue: memoryValue('seen') },
-      { provide: TRACK_READER, useValue: { read: () => track } },
-      { provide: SIGHTINGS_FORMAT, useValue: { publicationText: (o: Observation[]) => `${o.length} features`, feature: () => '{}', editUrl: 'https://github.com/edit' } },
-      { provide: DEMO_RESET, useValue: null },
-    ],
-  });
+  const { providers, mine } = fakePorts({ settings, publisher });
+  TestBed.configureTestingModule({ providers });
   const store = TestBed.inject(SonnailleStore);
   const map = new FakeMap();
   store.publicationActions = { copy: async (text) => void copied.push(text), open: () => undefined };
   await store.attach(map);
-  return { store, map, copied, mine: () => mine };
+  return { store, map, copied, mine };
 }
 
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));

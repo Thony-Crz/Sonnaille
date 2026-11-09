@@ -1,4 +1,4 @@
-import { afterNextRender, ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, ElementRef, inject, PendingTasks, viewChild } from '@angular/core';
 import { SonnailleStore } from '../sonnaille.store';
 import { MAP_FACTORY } from '../tokens';
 
@@ -24,13 +24,16 @@ const isGpx = (file: File) => /\.gpx$/i.test(file.name);
 export class MapComponent {
   private readonly store = inject(SonnailleStore);
   private readonly factory = inject(MAP_FACTORY);
+  private readonly pendingTasks = inject(PendingTasks);
   private readonly element = viewChild.required<ElementRef<HTMLElement>>('map');
   protected dropActive = false;
 
   constructor() {
     afterNextRender(() => {
       const map = this.factory(this.element().nativeElement, { baseMap: this.store.baseMap, framePadding: () => this.framePadding() });
-      void this.store.attach(map);
+      // Loading the zones and sightings counts as pending work (the app is stable once they are shown).
+      const done = this.pendingTasks.add();
+      void this.store.attach(map).finally(done);
     });
   }
 
