@@ -58,7 +58,7 @@ Les mêmes tests de contrat passent sur les deux stockages : en mémoire partout
 
 ## Branchement de l'app web
 
-Si l'adresse de l'API est donnée à la construction du site (variable `VITE_SIGHTINGS_API_URL`, variable de dépôt `SIGHTINGS_API_URL` en CI) :
+Si l'adresse de l'API est donnée à la construction du site (`--define "SONNAILLE_SIGHTINGS_API_URL='https://…'"`, variable de dépôt `SIGHTINGS_API_URL` en CI) :
 
 - « Publier » envoie chaque signalement gardé sur l'appareil à `POST /api/sightings` ; ceux reçus sont retirés de l'appareil, les autres restent pour un nouvel essai ;
 - la carte affiche les signalements publiés du fichier `content/observations.geojson` et ceux validés de `GET /api/sightings` ; si l'API ne répond pas, le fichier suffit.

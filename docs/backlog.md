@@ -77,7 +77,7 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 
 ## V1 — Alpes (à découper plus tard)
 
-- API ASP.NET Core, base PostgreSQL et PostGIS — en cours : squelette clean archi dans `api/` ([docs/api.md](api.md)), signalements GeoJSON et modération par clé, stockage PostGIS (ou en mémoire), app web branchée si `VITE_SIGHTINGS_API_URL` est fournie ; reste l'hébergement (options dans [hebergement.md](hebergement.md), à décider)
+- API ASP.NET Core, base PostgreSQL et PostGIS — en cours : squelette clean archi dans `api/` ([docs/api.md](api.md)), signalements GeoJSON et modération par clé, stockage PostGIS (ou en mémoire), app web branchée si l'adresse de l'API est fournie au build ; reste l'hébergement (options dans [hebergement.md](hebergement.md), à décider)
 - Comptes contributeurs (connexion Google, etc.) et rôles
 - Signalements par les contributeurs et modération — côté serveur : dépôt en attente, validation par un modérateur, seuls les signalements validés sont publics
 - Question « les bêtes y sont toujours ? »
@@ -88,6 +88,7 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 - Rappel le matin de la sortie (Could)
 - Notifications pendant la sortie sur le téléphone, avec le mode hors ligne (Could, peut-être après la V1)
 - Contact avec Visorando (V1 ou V2)
+- ~~Front en Angular~~ ✅ fait (D5) : Angular 22, composants autonomes et signals, store à la place de `main.ts`, service worker d'Angular pour le hors ligne
 
 ## V2 — France (à découper plus tard)
 

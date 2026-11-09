@@ -44,9 +44,10 @@ Le code reste public. Les données Map Patou ne sont jamais committées.
 | `domain` | Entités et règles métier pures | `domain` seulement, aucune bibliothèque |
 | `application` | Cas d'usage et ports (interfaces) | `domain`, `application`, aucune bibliothèque |
 | `infrastructure` | Adaptateurs : GeoJSON, Map Patou, GPX, Turf.js, stockage | `domain`, `application`, `infrastructure`, bibliothèques |
-| `ui` | Carte MapLibre, écrans | `domain`, `application`, `ui`, bibliothèques |
+| `ui` | Carte MapLibre, fonds, pictogrammes, libellés | `domain`, `application`, `ui`, bibliothèques |
+| `app` | Front Angular (D5) : composants, store | `domain`, `application`, `ui`, `app`, bibliothèques |
 
-`src/main.ts` est le point de composition : le seul fichier qui assemble adaptateurs, cas d'usage et interface.
+`src/app/app.config.ts` est le point de composition : le seul fichier qui assemble adaptateurs, cas d'usage et interface (révision du 9 novembre 2026, D5 ; avant, `src/main.ts`).
 
 **Vérification automatique**
 
@@ -96,3 +97,22 @@ Depuis les serveurs de GitHub Actions, la connexion à `mappatous-api.lessem.inr
 1. Un accès officiel accordé par le Réseau Pastoral AuRA (T03), éventuellement avec un export que la CI peut lire.
 2. Un dépôt privé de données, alimenté depuis le poste d'Anthony par `npm run data`, que la CI lit avec un jeton.
 3. Un runner GitHub auto-hébergé sur un poste en France.
+
+## D5 — Le front passe en Angular (9 novembre 2026)
+
+**Contexte** : le front était écrit en TypeScript sans framework (Vite, fonctions qui créent le DOM, orchestration dans `src/main.ts`). Anthony a demandé de le transformer en Angular.
+
+**Décision**
+
+- Angular 22, composants autonomes, `OnPush` et signals, sans zone.js. Build et tests par la CLI Angular (`@angular/build`), tests des composants sous Vitest (`ng test`).
+- Seule l'interface change : `domain`, `application` et `infrastructure` sont repris tels quels. Le front Angular (`src/app`) est une couche de plus, qui ne parle qu'à l'application et aux ports.
+- Les ports sont fournis par des jetons d'injection (`src/app/tokens.ts`) ; `src/app/app.config.ts` est la racine de composition, seul fichier de `src/app` autorisé à importer l'infrastructure (vérifié par `tests/architecture`).
+- L'orchestration de `src/main.ts` devient un store injectable à base de signals (`SonnailleStore`), testé avec de faux ports et une fausse carte.
+- Les composants sont « de présentation » (entrées et sorties seulement) ; l'app les branche sur le store.
+- La carte MapLibre reste un adaptateur sans framework (`src/ui/maplibre-map-view.ts`), créé par une fabrique injectée : le composant carte se teste sans WebGL.
+- Hors ligne : le service worker d'Angular (`ngsw-config.json`) remplace Workbox, avec les mêmes règles ; `public/sw.js` désinstalle l'ancien service worker chez ceux qui l'avaient.
+- Valeurs de build (clé IGN, adresse de l'API) : `ng build --define`, à la place des variables `VITE_`.
+- Angular 22 demande TypeScript 6.0 : le projet est passé de TypeScript 7 à 6.0.
+
+**Conséquences** : la migration s'est faite par étapes, l'app Vite restant déployée jusqu'à ce que le front Angular fasse tout ce qu'elle faisait ; les tests des anciennes fonctions DOM ont été portés en tests de composants.
+

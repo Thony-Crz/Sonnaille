@@ -4,7 +4,7 @@ Scénario d'une dizaine de minutes pour présenter la V0 à un partenaire. Le tr
 
 ## Mode démo, sans aucune API
 
-Ouvrir **https://thony-crz.github.io/Sonnaille/?demo** (ou `http://localhost:5173/Sonnaille/?demo` en local). Un bandeau le signale. Tout y est fictif et rien ne quitte l'appareil :
+Ouvrir **https://thony-crz.github.io/Sonnaille/?demo** (ou `http://localhost:4200/Sonnaille/?demo` en local, avec `npm run dev`). Un bandeau le signale. Tout y est fictif et rien ne quitte l'appareil :
 
 - quatre zones fictives dans le Vercors (`public/demo/pastoral-zones.geojson`), une par cas : troupeau avec chiens, troupeau sans chiens, chevaux et ânes, troupeau prévu plus tard ;
 - quelques signalements fictifs près du tracé : brebis, ânes, nid de frelons, ruches (`public/demo/observations.geojson`) ;
@@ -17,7 +17,7 @@ Quand les vraies zones sont indisponibles (D4), la légende propose « Voir la d
 ## Démo avec les vraies données (en local)
 
 1. Récupérer les zones d'un jour d'été (une seule requête à Map Patou) : `MAP_PATOU_DATE=2026-07-15 npm run data`, puis `npm run dev`.
-2. Ouvrir `http://localhost:5173/Sonnaille/?date=2026-07-15`.
+2. Ouvrir `http://localhost:4200/Sonnaille/?date=2026-07-15`.
 3. Utiliser le même tracé de démo.
 
 ## Déroulé

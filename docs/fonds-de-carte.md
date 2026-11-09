@@ -17,8 +17,8 @@ Case à cocher dans le panneau « Fond de carte » : les itinéraires balisés (
 Le SCAN 25 n'est proposé que si une clé IGN est fournie au moment du build.
 
 1. Créer un compte et une clé d'accès sur l'espace IGN (cartes.gouv.fr ou geoservices.ign.fr), et lire les conditions d'utilisation du SCAN 25 : usage autorisé, volumes, mention de l'IGN.
-2. En local : créer un fichier `.env.local` (ignoré par git) contenant `VITE_IGN_SCAN25_KEY=la-cle`.
-3. En production : dans GitHub, Settings → Secrets and variables → Actions → **Variables**, créer `IGN_SCAN25_KEY`. La CI la transmet au build.
+2. En local : `npm run dev -- --define "SONNAILLE_SCAN25_KEY='la-cle'"` (même option pour `npm run build`).
+3. En production : dans GitHub, Settings → Secrets and variables → Actions → **Variables**, créer `IGN_SCAN25_KEY`. La CI la transmet au build (`--define SONNAILLE_SCAN25_KEY`).
 
 Une clé utilisée dans une page web est visible de tous : c'est une clé de service public, pas un secret. Si l'IGN restreint la clé à un domaine, déclarer `thony-crz.github.io`.
 

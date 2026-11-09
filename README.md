@@ -25,9 +25,9 @@ Requires Node.js 22.
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173/Sonnaille/
-npm test         # unit and architecture tests
-npm run build    # type check and production build
+npm run dev      # Angular front: http://localhost:4200/Sonnaille/
+npm test         # unit, architecture and Angular component tests
+npm run build    # production build (dist/browser)
 npm run data     # fetch today's pastoral zones from Map Patou (never committed)
 ```
 
@@ -40,7 +40,7 @@ npm run data     # fetch today's pastoral zones from Map Patou (never committed)
 ## Conventions
 
 - **TDD**: every piece of production code starts with a failing test.
-- **Clean architecture**: `src/domain`, `src/application`, `src/infrastructure`, `src/ui`, wired together in `src/main.ts`. A test in `tests/architecture/` enforces the dependency rule.
+- **Clean architecture**: `src/domain`, `src/application`, `src/infrastructure`, `src/ui` (MapLibre map), and the Angular 22 front in `src/app`, whose composition root `src/app/app.config.ts` wires the adapters. A test in `tests/architecture/` enforces the dependency rule.
 - **Language**: code in English; documentation and user-facing text in French; READMEs in both.
 
-Details in [decisions.md](docs/decisions.md) (D2, D3).
+Details in [decisions.md](docs/decisions.md) (D2, D3, D5).
