@@ -67,7 +67,9 @@ jobs:
       - run: docker build --tag sonnaille-api .
       - run: |
           docker run --detach --publish 8080:8080 --env Zones__Refresh=false --name sonnaille-api sonnaille-api
-          curl --fail --silent --retry 30 --retry-connrefused --retry-delay 1 http://localhost:8080/api/health
+          # While the API starts, Docker accepts then drops the connections: retry on every error.
+          curl --fail --silent --show-error --retry 30 --retry-all-errors --retry-delay 1 http://localhost:8080/api/health \
+            || { docker logs sonnaille-api; exit 1; }
 
   # Deploys the API to Scaleway Serverless Containers (docs/deploiement-api.md), once the account is set up:
   # skipped while the SCW_SECRET_KEY secret and the SCW_* variables are missing.
