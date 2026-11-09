@@ -60,6 +60,13 @@ describe('offline mode (V1)', () => {
     },
   );
 
+  it.each(['https://api.sonnaille.fr/api/zones', 'https://sonnaille.example.org/api/sightings'])(
+    'takes the API answer %s from the network when possible, else the last one kept',
+    (url) => {
+      expect(groupFor(url)?.cacheConfig.strategy).toBe('freshness');
+    },
+  );
+
   it.each([
     'https://data.geopf.fr/tms/1.0.0/PLAN.IGN/12/2112/1450.pbf',
     'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&LAYER=ORTHOIMAGERY.ORTHOPHOTOS',

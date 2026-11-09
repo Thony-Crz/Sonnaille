@@ -7,10 +7,7 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
-  schedule:
-    # Every morning of the summer grazing season (June to October), 06:00 Paris summer time,
-    # so the published planned presences stay current.
-    - cron: '0 4 * 6-10 *'
+  # No daily rebuild any more: the API keeps the zones of the day (D6).
 
 permissions:
   contents: read
@@ -30,24 +27,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      # Pastoral zones from Map Patou: fetched at build time, never committed (D1).
-      # The cache is keyed by day, so the API is called at most once per day.
-      - id: day
-        run: echo "today=$(TZ=Europe/Paris date +%F)" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@v6
-        with:
-          path: public/data
-          key: pastoral-zones-${{ steps.day.outputs.today }}
-      # Not blocking: the Map Patou API is not reachable from GitHub runners (D4).
-      # Without data, the site deploys and the app says the zones are unavailable.
-      - run: npm run data
-        continue-on-error: true
+      # No pastoral zones in the build: the site reads them from the API, which fetches them
+      # from Map Patou and keeps them in its database (docs/decisions.md, D6; never committed, D1).
       # Angular front. Values given at build time (src/app/build-values.ts), both optional:
-      # the personal IGN key for the 1:25,000 map (docs/fonds-de-carte.md) and the V1 sightings API (docs/api.md).
-      - run: npm run build -- --define "SONNAILLE_SCAN25_KEY='$SCAN25_KEY'" --define "SONNAILLE_SIGHTINGS_API_URL='$SIGHTINGS_API_URL'"
+      # the personal IGN key for the 1:25,000 map (docs/fonds-de-carte.md) and the Sonnaille API (docs/api.md).
+      - run: npm run build -- --define "SONNAILLE_SCAN25_KEY='$SCAN25_KEY'" --define "SONNAILLE_API_URL='$API_URL'"
         env:
           SCAN25_KEY: ${{ vars.IGN_SCAN25_KEY }}
-          SIGHTINGS_API_URL: ${{ vars.SIGHTINGS_API_URL }}
+          API_URL: ${{ vars.SONNAILLE_API_URL }}
       - if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v5
         with:

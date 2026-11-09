@@ -21,7 +21,7 @@
   "dataGroups": [
     {
       "name": "zones-and-content",
-      "urls": ["data/**", "content/**", "demo/*.geojson"],
+      "urls": ["data/**", "content/**", "demo/*.geojson", "https://*/api/zones", "https://*/api/sightings"],
       "cacheConfig": { "strategy": "freshness", "timeout": "5s", "maxSize": 20, "maxAge": "30d" }
     },
     {

@@ -14,7 +14,7 @@ import { HttpSightingPublisher, MergedObservationRepository } from '../infrastru
 import { createBaseMapStyles } from '../ui/base-map-styles';
 import { MapLibreMapView } from '../ui/maplibre-map-view';
 import { BUILD_VALUES } from './build-values';
-import { readSettings } from './settings';
+import { readSettings, zonesUrl } from './settings';
 import {
   ACTIVITY_PREFERENCES,
   ADVICE_REPOSITORY,
@@ -38,13 +38,12 @@ import {
  * The only file of src/app allowed to import the infrastructure (tests/architecture).
  */
 const settings = readSettings(window.location.search, new URL(document.baseURI).pathname, BUILD_VALUES);
-const { base, demo, sightingsApiUrl } = settings;
+const { base, demo, apiUrl } = settings;
 const storage = () => window.localStorage;
 const get = (url: string) => fetch(url);
 // Demo mode: a sightings "server" living in the browser (docs/demo/README.md).
 const demoServer = demo ? new DemoSightingsServer(storage) : null;
 const published = new HttpObservationRepository(`${base}${demo ? 'demo' : 'content'}/observations.geojson`, get);
-const apiUrl = sightingsApiUrl?.replace(/\/+$/, '');
 // The MapLibre worker is copied next to the app (angular.json, assets).
 setWorkerUrl(`${base}maplibre/maplibre-gl-worker.mjs`);
 const mapStyles = createBaseMapStyles({ scan25Key: settings.scan25Key });
@@ -63,7 +62,8 @@ export const appConfig: ApplicationConfig = {
       });
     }),
     { provide: APP_SETTINGS, useValue: settings },
-    { provide: ZONE_REPOSITORY, useValue: new HttpPastoralZoneRepository(`${base}${demo ? 'demo' : 'data'}/pastoral-zones.geojson`, get) },
+    // Pastoral zones: from the API's database (D6), the demo, or `npm run data` in development.
+    { provide: ZONE_REPOSITORY, useValue: new HttpPastoralZoneRepository(zonesUrl(settings), get) },
     { provide: ADVICE_REPOSITORY, useValue: new HttpAdviceRepository(`${base}content/advice.json`, get) },
     {
       provide: OBSERVATION_REPOSITORY,
