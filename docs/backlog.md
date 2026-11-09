@@ -77,7 +77,7 @@ Découpage du [cahier des charges](cahier-des-charges.md) en tâches. La V0 est 
 
 ## V1 — Alpes (à découper plus tard)
 
-- API ASP.NET Core, base PostgreSQL et PostGIS — en cours : squelette clean archi dans `api/` ([docs/api.md](api.md)), signalements GeoJSON et modération par clé, zones du jour récupérées chez Map Patou et gardées en base (D6), stockage PostGIS (ou en mémoire), app web branchée si l'adresse de l'API est fournie au build ; reste l'hébergement (options dans [hebergement.md](hebergement.md), à décider)
+- API ASP.NET Core, base PostgreSQL et PostGIS — en cours : squelette clean archi dans `api/` ([docs/api.md](api.md)), signalements GeoJSON et modération par clé, zones du jour récupérées chez Map Patou et gardées en base (D6), stockage PostGIS (ou en mémoire), app web branchée si l'adresse de l'API est fournie au build ; hébergement choisi (Scaleway et Neon) : image Docker et déploiement prêts, comptes et secrets à créer ([deploiement-api.md](deploiement-api.md))
 - Comptes contributeurs (connexion Google, etc.) et rôles
 - Signalements par les contributeurs et modération — côté serveur : dépôt en attente, validation par un modérateur, seuls les signalements validés sont publics
 - Question « les bêtes y sont toujours ? »

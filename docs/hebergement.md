@@ -9,6 +9,8 @@ L'[API des signalements](api.md) est un conteneur .NET 10 et une base PostgreSQL
 | **C. Azure** (Container Apps + PostgreSQL Flexible Server, PostGIS supporté) | Le plus naturel pour .NET, région France, montée en charge facile | Plus de configuration ; base payante après la période d'essai | De 0 à environ 15 € par mois selon les crédits |
 | **D. Petit VPS** (Hetzner, OVH, Scaleway) avec Docker Compose (API + PostGIS) | Le moins cher à coût fixe, contrôle total | Sauvegardes, certificats HTTPS et mises à jour à notre charge | Environ 4 à 6 € par mois |
 
+**Choix du 9 novembre 2026 : A** (Scaleway Serverless Containers et Neon). Mise en place : [deploiement-api.md](deploiement-api.md).
+
 ## Recommandation pour l'alpha : A
 
 - Pas de coût fixe, rien à maintenir.

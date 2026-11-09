@@ -24,7 +24,8 @@ Un test d'architecture (`ArchitectureTests`) vérifie ces dépendances. Tout est
 |---|---|---|---|
 | `GET` | `/api/zones` | public | `FeatureCollection` des zones du jour, au format de [format-zones.md](format-zones.md) (déjà lu par l'app web), ou `503` avant la première récupération |
 
-- Une tâche de fond vérifie toutes les heures ; Map Patou n'est appelé qu'une fois par jour, heure de Paris (D1). En cas d'échec, les zones précédentes restent servies et un nouvel essai a lieu l'heure suivante.
+- Map Patou n'est appelé qu'une fois par jour, heure de Paris (D1), et un seul appel à la fois. Sur un hébergement serverless qui s'éteint entre deux visites, ce sont les visites qui tiennent les zones à jour : la toute première attend les zones ; la première d'un nouveau jour reçoit celles de la veille pendant que celles du jour sont récupérées. Quand le serveur reste allumé, une tâche de fond vérifie aussi toutes les heures. En cas d'échec, les zones précédentes restent servies.
+- `GET /api/health` répond `ok`, pour les vérifications de l'hébergeur.
 - Seules les zones qui touchent le territoire de la V0 (Chartreuse et Vercors) sont gardées.
 - Les journaux ne contiennent jamais les données, seulement ce qui s'est passé.
 - `Zones:Refresh=false` coupe la tâche de fond (les tests n'appellent jamais Map Patou).
@@ -84,5 +85,5 @@ Sans cette variable, les zones viennent du fichier fait par `npm run data` (dév
 
 ## Reste à faire
 
-- Hébergement de l'API : options et recommandation dans [hebergement.md](hebergement.md).
+- Hébergement : Scaleway et Neon, image et déploiement prêts ; comptes et secrets à créer ([deploiement-api.md](deploiement-api.md)).
 - Comptes contributeurs et rôles à la place de la clé de modérateur.
